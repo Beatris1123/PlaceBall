@@ -9,20 +9,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@1,900&display=swap" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;900&display=swap');
-        :root { --t: #334155; --t-rgb: 51,65,85; --t-light: rgba(51,65,85,0.15); }
-        *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
-        body {
-            font-family: 'Pretendard', sans-serif;
-            background: #f8fafc; color: #0f172a;
-            margin: 0; padding-bottom: 90px;
-            background-image:
-                radial-gradient(ellipse 70% 50% at 100% 0%,   rgba(var(--t-rgb),.14) 0%, transparent 60%),
-                radial-gradient(ellipse 50% 40% at 0%   100%, rgba(245,158,11,.08)   0%, transparent 55%);
-            background-attachment: fixed;
+
+        :root {
+            --t: #2563eb;
+            --t-rgb: 37,99,235;
+            --t-light: rgba(37,99,235,0.10);
         }
 
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #f1f5f9;
+            color: #0f172a;
+            margin: 0;
+            padding-bottom: 90px;
+            min-height: 100vh;
+        }
+
+        /* ── NAV ── */
         .topnav {
-            background: rgba(255,255,255,0.92); backdrop-filter: blur(24px) saturate(160%);
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
             border-bottom: 1px solid #e2e8f0;
             position: sticky; top: 0; z-index: 100; padding: 0 16px;
         }
@@ -38,110 +46,155 @@
         }
         .logo-text .main { color: #0f172a; }
         .logo-text .sub  { color: var(--t); font-style: italic; }
-        .logo-text .dot  { color: #fbbf24; }
+        .logo-text .dot  { color: #f59e0b; }
 
-        /* CALENDAR */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        /* ── CALENDAR ── */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+
         .day-label {
             text-align: center; font-size: 9px; font-weight: 900;
-            color: #334155; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.1em;
+            color: #94a3b8; padding-bottom: 8px;
+            text-transform: uppercase; letter-spacing: 0.08em;
         }
+
         .day-card {
-            aspect-ratio: 1 / 1.2; background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px; padding: 8px; cursor: pointer; transition: all 0.2s;
-            display: flex; flex-direction: column; gap: 3px; overflow: hidden;
-            backdrop-filter: blur(8px);
+            aspect-ratio: 1 / 1.2;
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px; padding: 8px;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; flex-direction: column; gap: 3px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        .day-card:hover { transform: translateY(-2px); border-color: rgba(var(--t-rgb),0.4); }
-        .day-card.empty { background: transparent; border: none; cursor: default; }
+        .day-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(var(--t-rgb), 0.4);
+            box-shadow: 0 4px 12px rgba(var(--t-rgb), 0.12);
+        }
+        .day-card.empty {
+            background: transparent; border: none;
+            cursor: default; box-shadow: none;
+        }
         .day-card.win-card {
             background: var(--t-light);
-            border-color: rgba(var(--t-rgb),0.35) !important;
+            border-color: rgba(var(--t-rgb), 0.3) !important;
+            box-shadow: 0 2px 8px rgba(var(--t-rgb), 0.1);
         }
-        .day-card.lose-card { background: rgba(30,41,59,0.5); }
+        .day-card.lose-card {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
 
-        /* WIN RATE */
-        .rate-bar { height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
-        .rate-fill { height: 100%; background: var(--t); border-radius: 99px; transition: width 1.2s ease; }
+        /* ── WIN RATE BAR ── */
+        .rate-bar {
+            height: 6px; background: #e2e8f0;
+            border-radius: 99px; overflow: hidden;
+        }
+        .rate-fill {
+            height: 100%; background: var(--t);
+            border-radius: 99px; transition: width 1.2s ease;
+        }
 
-        /* MODAL */
+        /* ── MODAL ── */
         #modal { display: none; }
         #modal.open {
             display: flex; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.75); backdrop-filter: blur(12px);
+            background: rgba(15,23,42,0.6);
+            backdrop-filter: blur(8px);
             z-index: 300; align-items: flex-end; justify-content: center;
-            padding: 0;
         }
         .modal-card {
-            background: rgba(13,21,38,0.97); backdrop-filter: blur(28px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 28px 28px 0 0; width: 100%; max-width: 480px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 28px 28px 0 0;
+            width: 100%; max-width: 480px;
             padding: 28px 24px 40px;
             animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.12);
         }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to   { transform: translateY(0); }
+        }
 
         .result-btn {
-            flex: 1; padding: 14px 0; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.03); color: #475569;
-            font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 800;
+            flex: 1; padding: 14px 0; border-radius: 14px;
+            border: 1.5px solid #e2e8f0;
+            background: #f8fafc;
+            color: #94a3b8;
+            font-family: 'Pretendard', sans-serif;
+            font-size: 13px; font-weight: 800;
             cursor: pointer; transition: all 0.2s;
         }
+        .result-btn:hover { border-color: #cbd5e1; background: #f1f5f9; }
         .result-btn.active-win {
-            background: rgba(var(--t-rgb),0.15); border-color: var(--t);
+            background: var(--t-light);
+            border-color: var(--t);
             color: var(--t);
         }
         .result-btn.active-lose {
-            background: rgba(30,41,59,0.8); border-color: #475569; color: #e2e8f0;
+            background: #fef2f2;
+            border-color: #fca5a5;
+            color: #ef4444;
         }
 
         .modal-input {
             width: 100%; padding: 13px 14px;
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
             border-radius: 12px; outline: none;
-            font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600;
-            color: #e2e8f0; transition: border-color 0.2s;
+            font-family: 'Pretendard', sans-serif;
+            font-size: 13px; font-weight: 600;
+            color: #0f172a; transition: border-color 0.2s;
         }
-        .modal-input::placeholder { color: #475569; }
-        .modal-input:focus { border-color: rgba(var(--t-rgb),0.5); }
+        .modal-input::placeholder { color: #94a3b8; }
+        .modal-input:focus { border-color: rgba(var(--t-rgb), 0.5); background: #fff; }
 
         .btn-save {
             width: 100%; padding: 16px; border: none; border-radius: 16px;
             background: var(--t); color: white;
-            font-family: 'Pretendard', sans-serif; font-size: 14px; font-weight: 900;
+            font-family: 'Pretendard', sans-serif;
+            font-size: 14px; font-weight: 900;
             cursor: pointer; transition: all 0.2s;
-            box-shadow: 0 8px 24px rgba(var(--t-rgb),0.35);
+            box-shadow: 0 4px 16px rgba(var(--t-rgb), 0.3);
         }
-        .btn-save:hover { filter: brightness(1.1); }
+        .btn-save:hover { filter: brightness(1.08); transform: translateY(-1px); }
 
-        /* LOCK SCREEN */
+        /* ── LOCK OVERLAY ── */
         .lock-overlay {
             display: none; position: absolute; inset: 0;
-            background: rgba(10,14,26,0.85); backdrop-filter: blur(12px);
-            z-index: 50; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(248,250,252,0.92);
+            backdrop-filter: blur(8px);
+            z-index: 50; flex-direction: column;
+            align-items: center; justify-content: center;
             border-radius: 24px;
         }
         .lock-overlay.active { display: flex; }
 
-        /* BOTTOM NAV */
+        /* ── BOTTOM NAV ── */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-            background: rgba(10,14,26,0.95); backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid #e2e8f0;
             display: flex; padding-bottom: env(safe-area-inset-bottom);
         }
         .bnav-item {
-            flex: 1; display: flex; flex-direction: column; align-items: center;
-            justify-content: center; padding: 10px 4px 8px; gap: 4px;
-            font-size: 9px; font-weight: 700; color: #475569;
-            cursor: pointer; transition: all 0.2s; text-transform: uppercase;
-            letter-spacing: 0.04em; border: none; background: transparent;
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 10px 4px 8px; gap: 4px;
+            font-size: 9px; font-weight: 700; color: #94a3b8;
+            cursor: pointer; transition: all 0.2s;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            border: none; background: transparent;
         }
         .bnav-item.active { color: var(--t); }
+        .bnav-item:active { opacity: 0.6; }
     </style>
 </head>
 <body>
+
     <!-- NAV -->
     <header class="topnav">
         <div class="topnav-inner">
@@ -153,56 +206,66 @@
     </header>
 
     <main class="max-w-3xl mx-auto p-4 mt-4 relative min-h-[600px]">
-        <!-- Lock -->
+
+        <!-- LOCK -->
         <div id="login-lock" class="lock-overlay">
-            <i data-lucide="lock" class="w-12 h-12 text-slate-600 mb-4"></i>
-            <h2 class="text-xl font-black text-white mb-2">직관 기록을 시작하세요</h2>
-            <p class="text-sm text-slate-500 font-medium mb-6 text-center">로그인 후 승패 관리와 경기 메모가 가능합니다.</p>
+            <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+                 style="background: rgba(var(--t-rgb), 0.1);">
+                <i data-lucide="lock" class="w-8 h-8" style="color: var(--t);"></i>
+            </div>
+            <h2 class="text-xl font-black text-slate-800 mb-2">직관 기록을 시작하세요</h2>
+            <p class="text-sm text-slate-500 font-medium mb-6 text-center px-6">로그인 후 승패 관리와 경기 메모가 가능합니다.</p>
             <button onclick="location.href='login.html'"
                     class="px-10 py-4 rounded-2xl font-black text-white text-sm"
-                    style="background:var(--t);">Login →</button>
+                    style="background: var(--t);">로그인하기 →</button>
         </div>
 
-        <!-- Header -->
-        <header class="mb-8">
+        <!-- HEADER -->
+        <header class="mb-6">
             <div class="flex justify-between items-end mb-4">
                 <div class="flex items-center gap-4">
                     <div>
-                        <h2 id="month-disp" class="text-5xl font-black italic tracking-tighter leading-none uppercase"
-                            style="color:var(--t)">MONTH</h2>
-                        <p id="year-disp" class="text-xs font-bold text-slate-600 ml-1">2026</p>
+                        <h2 id="month-disp"
+                            class="text-5xl font-black italic tracking-tighter leading-none uppercase"
+                            style="color: var(--t)">MONTH</h2>
+                        <p id="year-disp" class="text-xs font-bold text-slate-400 ml-1">2026</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="changeMonth(-1)"
-                                class="w-9 h-9 rounded-full flex items-center justify-center bg-white/5 border border-[rgba(255,255,255,0.08)] hover:bg-white/10 transition">
+                                class="w-9 h-9 rounded-full flex items-center justify-center bg-white border border-slate-200 hover:border-slate-300 hover:shadow transition text-slate-500">
                             <i data-lucide="chevron-left" class="w-4 h-4"></i>
                         </button>
                         <button onclick="changeMonth(1)"
-                                class="w-9 h-9 rounded-full flex items-center justify-center bg-white/5 border border-[rgba(255,255,255,0.08)] hover:bg-white/10 transition">
+                                class="w-9 h-9 rounded-full flex items-center justify-center bg-white border border-slate-200 hover:border-slate-300 hover:shadow transition text-slate-500">
                             <i data-lucide="chevron-right" class="w-4 h-4"></i>
                         </button>
                     </div>
                 </div>
+
                 <div class="text-right">
-                    <p class="text-[9px] font-black text-slate-600 mb-1 uppercase tracking-widest">Win Rate</p>
-                    <span id="win-rate" class="text-3xl font-black" style="color:var(--t)">0%</span>
+                    <p class="text-[9px] font-black text-slate-400 mb-1 uppercase tracking-widest">Win Rate</p>
+                    <span id="win-rate" class="text-3xl font-black" style="color: var(--t)">0%</span>
                 </div>
             </div>
+
             <div class="rate-bar">
-                <div id="rate-fill" class="rate-fill" style="width:0%"></div>
+                <div id="rate-fill" class="rate-fill" style="width: 0%"></div>
             </div>
-            <div class="flex justify-between text-[10px] font-bold text-slate-600 mt-1.5 px-0.5">
+            <div class="flex justify-between text-[10px] font-bold text-slate-400 mt-1.5 px-0.5">
                 <span id="stat-total">0경기</span>
                 <span id="stat-wl">0승 0패</span>
             </div>
         </header>
 
-        <!-- Calendar -->
+        <!-- CALENDAR -->
         <div class="calendar-grid mb-2">
-            <div class="day-label">일</div><div class="day-label">월</div>
-            <div class="day-label">화</div><div class="day-label">수</div>
-            <div class="day-label">목</div><div class="day-label">금</div>
-            <div class="day-label" style="color:#f87171;">토</div>
+            <div class="day-label">일</div>
+            <div class="day-label">월</div>
+            <div class="day-label">화</div>
+            <div class="day-label">수</div>
+            <div class="day-label">목</div>
+            <div class="day-label">금</div>
+            <div class="day-label" style="color: #f87171;">토</div>
         </div>
         <div class="calendar-grid" id="calendar"></div>
     </main>
@@ -211,9 +274,10 @@
     <div id="modal">
         <div class="modal-card">
             <div class="flex justify-between items-center mb-5">
-                <h3 id="modal-date" class="text-2xl font-black italic" style="color:var(--t)">DATE</h3>
-                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                    <i data-lucide="x" class="w-4 h-4 text-slate-400"></i>
+                <h3 id="modal-date" class="text-2xl font-black italic" style="color: var(--t)">DATE</h3>
+                <button onclick="closeModal()"
+                        class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition">
+                    <i data-lucide="x" class="w-4 h-4 text-slate-500"></i>
                 </button>
             </div>
 
@@ -224,7 +288,7 @@
 
             <div class="grid grid-cols-2 gap-3 mb-3">
                 <input type="text" id="opp-team" placeholder="상대 팀" class="modal-input">
-                <input type="text" id="seat" placeholder="좌석번호" class="modal-input">
+                <input type="text" id="seat"     placeholder="좌석번호" class="modal-input">
             </div>
             <textarea id="memo" placeholder="오늘 경기 한 줄 평 🎙️"
                       class="modal-input w-full h-24 resize-none mb-5"></textarea>
@@ -264,9 +328,11 @@
         const g = parseInt(u.color.slice(3,5),16);
         const b = parseInt(u.color.slice(5,7),16);
         document.documentElement.style.setProperty('--t-rgb', `${r},${g},${b}`);
-        document.documentElement.style.setProperty('--t-light', `rgba(${r},${g},${b},0.12)`);
-        authZone.innerHTML = `<span class="text-xs font-bold text-slate-400">${u.nick}</span>
-            <div class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black text-white" style="background:${u.color}">${u.nick.charAt(0).toUpperCase()}</div>`;
+        document.documentElement.style.setProperty('--t-light', `rgba(${r},${g},${b},0.10)`);
+        authZone.innerHTML = `
+            <span class="text-xs font-bold text-slate-500">${u.nick}</span>
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black text-white"
+                 style="background:${u.color}">${u.nick.charAt(0).toUpperCase()}</div>`;
     } else {
         document.getElementById('login-lock').classList.add('active');
         authZone.innerHTML = `<button onclick="location.href='login.html'" class="text-xs font-bold text-slate-500 underline">로그인</button>`;
@@ -280,10 +346,10 @@
                     'July','August','September','October','November','December'];
 
     function renderCalendar() {
-        const yr = currDate.getFullYear();
-        const mo = currDate.getMonth();
+        const yr  = currDate.getFullYear();
+        const mo  = currDate.getMonth();
         document.getElementById('month-disp').textContent = MONTHS[mo];
-        document.getElementById('year-disp').textContent = yr;
+        document.getElementById('year-disp').textContent  = yr;
 
         const firstDay = new Date(yr, mo, 1).getDay();
         const lastDate = new Date(yr, mo+1, 0).getDate();
@@ -299,10 +365,10 @@
         }
 
         for (let d = 1; d <= lastDate; d++) {
-            const key = `${yr}-${mo+1}-${d}`;
+            const key  = `${yr}-${mo+1}-${d}`;
             const data = records[key];
 
-            if (data?.res === 'W') { wins++; total++; }
+            if (data?.res === 'W') { wins++;   total++; }
             else if (data?.res === 'L') { losses++; total++; }
 
             const card = document.createElement('div');
@@ -312,26 +378,30 @@
 
             card.onclick = () => u ? openModal(d, key) : location.href = 'login.html';
 
-            const dayColor = data ? (data.res === 'W' ? 'var(--t)' : '#64748b') : 'rgba(255,255,255,0.15)';
+            // 날짜 색상
+            let dayColor = '#94a3b8';
+            if (data?.res === 'W') dayColor = 'var(--t)';
+            else if (data?.res === 'L') dayColor = '#ef4444';
 
             card.innerHTML = `
                 <span class="text-[11px] font-black" style="color:${dayColor}">${d}</span>
                 ${data ? `
                 <div class="overflow-hidden">
-                    <p class="text-[9px] font-black truncate" style="color:${data.res === 'W' ? 'var(--t)' : '#64748b'}">
+                    <p class="text-[9px] font-black truncate"
+                       style="color:${data.res === 'W' ? 'var(--t)' : '#ef4444'}">
                         ${data.res === 'W' ? '🏆' : '💔'} vs ${data.opp || '?'}
                     </p>
-                    ${data.memo ? `<p class="text-[8px] text-slate-600 font-medium line-clamp-2 leading-tight mt-0.5">${data.memo}</p>` : ''}
+                    ${data.memo ? `<p class="text-[8px] text-slate-400 font-medium line-clamp-2 leading-tight mt-0.5">${data.memo}</p>` : ''}
                 </div>` : ''}
             `;
             cal.appendChild(card);
         }
 
         const rate = total === 0 ? 0 : Math.round((wins / total) * 100);
-        document.getElementById('win-rate').textContent = rate + '%';
-        document.getElementById('rate-fill').style.width = rate + '%';
-        document.getElementById('stat-total').textContent = total + '경기';
-        document.getElementById('stat-wl').textContent = `${wins}승 ${losses}패`;
+        document.getElementById('win-rate').textContent    = rate + '%';
+        document.getElementById('rate-fill').style.width  = rate + '%';
+        document.getElementById('stat-total').textContent  = total + '경기';
+        document.getElementById('stat-wl').textContent     = `${wins}승 ${losses}패`;
         lucide.createIcons();
     }
 
@@ -343,10 +413,10 @@
     function openModal(d, key) {
         selectedKey = key;
         document.getElementById('modal-date').textContent = `${MONTHS[currDate.getMonth()]} ${d}`;
-        const data = records[key] || { opp:'', seat:'', memo:'', res:null };
+        const data = records[key] || { opp:'', seat:'', memo:'', res: null };
         document.getElementById('opp-team').value = data.opp;
-        document.getElementById('seat').value = data.seat;
-        document.getElementById('memo').value = data.memo;
+        document.getElementById('seat').value     = data.seat;
+        document.getElementById('memo').value     = data.memo;
         setResult(data.res);
         document.getElementById('modal').classList.add('open');
         lucide.createIcons();
@@ -356,24 +426,26 @@
         selectedResult = res;
         const bw = document.getElementById('btn-w');
         const bl = document.getElementById('btn-l');
-        bw.className = 'result-btn' + (res === 'W' ? ' active-win' : '');
+        bw.className = 'result-btn' + (res === 'W' ? ' active-win'  : '');
         bl.className = 'result-btn' + (res === 'L' ? ' active-lose' : '');
     }
 
     function saveRecord() {
         if (!u) return;
         records[selectedKey] = {
-            opp: document.getElementById('opp-team').value,
+            opp:  document.getElementById('opp-team').value,
             seat: document.getElementById('seat').value,
             memo: document.getElementById('memo').value,
-            res: selectedResult
+            res:  selectedResult
         };
         localStorage.setItem(`diary_${u.email}`, JSON.stringify(records));
         closeModal();
         renderCalendar();
     }
 
-    function closeModal() { document.getElementById('modal').classList.remove('open'); }
+    function closeModal() {
+        document.getElementById('modal').classList.remove('open');
+    }
 
     renderCalendar();
     </script>

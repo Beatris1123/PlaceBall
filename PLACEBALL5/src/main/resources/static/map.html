@@ -6,26 +6,24 @@
     <title>PLACEBALL — Stadium Map</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=a6b54298c1ed0eb5de93147ba633a285"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- Leaflet CSS/JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@1,900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;900&display=swap');
 
         :root {
-            --t: #334155;
-            --t-rgb: 51, 65, 85;
-            --bg: #0d1526;
-            --card: rgba(255,255,255,0.96);
-            --border: rgba(0,0,0,0.09);
+            --t: #2563eb;
+            --t-rgb: 37,99,235;
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Pretendard', sans-serif;
-            background: var(--bg); color: #0f172a;
+            background: #f1f5f9; color: #0f172a;
             overflow: hidden; height: 100dvh; height: 100vh;
             display: flex; flex-direction: column;
             -webkit-tap-highlight-color: transparent;
@@ -40,117 +38,128 @@
         }
         .logo-text .main { color: #0f172a; }
         .logo-text .sub  { color: var(--t); font-style: italic; }
-        .logo-text .dot  { color: #fbbf24; }
+        .logo-text .dot  { color: #f59e0b; }
 
         /* ─── TOP BAR ─── */
         .topbar {
-            background: rgba(255,255,255,0.94); backdrop-filter: blur(24px) saturate(160%);
-            border-bottom: 1px solid var(--border);
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #e2e8f0;
             z-index: 200; flex-shrink: 0;
         }
 
-        /* ─── STADIUM TABS ─── */
+        /* ─── STADIUM PILLS ─── */
         .stadium-scroll {
             display: flex; gap: 6px; overflow-x: auto;
             padding: 8px 16px; scrollbar-width: none;
-            -ms-overflow-style: none;
         }
         .stadium-scroll::-webkit-scrollbar { display: none; }
 
         .stadium-pill {
             flex-shrink: 0; padding: 6px 14px;
             border-radius: 99px; font-size: 11px; font-weight: 700;
-            background: rgba(255,255,255,0.05); color: #475569;
-            border: 1px solid var(--border); cursor: pointer;
+            background: #f8fafc; color: #64748b;
+            border: 1.5px solid #e2e8f0; cursor: pointer;
             transition: all 0.2s; white-space: nowrap;
         }
         .stadium-pill.active {
             background: var(--t); color: white; border-color: transparent;
-            box-shadow: 0 4px 12px rgba(var(--t-rgb), 0.4);
+            box-shadow: 0 4px 12px rgba(var(--t-rgb), 0.35);
         }
+        .stadium-pill:hover:not(.active) { border-color: #cbd5e1; background: #f1f5f9; }
 
         /* ─── CATEGORY TABS ─── */
         .cat-bar {
-            display: flex; gap: 6px; padding: 8px 16px;
+            display: flex; gap: 6px; padding: 6px 16px 10px;
             overflow-x: auto; scrollbar-width: none; flex-shrink: 0;
         }
         .cat-bar::-webkit-scrollbar { display: none; }
 
         .cat-btn {
-            flex-shrink: 0; display: flex; align-items: center; gap: 6px;
-            padding: 7px 14px; border-radius: 12px; font-size: 11px; font-weight: 700;
-            border: 1px solid var(--border); background: rgba(255,255,255,0.04);
-            color: #475569; cursor: pointer; transition: all 0.2s;
+            flex-shrink: 0; display: flex; align-items: center; gap: 5px;
+            padding: 7px 13px; border-radius: 10px; font-size: 11px; font-weight: 700;
+            border: 1.5px solid #e2e8f0; background: #f8fafc;
+            color: #64748b; cursor: pointer; transition: all 0.2s;
         }
-        .cat-btn.active-FOOD   { background: rgba(234,88,12,0.15);  color: #fb923c; border-color: rgba(234,88,12,0.3); }
-        .cat-btn.active-STORE  { background: rgba(22,163,74,0.12);  color: #4ade80; border-color: rgba(22,163,74,0.3); }
-        .cat-btn.active-BATH   { background: rgba(37,99,235,0.12);  color: #60a5fa; border-color: rgba(37,99,235,0.3); }
-        .cat-btn.active-GOODS  { background: rgba(var(--t-rgb),0.15); color: var(--t); border-color: rgba(var(--t-rgb),0.3); }
+        .cat-btn.active-FOOD   { background: #fff7ed; color: #ea580c; border-color: #fdba74; }
+        .cat-btn.active-STORE  { background: #f0fdf4; color: #16a34a; border-color: #86efac; }
+        .cat-btn.active-BATH   { background: #eff6ff; color: #2563eb; border-color: #93c5fd; }
+        .cat-btn.active-GOODS  { background: rgba(var(--t-rgb),0.08); color: var(--t); border-color: rgba(var(--t-rgb),0.3); }
 
-        /* ─── MAP CONTAINER ─── */
-        #map_wrap {
-            flex: 1; position: relative; overflow: hidden;
+        /* ─── MAP ─── */
+        #map_wrap { flex: 1; position: relative; overflow: hidden; }
+        #map { width: 100%; height: 100%; z-index: 1; }
+
+        /* Leaflet override */
+        .leaflet-container { font-family: 'Pretendard', sans-serif; }
+        .leaflet-control-zoom a {
+            border-radius: 8px !important;
+            font-weight: 900 !important;
         }
-        #map { width: 100%; height: 100%; }
 
-        /* ─── NAV BUTTON (floating) ─── */
+        /* ─── FAB BUTTONS ─── */
         .fab {
-            position: absolute; right: 16px;
-            width: 48px; height: 48px; border-radius: 16px;
+            position: absolute; right: 14px;
+            width: 46px; height: 46px; border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             cursor: pointer; transition: all 0.2s; z-index: 50;
             border: none;
         }
         .fab:active { transform: scale(0.95); }
-        #fab_locate { bottom: 340px; background: #1e293b; border: 1px solid var(--border); color: #94a3b8; }
-        #fab_nav    { bottom: 284px; background: var(--t); color: white; }
+        #fab_locate {
+            bottom: 320px; background: #ffffff;
+            border: 1.5px solid #e2e8f0; color: #64748b;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        #fab_locate:hover { background: #f8fafc; }
+        #fab_nav {
+            bottom: 264px; background: var(--t); color: white;
+            box-shadow: 0 4px 16px rgba(var(--t-rgb),0.35);
+        }
 
         /* ─── BOTTOM SHEET ─── */
         #bottom_sheet {
             position: absolute; bottom: 0; left: 0; right: 0; z-index: 150;
-            background: rgba(13,21,38,0.97);
-            backdrop-filter: blur(28px) saturate(160%);
-            border-radius: 24px 24px 0 0;
-            border-top: 1px solid rgba(255,255,255,0.12);
+            background: #ffffff;
+            border-radius: 22px 22px 0 0;
+            border-top: 1px solid #e2e8f0;
             transform: translateY(100%);
             transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-            max-height: 70vh; overflow-y: auto;
-            box-shadow: 0 -24px 64px rgba(0,0,0,0.6);
+            max-height: 65vh; overflow-y: auto;
+            box-shadow: 0 -6px 32px rgba(0,0,0,0.1);
         }
         #bottom_sheet.open { transform: translateY(0); }
 
         .sheet-handle {
-            width: 40px; height: 4px; background: rgba(255,255,255,0.15);
-            border-radius: 99px; margin: 12px auto 0;
+            width: 38px; height: 4px; background: #cbd5e1;
+            border-radius: 99px; margin: 10px auto 0;
         }
 
-        /* Crowd meter */
-        .crowd-bar {
-            height: 8px; background: rgba(255,255,255,0.06);
-            border-radius: 99px; overflow: hidden; margin-top: 6px;
-        }
-        .crowd-fill {
-            height: 100%; border-radius: 99px; transition: width 0.8s ease;
-        }
+        /* Crowd */
+        .crowd-bar { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; margin-top: 6px; }
+        .crowd-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
 
         /* Vote buttons */
         .vote-btn {
             flex: 1; padding: 8px 0; border-radius: 10px;
             font-size: 11px; font-weight: 800; cursor: pointer;
-            border: 1px solid var(--border); background: rgba(255,255,255,0.04);
-            color: #475569; transition: all 0.2s;
+            border: 1.5px solid #e2e8f0; background: #f8fafc;
+            color: #64748b; transition: all 0.2s;
         }
-        .vote-btn:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
-        .vote-btn.voted-low  { background: rgba(34,197,94,0.15);  color: #4ade80; border-color: rgba(34,197,94,0.3); }
-        .vote-btn.voted-mid  { background: rgba(251,191,36,0.12); color: #fbbf24; border-color: rgba(251,191,36,0.3); }
-        .vote-btn.voted-high { background: rgba(239,68,68,0.12);  color: #f87171; border-color: rgba(239,68,68,0.3); }
+        .vote-btn:hover { background: #f1f5f9; }
+        .vote-btn.voted-low  { background: #f0fdf4; color: #16a34a; border-color: #86efac; }
+        .vote-btn.voted-mid  { background: #fffbeb; color: #d97706; border-color: #fcd34d; }
+        .vote-btn.voted-high { background: #fef2f2; color: #dc2626; border-color: #fca5a5; }
 
         /* ─── CUSTOM MARKERS ─── */
-        .mk { width: 28px; height: 28px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
-              display: flex; align-items: center; justify-content: center;
-              border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); cursor: pointer;
-              transition: transform 0.2s; }
+        .mk {
+            width: 30px; height: 30px; border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+            cursor: pointer; transition: transform 0.2s;
+        }
         .mk:hover { transform: rotate(-45deg) scale(1.2); }
         .mk-inner { transform: rotate(45deg); font-size: 11px; font-weight: 900; color: white; }
         .mk-FOOD  { background: #ea580c; }
@@ -158,10 +167,27 @@
         .mk-BATH  { background: #2563eb; }
         .mk-GOODS { background: var(--t); }
 
+        /* ─── NAV CTA ─── */
+        .nav-cta {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 13px; border-radius: 13px; font-size: 13px; font-weight: 900;
+            cursor: pointer; transition: all 0.2s; border: none;
+            background: var(--t); color: white;
+            box-shadow: 0 4px 16px rgba(var(--t-rgb),0.3);
+        }
+        .nav-cta:active { transform: scale(0.98); }
+        .nav-cta.secondary {
+            background: #f1f5f9; border: 1.5px solid #e2e8f0; color: #64748b;
+            box-shadow: none;
+        }
+
+        /* ─── LEGEND ─── */
+        .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+
         /* ─── BOTTOM NAV ─── */
         .bottom-nav {
-            background: rgba(10,14,26,0.95); backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border);
+            background: rgba(255,255,255,0.97); backdrop-filter: blur(20px);
+            border-top: 1px solid #e2e8f0;
             display: flex; flex-shrink: 0;
             padding-bottom: env(safe-area-inset-bottom);
         }
@@ -169,29 +195,25 @@
             flex: 1; display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             padding: 10px 4px 8px; gap: 4px;
-            font-size: 9px; font-weight: 700; color: #475569;
+            font-size: 9px; font-weight: 700; color: #94a3b8;
             cursor: pointer; transition: all 0.2s;
             text-transform: uppercase; letter-spacing: 0.04em;
             border: none; background: transparent;
         }
         .bnav-item.active { color: var(--t); }
+        .bnav-item:active { opacity: 0.6; }
 
-        /* ─── NAV CTA (full width) ─── */
-        .nav-cta {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            padding: 14px; border-radius: 14px; font-size: 13px; font-weight: 900;
-            cursor: pointer; transition: all 0.2s; border: none;
-            background: var(--t); color: white;
-            box-shadow: 0 6px 20px rgba(var(--t-rgb), 0.35);
+        /* No data hint */
+        .no-data-hint {
+            position: absolute; top: 50%; left: 50%; z-index: 10;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.95);
+            border: 1px solid #e2e8f0;
+            border-radius: 16px; padding: 16px 24px;
+            text-align: center; font-size: 13px; font-weight: 700;
+            color: #64748b; pointer-events: none;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
         }
-        .nav-cta:active { transform: scale(0.98); }
-        .nav-cta.secondary {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #94a3b8;
-            box-shadow: none;
-        }
-
-        /* ─── LEGEND ─── */
-        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
     </style>
 </head>
 <body>
@@ -203,12 +225,13 @@
                 <span class="main">PLACE</span><span class="sub">BALL</span><span class="dot">.</span>
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="startNavToStadium()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
-                        style="background: rgba(var(--t-rgb),0.15); color: var(--t); border: 1px solid rgba(var(--t-rgb),0.3);">
+                <button onclick="navToStadium()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
+                        style="background: rgba(var(--t-rgb),0.1); color: var(--t); border: 1.5px solid rgba(var(--t-rgb),0.2);">
                     <i data-lucide="navigation" class="w-3.5 h-3.5"></i>
                     <span>구장 길찾기</span>
                 </button>
-                <div id="u_circle" class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black text-white">?</div>
+                <div id="u_circle" class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black text-white"
+                     style="background: #94a3b8;">?</div>
             </div>
         </div>
 
@@ -240,11 +263,11 @@
                 <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i> 팀 스토어
             </button>
             <!-- Legend -->
-            <div class="flex items-center gap-3 ml-auto pl-4 shrink-0">
-                <div class="flex items-center gap-1"><div class="legend-dot bg-orange-500"></div><span class="text-[9px] text-slate-500">음식</span></div>
-                <div class="flex items-center gap-1"><div class="legend-dot bg-green-600"></div><span class="text-[9px] text-slate-500">편의점</span></div>
-                <div class="flex items-center gap-1"><div class="legend-dot bg-blue-600"></div><span class="text-[9px] text-slate-500">화장실</span></div>
-                <div class="flex items-center gap-1"><div class="legend-dot" style="background:var(--t)"></div><span class="text-[9px] text-slate-500">스토어</span></div>
+            <div class="flex items-center gap-3 ml-auto pl-2 shrink-0">
+                <div class="flex items-center gap-1.5"><div class="legend-dot bg-orange-500"></div><span class="text-[9px] text-slate-400 font-bold">음식</span></div>
+                <div class="flex items-center gap-1.5"><div class="legend-dot bg-green-600"></div><span class="text-[9px] text-slate-400 font-bold">편의점</span></div>
+                <div class="flex items-center gap-1.5"><div class="legend-dot bg-blue-600"></div><span class="text-[9px] text-slate-400 font-bold">화장실</span></div>
+                <div class="flex items-center gap-1.5"><div class="legend-dot" style="background:var(--t)"></div><span class="text-[9px] text-slate-400 font-bold">스토어</span></div>
             </div>
         </div>
     </header>
@@ -253,13 +276,18 @@
     <div id="map_wrap">
         <div id="map"></div>
 
-        <!-- FAB buttons -->
-        <button class="fab" id="fab_locate" onclick="locateMe()" title="내 위치">
+        <!-- FAB -->
+        <button class="fab" id="fab_locate" onclick="locateMe()">
             <i data-lucide="locate" class="w-5 h-5"></i>
         </button>
-        <button class="fab" id="fab_nav" onclick="navToSelected()" title="길찾기">
+        <button class="fab" id="fab_nav" onclick="navToStadium()">
             <i data-lucide="navigation-2" class="w-5 h-5"></i>
         </button>
+
+        <!-- No data hint -->
+        <div id="no_data" class="no-data-hint" style="display:none;">
+            📍 해당 구장의 시설 정보를 준비 중입니다
+        </div>
 
         <!-- Bottom Sheet -->
         <div id="bottom_sheet">
@@ -269,36 +297,36 @@
                 <!-- Header -->
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex items-center gap-3">
-                        <div id="bs_cat_icon" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-orange-500/15">
-                            <i data-lucide="utensils" class="w-5 h-5 text-orange-400"></i>
+                        <div id="bs_cat_icon" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                             style="background: #fff7ed;">
+                            <i data-lucide="utensils" class="w-5 h-5 text-orange-500"></i>
                         </div>
                         <div>
-                            <h3 id="bs_name" class="text-lg font-black text-white">시설 이름</h3>
-                            <p id="bs_cat_label" class="text-xs font-semibold text-slate-500">카테고리</p>
+                            <h3 id="bs_name" class="text-lg font-black text-slate-800">시설 이름</h3>
+                            <p id="bs_cat_label" class="text-xs font-semibold text-slate-400">카테고리</p>
                         </div>
                     </div>
-                    <button onclick="closeSheet()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                        <i data-lucide="x" class="w-4 h-4 text-slate-400"></i>
+                    <button onclick="closeSheet()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition">
+                        <i data-lucide="x" class="w-4 h-4 text-slate-500"></i>
                     </button>
                 </div>
 
-                <!-- Location desc -->
-                <div class="flex items-start gap-2 mb-4 p-3 rounded-xl bg-white/3 border border-[var(--border)]">
+                <!-- Location -->
+                <div class="flex items-start gap-2 mb-4 p-3 rounded-xl bg-slate-50 border border-slate-200">
                     <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 mt-0.5 shrink-0"></i>
-                    <p id="bs_loc" class="text-xs text-slate-300 leading-relaxed font-medium">위치 정보를 불러오는 중...</p>
+                    <p id="bs_loc" class="text-xs text-slate-600 leading-relaxed font-medium">위치 정보를 불러오는 중...</p>
                 </div>
 
                 <!-- Crowd meter -->
                 <div class="mb-4">
                     <div class="flex items-center justify-between mb-2">
-                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-wider">현재 혼잡도</p>
-                        <span id="bs_crowd_label" class="text-xs font-black text-amber-400">보통</span>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">현재 혼잡도</p>
+                        <span id="bs_crowd_label" class="text-xs font-black text-amber-500">보통</span>
                     </div>
                     <div class="crowd-bar">
                         <div id="bs_crowd_bar" class="crowd-fill bg-amber-400" style="width: 55%"></div>
                     </div>
-                    <!-- Vote -->
-                    <p class="text-[10px] text-slate-600 font-medium mt-2 mb-2">직접 혼잡도를 알려주세요 👇</p>
+                    <p class="text-[10px] text-slate-400 font-medium mt-2 mb-2">직접 혼잡도를 알려주세요 👇</p>
                     <div class="flex gap-2">
                         <button class="vote-btn" onclick="vote('low')"  id="vbtn-low">🟢 여유</button>
                         <button class="vote-btn" onclick="vote('mid')"  id="vbtn-mid">🟡 보통</button>
@@ -312,13 +340,11 @@
                         <i data-lucide="navigation-2" class="w-4 h-4"></i>
                         여기로 길찾기
                     </button>
-                    <button class="nav-cta secondary" onclick="kakaoNavToSelected()" style="width:48px; padding:0; flex-shrink:0;">
+                    <button class="nav-cta secondary" onclick="navToSelected()"
+                            style="width:48px; padding:0; flex-shrink:0;">
                         <i data-lucide="external-link" class="w-4 h-4"></i>
                     </button>
                 </div>
-
-                <!-- Nearby hint -->
-                <p id="bs_nearby" class="text-[10px] text-slate-600 font-medium mt-3 text-center hidden"></p>
             </div>
         </div>
     </div>
@@ -342,7 +368,6 @@
         </button>
     </nav>
 
-<!-- ══════════════════════════════════════════════════ SCRIPT ══ -->
 <script>
 /* ── THEME ── */
 (function() {
@@ -368,43 +393,33 @@ lucide.createIcons();
 /* ── DATA ── */
 const facilityData = {
     jamsil: [
-        /* FOOD */
-        { name:"면당포", lat:37.51160, lng:127.07108, cat:"FOOD", loc:"1루 게이트 진입 후 좌측 첫 번째 매장", crowd:40 },
-        { name:"명인만두", lat:37.51139, lng:127.07148, cat:"FOOD", loc:"외야 3루 코너 방면 입구 부근", crowd:60 },
-        { name:"짝태패밀리", lat:37.51277, lng:127.07243, cat:"FOOD", loc:"잠실 올림픽공원 방면 외부 노점", crowd:70 },
-        { name:"공씨네주먹밥", lat:37.51270, lng:127.07253, cat:"FOOD", loc:"외부 푸드존 중앙 위치", crowd:55 },
-        { name:"스테프핫도그", lat:37.51271, lng:127.07263, cat:"FOOD", loc:"외부 포장마차 거리", crowd:30 },
-        { name:"잠실원샷(치킨)", lat:37.51196, lng:127.07297, cat:"FOOD", loc:"1루 외야 코너 내부 2층 매장 — 주문 폭주 잦음", crowd:90 },
-        { name:"꼬꼬닭", lat:37.51184, lng:127.07279, cat:"FOOD", loc:"내부 1루 통로 매장", crowd:65 },
-        { name:"BBQ치킨", lat:37.51241, lng:127.07299, cat:"FOOD", loc:"1루 외부 광장 푸드트럭", crowd:80 },
-        { name:"망고식스", lat:37.51227, lng:127.07277, cat:"FOOD", loc:"정문 광장 좌측 음료 매장", crowd:40 },
-        { name:"달콤커피", lat:37.51219, lng:127.07279, cat:"FOOD", loc:"정문 광장 중앙 카페", crowd:35 },
-        { name:"도미노피자", lat:37.51283, lng:127.07111, cat:"FOOD", loc:"외야 3루 방향 외부 도로변", crowd:50 },
-        /* STORE */
-        { name:"GS25 외야점", lat:37.51130, lng:127.07160, cat:"STORE", loc:"3루 외야 통로 입구 바로 옆 편의점", crowd:55 },
-        { name:"홈런마트", lat:37.51260, lng:127.07089, cat:"STORE", loc:"내부 1루 1층 — 야구 굿즈·음료 취급", crowd:70 },
-        { name:"GS25 정문점", lat:37.51220, lng:127.07301, cat:"STORE", loc:"정문 게이트 우측 24시 편의점", crowd:45 },
-        /* BATH */
-        { name:"화장실 A", lat:37.51206, lng:127.07305, cat:"BATH", loc:"1루 내부 2층 복도 중앙부 (계단 바로 옆)", crowd:60 },
-        { name:"화장실 B", lat:37.51261, lng:127.07087, cat:"BATH", loc:"3루 외야 게이트 진입 직후 우측", crowd:30 },
-        { name:"화장실 C", lat:37.51157, lng:127.07250, cat:"BATH", loc:"외야 응원석 1층 우측 코너", crowd:75 },
-        { name:"화장실 D", lat:37.51138, lng:127.07199, cat:"BATH", loc:"외야 중앙부 하단 통로", crowd:45 },
-        /* GOODS */
-        { name:"LG 팀 스토어", lat:37.51200, lng:127.07160, cat:"GOODS", loc:"정문 입장 후 중앙 광장 좌측 공식 스토어 — 유니폼·기념품", crowd:80 },
-        { name:"KBO 공식 MD샵", lat:37.51180, lng:127.07220, cat:"GOODS", loc:"1루 내부 1층 게이트 진입 후 정면 — 모든 구단 굿즈 취급", crowd:65 },
-        { name:"야구카드 플리마켓", lat:37.51155, lng:127.07195, cat:"GOODS", loc:"외야 3루 외부 광장 — 주말 운영", crowd:40 },
+        { name:"면당포",        lat:37.51160, lng:127.07108, cat:"FOOD",  loc:"1루 게이트 진입 후 좌측 첫 번째 매장",              crowd:40 },
+        { name:"명인만두",      lat:37.51139, lng:127.07148, cat:"FOOD",  loc:"외야 3루 코너 방면 입구 부근",                       crowd:60 },
+        { name:"잠실원샷(치킨)",lat:37.51196, lng:127.07297, cat:"FOOD",  loc:"1루 외야 코너 내부 2층 — 주문 폭주 잦음",            crowd:90 },
+        { name:"BBQ치킨",       lat:37.51241, lng:127.07299, cat:"FOOD",  loc:"1루 외부 광장 푸드트럭",                             crowd:80 },
+        { name:"달콤커피",      lat:37.51219, lng:127.07279, cat:"FOOD",  loc:"정문 광장 중앙 카페",                                crowd:35 },
+        { name:"GS25 외야점",   lat:37.51130, lng:127.07160, cat:"STORE", loc:"3루 외야 통로 입구 바로 옆",                         crowd:55 },
+        { name:"홈런마트",      lat:37.51260, lng:127.07089, cat:"STORE", loc:"내부 1루 1층 — 야구 굿즈·음료 취급",                 crowd:70 },
+        { name:"GS25 정문점",   lat:37.51220, lng:127.07301, cat:"STORE", loc:"정문 게이트 우측 24시 편의점",                       crowd:45 },
+        { name:"화장실 A",      lat:37.51206, lng:127.07305, cat:"BATH",  loc:"1루 내부 2층 복도 중앙부 (계단 바로 옆)",            crowd:60 },
+        { name:"화장실 B",      lat:37.51261, lng:127.07087, cat:"BATH",  loc:"3루 외야 게이트 진입 직후 우측",                     crowd:30 },
+        { name:"화장실 C",      lat:37.51157, lng:127.07250, cat:"BATH",  loc:"외야 응원석 1층 우측 코너",                          crowd:75 },
+        { name:"LG 팀 스토어",  lat:37.51200, lng:127.07160, cat:"GOODS", loc:"정문 광장 좌측 공식 스토어 — 유니폼·기념품",         crowd:80 },
+        { name:"KBO 공식 MD샵", lat:37.51180, lng:127.07220, cat:"GOODS", loc:"1루 내부 1층 — 모든 구단 굿즈 취급",                 crowd:65 },
     ],
     gocheok: [
         { name:"고척 공식 굿즈샵", lat:37.49820, lng:126.86700, cat:"GOODS", loc:"돔 구장 메인 게이트 입장 직후 정면", crowd:60 },
-        { name:"GS25 고척점", lat:37.49840, lng:126.86720, cat:"STORE", loc:"1번 게이트 우측", crowd:40 },
+        { name:"GS25 고척점",      lat:37.49840, lng:126.86720, cat:"STORE", loc:"1번 게이트 우측",                     crowd:40 },
     ],
-    incheon: [],
-    suwon: [],
-    gwangju: [],
-    daegu: [],
-    sajik: [],
-    changwon: [],
-    daejeon: []
+    incheon: [], suwon: [], gwangju: [], daegu: [], sajik: [], changwon: [], daejeon: []
+};
+
+const stadiumCoords = {
+    jamsil:   [37.5122, 127.0719], gocheok:  [37.4982, 126.8670],
+    incheon:  [37.4370, 126.6933], suwon:    [37.2997, 127.0097],
+    gwangju:  [35.1681, 126.8848], daegu:    [35.8412, 128.6818],
+    sajik:    [35.1940, 129.0615], changwon: [35.2224, 128.5823],
+    daejeon:  [36.3171, 127.4292]
 };
 
 const stadiumNames = {
@@ -414,54 +429,45 @@ const stadiumNames = {
 };
 
 const catMeta = {
-    FOOD:  { label:'음식점', icon:'utensils',    color:'#ea580c', iconColor:'text-orange-400', bg:'bg-orange-500/15' },
-    STORE: { label:'편의점', icon:'store',        color:'#16a34a', iconColor:'text-green-400',  bg:'bg-green-500/12' },
-    BATH:  { label:'화장실', icon:'droplets',     color:'#2563eb', iconColor:'text-blue-400',   bg:'bg-blue-500/12' },
-    GOODS: { label:'팀 스토어', icon:'shopping-bag', color:'var(--t)', iconColor:'text-team',  bg:'bg-team/15' },
+    FOOD:  { label:'음식점',    icon:'utensils',    colorClass:'text-orange-500', bg:'#fff7ed' },
+    STORE: { label:'편의점',    icon:'store',        colorClass:'text-green-600',  bg:'#f0fdf4' },
+    BATH:  { label:'화장실',    icon:'droplets',     colorClass:'text-blue-600',   bg:'#eff6ff' },
+    GOODS: { label:'팀 스토어', icon:'shopping-bag', colorClass:'',                bg:'' },
 };
 
 /* ── STATE ── */
-let map, currentStadiumId = 'jamsil', currentCategory = 'FOOD';
-let activeOverlays = [], selectedFacility = null, userLatLng = null;
-let voteState = {};
+let currentStadiumId = 'jamsil', currentCategory = 'FOOD';
+let activeMarkers = [], selectedFacility = null, voteState = {};
 
-/* ── KAKAO MAP INIT ── */
-const stadiumCoords = {};
-kakao.maps.load(function() {
-    const coords = {
-        jamsil:   [37.5122, 127.0719], gocheok: [37.4982, 126.8670],
-        incheon:  [37.4370, 126.6933], suwon:   [37.2997, 127.0097],
-        gwangju:  [35.1681, 126.8848], daegu:   [35.8412, 128.6818],
-        sajik:    [35.1940, 129.0615], changwon:[35.2224, 128.5823],
-        daejeon:  [36.3171, 127.4292]
-    };
-    for (const [k,[lat,lng]] of Object.entries(coords)) {
-        stadiumCoords[k] = new kakao.maps.LatLng(lat, lng);
-    }
-
-    const container = document.getElementById('map');
-    map = new kakao.maps.Map(container, {
-        center: stadiumCoords.jamsil,
-        level: 3
-    });
-
-    // Tap map → close sheet
-    kakao.maps.event.addListener(map, 'click', () => closeSheet());
-
-    // Initial render
-    setCategory('FOOD');
+/* ── LEAFLET MAP ── */
+const map = L.map('map', {
+    center: stadiumCoords.jamsil,
+    zoom: 17,
+    zoomControl: true,
+    attributionControl: false
 });
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+}).addTo(map);
+
+// Map click = close sheet
+map.on('click', () => closeSheet());
+
+// Initial render
+setCategory('FOOD');
 
 /* ── STADIUM CHANGE ── */
 function changeStadium(id) {
-    if (!map) return;
     currentStadiumId = id;
-    map.panTo(stadiumCoords[id]);
+    const c = stadiumCoords[id];
+    map.flyTo(c, 17, { duration: 0.8 });
 
     document.querySelectorAll('.stadium-pill').forEach(p => p.classList.remove('active'));
     document.getElementById('pill-' + id)?.classList.add('active');
 
-    clearOverlays();
+    clearMarkers();
     renderMarkers();
     closeSheet();
 }
@@ -469,44 +475,47 @@ function changeStadium(id) {
 /* ── CATEGORY ── */
 function setCategory(cat) {
     currentCategory = cat;
-
     document.querySelectorAll('.cat-btn').forEach(b => {
-        b.className = b.className.replace(/active-\w+/, '').trim();
+        b.className = b.className.replace(/\s*active-\w+/g, '').trim();
     });
     document.getElementById('cat-' + cat)?.classList.add('active-' + cat);
-
-    clearOverlays();
+    clearMarkers();
     renderMarkers();
     closeSheet();
 }
 
 /* ── MARKERS ── */
-function clearOverlays() {
-    activeOverlays.forEach(o => o.setMap(null));
-    activeOverlays = [];
+function clearMarkers() {
+    activeMarkers.forEach(m => map.removeLayer(m));
+    activeMarkers = [];
 }
 
 function renderMarkers() {
-    if (!map) return;
     const list = (facilityData[currentStadiumId] || []).filter(f => f.cat === currentCategory);
+
+    const noData = document.getElementById('no_data');
+    noData.style.display = list.length === 0 ? 'block' : 'none';
 
     list.forEach(f => {
         const el = document.createElement('div');
         el.className = `mk mk-${f.cat}`;
         el.innerHTML = `<span class="mk-inner">${f.name.charAt(0)}</span>`;
         el.addEventListener('click', (e) => {
-            e.stopPropagation();
+            L.DomEvent.stopPropagation(e);
             openSheet(f);
         });
 
-        const overlay = new kakao.maps.CustomOverlay({
-            position: new kakao.maps.LatLng(f.lat, f.lng),
-            content: el,
-            yAnchor: 1.15,
-            xAnchor: 0.5
+        const icon = L.divIcon({
+            html: el.outerHTML,
+            className: '',
+            iconSize: [30, 30],
+            iconAnchor: [15, 30]
         });
-        overlay.setMap(map);
-        activeOverlays.push(overlay);
+
+        const marker = L.marker([f.lat, f.lng], { icon })
+            .addTo(map)
+            .on('click', (e) => { e.originalEvent.stopPropagation(); openSheet(f); });
+        activeMarkers.push(marker);
     });
 }
 
@@ -521,18 +530,15 @@ function openSheet(f) {
 
     // Cat icon
     const iconWrap = document.getElementById('bs_cat_icon');
-    iconWrap.className = `w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${meta.bg}`;
-    iconWrap.innerHTML = `<i data-lucide="${meta.icon}" class="w-5 h-5 ${meta.iconColor}"></i>`;
+    const teamColor = getComputedStyle(document.documentElement).getPropertyValue('--t').trim();
+    const goodsBg = `rgba(${getComputedStyle(document.documentElement).getPropertyValue('--t-rgb').trim()},0.1)`;
+    iconWrap.style.background = f.cat === 'GOODS' ? goodsBg : meta.bg;
+    iconWrap.innerHTML = `<i data-lucide="${meta.icon}" class="w-5 h-5 ${meta.colorClass}" ${f.cat === 'GOODS' ? `style="color:${teamColor}"` : ''}></i>`;
 
-    // Crowd
     updateCrowdUI(f.crowd);
-
-    // Reset votes
-    ['low','mid','high'].forEach(v => {
-        document.getElementById('vbtn-' + v).className = 'vote-btn';
-    });
-    const savedVote = voteState[f.name];
-    if (savedVote) document.getElementById('vbtn-' + savedVote)?.classList.add('voted-' + savedVote);
+    ['low','mid','high'].forEach(v => { document.getElementById('vbtn-' + v).className = 'vote-btn'; });
+    const saved = voteState[f.name];
+    if (saved) document.getElementById('vbtn-' + saved)?.classList.add('voted-' + saved);
 
     document.getElementById('bottom_sheet').classList.add('open');
     lucide.createIcons();
@@ -544,78 +550,61 @@ function closeSheet() {
 }
 
 function updateCrowdUI(pct) {
-    const bar = document.getElementById('bs_crowd_bar');
+    const bar   = document.getElementById('bs_crowd_bar');
     const label = document.getElementById('bs_crowd_label');
     bar.style.width = pct + '%';
-
     if (pct < 40) {
         bar.className = 'crowd-fill bg-green-400';
         label.textContent = '여유 (' + pct + '%)';
-        label.className = 'text-xs font-black text-green-400';
+        label.className   = 'text-xs font-black text-green-600';
     } else if (pct < 70) {
         bar.className = 'crowd-fill bg-amber-400';
         label.textContent = '보통 (' + pct + '%)';
-        label.className = 'text-xs font-black text-amber-400';
+        label.className   = 'text-xs font-black text-amber-500';
     } else {
         bar.className = 'crowd-fill bg-red-400';
         label.textContent = '혼잡 (' + pct + '%)';
-        label.className = 'text-xs font-black text-red-400';
+        label.className   = 'text-xs font-black text-red-500';
     }
 }
 
 function vote(level) {
     if (!selectedFacility) return;
     voteState[selectedFacility.name] = level;
-
-    ['low','mid','high'].forEach(v => {
-        document.getElementById('vbtn-' + v).className = 'vote-btn';
-    });
+    ['low','mid','high'].forEach(v => { document.getElementById('vbtn-' + v).className = 'vote-btn'; });
     document.getElementById('vbtn-' + level)?.classList.add('voted-' + level);
-
-    // Update crowd visual based on vote
     const pctMap = { low: 25, mid: 55, high: 85 };
     selectedFacility.crowd = pctMap[level];
-    updateCrowdUI(selectedFacility.crowd);
+    updateCrowdUI(pctMap[level]);
 }
 
 /* ── NAVIGATION ── */
 function navToSelected() {
-    if (!selectedFacility) {
-        startNavToStadium();
-        return;
-    }
+    if (!selectedFacility) { navToStadium(); return; }
     const { name, lat, lng } = selectedFacility;
-    window.open(`https://map.kakao.com/link/to/${name},${lat},${lng}`, '_blank');
+    window.open(`https://map.kakao.com/link/to/${encodeURIComponent(name)},${lat},${lng}`, '_blank');
 }
 
-function kakaoNavToSelected() {
-    navToSelected();
-}
-
-function startNavToStadium() {
-    const coord = stadiumCoords[currentStadiumId];
-    if (!coord) return;
+function navToStadium() {
+    const c = stadiumCoords[currentStadiumId];
     const name = stadiumNames[currentStadiumId];
-    window.open(`https://map.kakao.com/link/to/${name},${coord.getLat()},${coord.getLng()}`, '_blank');
+    window.open(`https://map.kakao.com/link/to/${encodeURIComponent(name)},${c[0]},${c[1]}`, '_blank');
 }
 
 function locateMe() {
     if (!navigator.geolocation) { alert('위치 서비스를 지원하지 않습니다.'); return; }
     navigator.geolocation.getCurrentPosition(pos => {
-        userLatLng = new kakao.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-        map.panTo(userLatLng);
-
-        // Place user marker
+        const { latitude: lat, longitude: lng } = pos.coords;
+        map.panTo([lat, lng]);
         const el = document.createElement('div');
         el.style.cssText = `
-            width:16px;height:16px;border-radius:50%;
-            background:var(--t);border:3px solid white;
-            box-shadow:0 0 0 4px rgba(var(--t-rgb),0.3);
+            width:16px; height:16px; border-radius:50%;
+            background:var(--t); border:3px solid white;
+            box-shadow:0 0 0 4px rgba(var(--t-rgb),0.25);
         `;
-        new kakao.maps.CustomOverlay({
-            position: userLatLng, content: el,
-            yAnchor: 0.5, xAnchor: 0.5
-        }).setMap(map);
+        L.marker([lat, lng], {
+            icon: L.divIcon({ html: el.outerHTML, className: '', iconSize:[16,16], iconAnchor:[8,8] })
+        }).addTo(map);
     }, () => alert('위치 정보를 가져올 수 없습니다.'));
 }
 </script>

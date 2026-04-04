@@ -42,20 +42,20 @@
 
         /* WRITE BOX */
         .write-card {
-            background: rgba(255,255,255,0.045);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.09);
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
             border-radius: 20px; padding: 18px; margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
         .write-input {
             width: 100%; height: 88px; padding: 12px 14px;
-            background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.09);
+            background: #f8fafc; border: 1.5px solid #e2e8f0;
             border-radius: 12px; outline: none; resize: none;
             font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 500;
-            color: #f1f5f9; transition: border-color 0.2s;
+            color: #0f172a; transition: border-color 0.2s;
         }
-        .write-input::placeholder { color: #475569; }
-        .write-input:focus { border-color: rgba(var(--t-rgb),0.5); }
+        .write-input::placeholder { color: #94a3b8; }
+        .write-input:focus { border-color: rgba(var(--t-rgb),0.5); background: #fff; }
 
         .btn-post {
             width: 100%; padding: 12px; border: none; border-radius: 12px; margin-top: 10px;
@@ -66,26 +66,30 @@
 
         /* POST CARD */
         .post-card {
-            background: rgba(255,255,255,0.04);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.09);
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
             border-left: 3px solid var(--t);
             border-radius: 18px; padding: 16px; margin-bottom: 10px;
             transition: all 0.2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
         }
-        .post-card:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(0,0,0,.25); border-color: rgba(var(--t-rgb),0.3); }
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            border-color: rgba(var(--t-rgb), 0.25);
+        }
 
         .post-author {
             font-size: 11px; font-weight: 800; text-transform: uppercase;
             letter-spacing: 0.05em; color: var(--t);
         }
         .post-content {
-            font-size: 14px; font-weight: 500; color: #cbd5e1;
+            font-size: 14px; font-weight: 500; color: #334155;
             line-height: 1.7; margin: 8px 0;
         }
         .action-btn {
             display: flex; align-items: center; gap: 5px;
-            font-size: 11px; font-weight: 700; color: #475569;
+            font-size: 11px; font-weight: 700; color: #94a3b8;
             border: none; background: transparent; cursor: pointer; transition: all 0.2s;
             padding: 4px 0;
         }
@@ -102,7 +106,7 @@
         .bnav-item {
             flex: 1; display: flex; flex-direction: column; align-items: center;
             justify-content: center; padding: 10px 4px 8px; gap: 4px;
-            font-size: 9px; font-weight: 700; color: #475569;
+            font-size: 9px; font-weight: 700; color: #94a3b8;
             cursor: pointer; transition: all 0.2s; text-transform: uppercase;
             letter-spacing: 0.04em; border: none; background: transparent;
         }
@@ -125,7 +129,7 @@
         <!-- Section header -->
         <div class="flex items-center justify-between mb-4">
             <div>
-                <h2 class="text-xl font-black text-white">팬 커뮤니티</h2>
+                <h2 class="text-xl font-black text-slate-800">팬 커뮤니티</h2>
                 <p class="text-xs text-slate-500 font-medium mt-0.5">실시간 경기 이야기를 나눠보세요</p>
             </div>
             <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black"
@@ -217,7 +221,7 @@
                     <span class="ml-auto text-[9px] text-slate-600 font-medium">${p.time || ''}</span>
                 </div>
                 <p class="post-content">${p.content}</p>
-                <div class="flex gap-4 pt-2 border-t border-[rgba(255,255,255,0.05)]">
+                <div class="flex gap-4 pt-2 border-t border-slate-100">
                     <button onclick="toggleLike(${i})" class="action-btn ${p.liked ? 'liked' : ''}">
                         <i data-lucide="heart" class="w-3.5 h-3.5 ${p.liked ? 'fill-current' : ''}"></i>
                         <span>${p.likes}</span>
