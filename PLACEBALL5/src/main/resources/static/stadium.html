@@ -1,28 +1,171 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8"><title>구장별 팁</title><script src="https://cdn.tailwindcss.com"></script><script src="https://unpkg.com/lucide@latest"></script>
-    <style>:root { --t: #334155; } body { font-family: 'Pretendard', sans-serif; background: #f1f5f9; margin:0; }
-    .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .text-team { color: var(--t); } .bg-team { background: var(--t); }</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLACEBALL — 구장 팁</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@1,900&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;900&display=swap');
+        :root { --t: #334155; --t-rgb: 51,65,85; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #0a0e1a; color: #e2e8f0;
+            margin: 0; padding-bottom: 90px;
+        }
+        .topnav {
+            background: rgba(10,14,26,0.88); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            position: sticky; top: 0; z-index: 100; padding: 0 16px;
+        }
+        .topnav-inner {
+            max-width: 960px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between; height: 56px;
+        }
+        .logo-text {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.3rem; font-weight: 900; letter-spacing: -0.06em;
+            display: flex; align-items: baseline; cursor: pointer;
+        }
+        .logo-text .main { color: #f1f5f9; }
+        .logo-text .sub  { color: var(--t); font-style: italic; }
+        .logo-text .dot  { color: #fbbf24; }
+
+        .tip-card {
+            background: #111827; border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 20px; overflow: hidden; margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+        .tip-card:hover { border-color: rgba(var(--t-rgb),0.35); }
+        .tip-card-header {
+            padding: 18px 20px; display: flex; align-items: center; gap-3;
+            cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .tip-badge {
+            padding: 3px 10px; border-radius: 99px;
+            font-size: 9px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase;
+        }
+        .tip-content { padding: 16px 20px; }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(10,14,26,0.95); backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.07);
+            display: flex; padding-bottom: env(safe-area-inset-bottom);
+        }
+        .bnav-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 10px 4px 8px; gap: 4px;
+            font-size: 9px; font-weight: 700; color: #475569;
+            cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+            letter-spacing: 0.04em; border: none; background: transparent;
+        }
+        .bnav-item.active { color: var(--t); }
+    </style>
 </head>
 <body>
-    <nav class="glass sticky top-0 z-[100] px-6 py-3 flex justify-between items-center shadow-sm">
-        <h1 onclick="location.href='index.html'" class="text-xl font-black italic text-team cursor-pointer">PLACEBALL</h1>
-        <div class="flex gap-6 text-[13px] font-bold text-slate-500">
-            <a href="stadium.html" class="text-team border-b-2 border-team">구장별 팁</a>
-            <a href="community.html">커뮤니티</a>
-            <a href="diary.html">직관 다이어리</a>
+    <header class="topnav">
+        <div class="topnav-inner">
+            <div class="logo-text" onclick="location.href='index.html'">
+                <span class="main">PLACE</span><span class="sub">BALL</span><span class="dot">.</span>
+            </div>
+            <div id="u_circle" class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black text-white bg-slate-700">?</div>
         </div>
-    </nav>
-    <main class="max-w-4xl mx-auto p-10 mt-10 bg-white rounded-[3rem] shadow-xl">
-        <h2 class="text-2xl font-black mb-10 italic">STADIUM TIPS</h2>
-        <div class="p-8 bg-slate-50 rounded-[2rem] border-l-8 border-team">
-            <span class="text-[10px] font-black text-team">FOOD TIP</span>
-            <h3 class="text-xl font-bold mt-1 text-slate-800">잠실 구장 추천 메뉴</h3>
-            <p class="text-slate-500 mt-2 text-sm leading-relaxed font-medium">원정 팀 팬이라면 잠실 새내역 인근 시장에서 깻잎 닭강정을 포장해오세요! 구장 안보다 훨씬 맛있습니다.</p>
+    </header>
+
+    <main class="max-w-3xl mx-auto p-4 mt-4">
+        <div class="mb-6">
+            <h2 class="text-2xl font-black text-white mb-1">⚾ 구장 직관 팁</h2>
+            <p class="text-xs text-slate-500 font-medium">구장별 현지인 꿀팁 모음</p>
+        </div>
+
+        <div class="tip-card">
+            <div class="tip-card-header">
+                <div class="tip-badge" style="background:rgba(var(--t-rgb),0.15);color:var(--t);">FOOD TIP</div>
+                <div class="ml-2">
+                    <h3 class="text-sm font-black text-white">잠실 구장 — 추천 메뉴</h3>
+                </div>
+            </div>
+            <div class="tip-content">
+                <p class="text-sm text-slate-400 font-medium leading-relaxed">
+                    원정 팀 팬이라면 잠실 새내역 인근 시장에서 <span class="text-amber-400 font-bold">깻잎 닭강정</span>을 포장해오세요!
+                    구장 안보다 훨씬 맛있고 줄도 짧습니다. 경기 30분 전쯤 입장하면 여유롭게 자리 잡을 수 있어요.
+                </p>
+            </div>
+        </div>
+
+        <div class="tip-card">
+            <div class="tip-card-header">
+                <div class="tip-badge" style="background:rgba(37,99,235,0.12);color:#60a5fa;">PARK TIP</div>
+                <div class="ml-2">
+                    <h3 class="text-sm font-black text-white">잠실 주차 — 탄천 공영주차장 추천</h3>
+                </div>
+            </div>
+            <div class="tip-content">
+                <p class="text-sm text-slate-400 font-medium leading-relaxed">
+                    경기 당일 잠실 야구장 주차장은 대부분 만차! <span class="text-sky-400 font-bold">탄천 공영주차장</span>에서 도보 8분이 훨씬 현명합니다.
+                    대중교통 이용 시 9호선 종합운동장역 하차 후 5분이면 도착.
+                </p>
+            </div>
+        </div>
+
+        <div class="tip-card">
+            <div class="tip-card-header">
+                <div class="tip-badge" style="background:rgba(168,85,247,0.12);color:#c084fc;">GOODS TIP</div>
+                <div class="ml-2">
+                    <h3 class="text-sm font-black text-white">팀 스토어 — 유니폼 줄서기 팁</h3>
+                </div>
+            </div>
+            <div class="tip-content">
+                <p class="text-sm text-slate-400 font-medium leading-relaxed">
+                    인기 사이즈(M·L)는 경기 전 2시간 이내 품절되는 경우가 많아요.
+                    <span class="text-violet-400 font-bold">입장 직후 바로 스토어 먼저</span> 들르는 것을 추천합니다.
+                    온라인 사전 주문 후 현장 픽업 옵션도 활용해보세요.
+                </p>
+            </div>
+        </div>
+
+        <div class="text-center mt-8">
+            <button onclick="location.href='map.html'"
+                    class="flex items-center gap-2 mx-auto px-8 py-4 rounded-full font-black text-sm text-white transition"
+                    style="background:var(--t);box-shadow:0 8px 24px rgba(var(--t-rgb),0.35);">
+                <i data-lucide="map" class="w-4 h-4"></i> 구장 지도 열기
+            </button>
         </div>
     </main>
-    <script>const u = JSON.parse(localStorage.getItem('curr')); document.documentElement.style.setProperty('--t', u.color); lucide.createIcons();</script>
+
+    <nav class="bottom-nav">
+        <button class="bnav-item" onclick="location.href='index.html'">
+            <i data-lucide="radio" class="w-5 h-5"></i> 라이브
+        </button>
+        <button class="bnav-item" onclick="location.href='map.html'">
+            <i data-lucide="map" class="w-5 h-5"></i> 지도
+        </button>
+        <button class="bnav-item" onclick="location.href='guide.html'">
+            <i data-lucide="book-open" class="w-5 h-5"></i> 가이드
+        </button>
+        <button class="bnav-item" onclick="location.href='diary.html'">
+            <i data-lucide="calendar-heart" class="w-5 h-5"></i> 다이어리
+        </button>
+        <button class="bnav-item active">
+            <i data-lucide="messages-square" class="w-5 h-5"></i> 커뮤니티
+        </button>
+    </nav>
+
+    <script>
+    const u = JSON.parse(localStorage.getItem('curr') || 'null');
+    if (u?.color) {
+        document.documentElement.style.setProperty('--t', u.color);
+        const r=parseInt(u.color.slice(1,3),16), g=parseInt(u.color.slice(3,5),16), b=parseInt(u.color.slice(5,7),16);
+        document.documentElement.style.setProperty('--t-rgb',`${r},${g},${b}`);
+        const c = document.getElementById('u_circle');
+        c.textContent = u.nick.charAt(0).toUpperCase();
+        c.style.background = u.color;
+    }
+    lucide.createIcons();
+    </script>
 </body>
 </html>
