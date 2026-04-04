@@ -3,300 +3,459 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PLACEBALL - 초보자를 위한 상세 가이드</title>
+    <title>PLACEBALL — 직관 가이드</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Montserrat:ital,wght@1,900&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Pretendard:wght@400;600;700;900&family=Montserrat:ital,wght@1,900&display=swap');
-        
-        :root { --team-main: #3b82f6; --sky-blue: #0ea5e9; }
-        body { font-family: 'Pretendard', sans-serif; background: #f8fafc; color: #334155; margin:0; letter-spacing: -0.02em; }
-
-        .logo-text { font-family: 'Montserrat', sans-serif; font-size: 1.4rem; font-weight: 900; letter-spacing: -0.05em; display: flex; align-items: baseline; }
-        .logo-text .sub { color: var(--team-main); font-style: italic; }
-
-        /* [NEW] 트렌디하고 미니멀한 환영 섹션 */
-        .welcome-header {
-            background: white; border-radius: 32px; padding: 60px 50px;
-            border: 1px solid #e2e8f0; position: relative; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-        }
-        .welcome-header .deco-circle {
-            position: absolute; top: -50px; right: -50px; width: 200px; height: 200px;
-            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%); border-radius: 50%; opacity: 0.5;
-        }
-        .welcome-header .glass-tag {
-            background: rgba(14, 165, 233, 0.1); color: var(--sky-blue);
-            border-radius: 99px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 6px;
-            font-size: 0.85rem; font-weight: 700;
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;900&display=swap');
+        :root { --t: #334155; --t-rgb: 51,65,85; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #0a0e1a; color: #e2e8f0;
+            margin: 0; padding-bottom: 90px;
         }
 
-        /* [1] 전광판 디자인 유지 */
-        .scoreboard-container {
-            background: #0a0a0a; border: 4px solid #222; border-radius: 12px;
-            padding: 25px; color: #fff; font-family: 'Orbitron', sans-serif;
-            display: grid; grid-template-columns: 1.5fr 4fr 1.5fr; gap: 15px;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.6); width: 100%;
+        .topnav {
+            background: rgba(10,14,26,0.88); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            position: sticky; top: 0; z-index: 100;
+            padding: 0 16px;
         }
-        .lineup-col { background: #000; border: 1px solid #222; display: flex; flex-direction: column; }
-        .lineup-row { display: flex; justify-content: space-between; padding: 10px 12px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #111; font-family: 'Pretendard'; }
+        .topnav-inner {
+            max-width: 1100px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 56px;
+        }
+        .logo-text {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.3rem; font-weight: 900;
+            letter-spacing: -0.06em; display: flex; align-items: baseline;
+            cursor: pointer;
+        }
+        .logo-text .main { color: #f1f5f9; }
+        .logo-text .sub  { color: var(--t); font-style: italic; }
+        .logo-text .dot  { color: #fbbf24; }
+        .nav-links { display: flex; gap: 4px; }
+        .nav-link {
+            padding: 6px 12px; border-radius: 10px;
+            font-size: 12px; font-weight: 700; color: #475569;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .nav-link:hover { color: #e2e8f0; background: rgba(255,255,255,0.05); }
+        .nav-link.active { color: var(--t); background: rgba(var(--t-rgb),0.12); }
+
+        /* CONTENT */
+        .content { max-width: 1100px; margin: 0 auto; padding: 28px 16px; }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(var(--t-rgb),0.12) 0%, rgba(17,24,39,0) 60%),
+                        linear-gradient(180deg, #111827 0%, #0f172a 100%);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-left: 4px solid var(--t);
+            border-radius: 24px; padding: 32px 28px; margin-bottom: 32px;
+            position: relative; overflow: hidden;
+        }
+        .hero-tag {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(var(--t-rgb),0.15); color: var(--t);
+            padding: 5px 12px; border-radius: 99px;
+            font-size: 11px; font-weight: 800; letter-spacing: 0.05em;
+            margin-bottom: 14px;
+        }
+
+        /* SCOREBOARD */
+        .scoreboard {
+            background: #000; border: 2px solid #1e293b;
+            border-radius: 16px; padding: 20px; overflow: auto;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+        }
+        .sc-grid {
+            display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 12px;
+            min-width: 600px;
+        }
+        .lineup-col { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 8px; overflow: hidden; }
+        .lineup-row {
+            display: flex; justify-content: space-between; padding: 10px 14px;
+            font-size: 12px; cursor: pointer; border-bottom: 1px solid #0f0f0f;
+            color: #94a3b8; font-family: 'Pretendard', sans-serif; font-weight: 600;
+            transition: all 0.15s;
+        }
         .lineup-row:hover { background: #111; color: #fbbf24; }
-        .at-bat { background: #fbbf24; color: #000 !important; font-weight: 900; }
+        .lineup-row.at-bat { background: #fbbf24; color: #000; font-weight: 900; }
+        .score-table { width: 100%; border-collapse: collapse; text-align: center; }
+        .score-table th {
+            font-size: 10px; color: #475569; padding: 8px 4px;
+            border-bottom: 1px solid #1e293b; cursor: pointer; font-weight: 700;
+            font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em;
+        }
+        .score-table th:hover { color: #e2e8f0; }
+        .score-table td {
+            padding: 12px 4px; color: #fbbf24; border: 1px solid #111;
+            font-weight: 700; font-size: 15px; cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .score-table .team-name {
+            color: #e2e8f0; font-weight: 900; font-size: 14px;
+            background: #0a0a0a; text-align: left; padding-left: 10px;
+            font-family: 'Pretendard', sans-serif;
+        }
+        .score-table .summary-col { background: #0d0d0d; color: #e2e8f0; border-left: 2px solid #1e293b; }
+        .inning-active { color: #e2e8f0 !important; background: #1e293b; }
 
-        .score-table { width: 100%; background: #000; border-collapse: collapse; text-align: center; }
-        .score-table th { font-size: 11px; color: #555; padding: 8px; border-bottom: 2px solid #222; cursor: pointer; transition: 0.2s; }
-        .score-table th:hover { color: #fff; }
-        .score-table td { padding: 14px 4px; color: #fbbf24; border: 1px solid #111; font-weight: 700; font-size: 18px; cursor: pointer; }
-        .score-table .team-name { color: #fff; font-weight: 900; font-size: 18px; background: #111; width: 70px; }
-        .score-table .summary-col { background: #151515; color: #fff; border-left: 2px solid #333; }
-        .inning-active { color: #fff !important; background: #1e293b; position: relative; }
+        .bso-box {
+            background: #0a0a0a; border: 1px solid #1a1a1a;
+            border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .bso-dot { width: 14px; height: 14px; border-radius: 50%; background: #1e293b; border: 1px solid #334155; }
+        .b-on { background: #22c55e; box-shadow: 0 0 10px #22c55e; border-color: transparent; }
+        .s-on { background: #fbbf24; box-shadow: 0 0 10px #fbbf24; border-color: transparent; }
+        .o-on { background: #ef4444; box-shadow: 0 0 10px #ef4444; border-color: transparent; }
+        .velo-box {
+            background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 8px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer; padding: 14px; gap: 4px;
+        }
+        .velo-val { font-size: 2.5rem; font-weight: 900; color: #fff; font-family: 'Orbitron', sans-serif; line-height: 1; }
 
-        .bso-box { background: #000; border: 1px solid #222; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .dot { width: 16px; height: 16px; border-radius: 50%; background: #111; border: 1px solid #333; }
-        .b-on { background: #22c55e; box-shadow: 0 0 12px #22c55e; }
-        .s-on { background: #fbbf24; box-shadow: 0 0 12px #fbbf24; }
-        .o-on { background: #ef4444; box-shadow: 0 0 12px #ef4444; }
-        
-        .velo-box { background: #000; border: 1px solid #222; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; padding: 15px; }
-        .velo-box .val { font-size: 3rem; font-weight: 900; color: #fff; line-height: 1; }
-
-        /* [2] 필드 맵 디자인 유지 */
-        .field-card {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-radius: 24px; padding: 40px 20px; position: relative; overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        /* FIELD */
+        .field-wrap {
+            background: linear-gradient(135deg, #0f172a 0%, #111827 100%);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 20px; padding: 28px 16px; overflow: hidden;
         }
         .field-area {
-            background: radial-gradient(circle at center, #3d5a3d 0%, #2d4a2d 100%);
-            border-radius: 50% 50% 10px 10px; position: relative; 
-            height: 420px; width: 360px; margin: 0 auto;
-            border: 5px solid #475569;
+            background: radial-gradient(circle at center, #2d5016 0%, #1a3a0c 100%);
+            border-radius: 50% 50% 8px 8px; position: relative;
+            height: 360px; width: 320px; margin: 0 auto;
+            border: 4px solid rgba(255,255,255,0.1);
         }
         .infield-dirt {
-            position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%) rotate(45deg);
-            width: 210px; height: 210px; background: #8b5a2b; border: 4px solid #a0522d;
-            border-radius: 4px;
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%) rotate(45deg);
+            width: 185px; height: 185px; background: #5c3317;
+            border: 3px solid rgba(255,255,255,0.1); border-radius: 4px;
         }
         .pos-btn {
-            position: absolute; width: 36px; height: 36px; background: white;
+            position: absolute; width: 34px; height: 34px; background: #1e293b;
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4); font-size: 10px; font-weight: 900; 
-            cursor: pointer; border: 2px solid var(--team-main); transition: 0.2s; z-index: 20;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); font-size: 9px; font-weight: 900;
+            cursor: pointer; border: 2px solid var(--t); transition: all 0.2s; z-index: 20;
+            color: #94a3b8;
         }
-        .pos-btn:hover { transform: scale(1.2) !important; background: var(--team-main); color: white; }
+        .pos-btn:hover { transform: scale(1.25) !important; background: var(--t); color: white; }
 
-        /* [3] FAQ 및 팝업 스타일 유지 */
-        #quick-pop {
-            position: absolute; display: none; background: rgba(15, 23, 42, 0.98); color: #fff;
-            padding: 20px; border-radius: 12px; font-size: 14px; z-index: 1000;
-            pointer-events: none; width: 280px; line-height: 1.6;
-            border-left: 5px solid var(--team-main); box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            backdrop-filter: blur(8px);
+        /* FAQ */
+        .faq-card {
+            background: #111827; border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 20px; padding: 24px; overflow: hidden;
         }
-        .faq-section { background: white; border-radius: 24px; padding: 30px; border: 1px solid #e2e8f0; }
-        .faq-item { border-bottom: 1px solid #f1f5f9; }
-        .faq-trigger { width: 100%; padding: 20px 0; display: flex; justify-content: space-between; align-items: center; font-weight: 700; color: #1e293b; }
-        .faq-content { max-height: 0; overflow: hidden; transition: all 0.3s ease-out; color: #64748b; font-size: 14px; line-height: 1.6; }
-        .faq-content.open { max-height: 300px; padding-bottom: 20px; }
+        .faq-item { border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .faq-item:last-child { border-bottom: none; }
+        .faq-trigger {
+            width: 100%; padding: 18px 0; display: flex; justify-content: space-between;
+            align-items: center; font-weight: 700; color: #e2e8f0; font-size: 14px;
+            background: transparent; border: none; cursor: pointer; text-align: left;
+        }
+        .faq-trigger:hover { color: var(--t); }
+        .faq-content {
+            max-height: 0; overflow: hidden; transition: all 0.3s ease;
+            color: #64748b; font-size: 13px; line-height: 1.7;
+        }
+        .faq-content.open { max-height: 200px; padding-bottom: 18px; }
+
+        /* POPUP */
+        #quick-pop {
+            position: fixed; display: none;
+            background: #1e293b; color: #e2e8f0;
+            padding: 16px 18px; border-radius: 14px; font-size: 13px; z-index: 9999;
+            pointer-events: none; width: 260px; line-height: 1.6;
+            border-left: 4px solid var(--t);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+
+        /* BOTTOM NAV */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(10,14,26,0.95); backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.07);
+            display: flex; padding-bottom: env(safe-area-inset-bottom);
+        }
+        .bnav-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 10px 4px 8px; gap: 4px;
+            font-size: 9px; font-weight: 700; color: #475569;
+            cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+            letter-spacing: 0.04em; border: none; background: transparent;
+        }
+        .bnav-item.active { color: var(--t); }
+
+        .section-hdr {
+            font-size: 18px; font-weight: 900; font-style: italic;
+            color: #f1f5f9; display: flex; align-items: center; gap: 8px;
+            margin-bottom: 16px;
+        }
+        .live-badge {
+            background: #ef4444; color: white; font-size: 9px; font-weight: 900;
+            padding: 3px 8px; border-radius: 4px; font-style: normal; letter-spacing: 0.05em;
+        }
     </style>
 </head>
-<body class="pb-24">
+<body>
+    <div id="quick-pop"></div>
 
-    <nav class="px-6 py-4 flex justify-between items-center bg-white/80 backdrop-blur-md border-b sticky top-0 z-50">
-        <div class="logo-text" onclick="location.href='index.html'" style="cursor:pointer;"><span>PLACE</span><span class="sub">BALL</span></div>
-        <div id="u_circle" class="w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-black text-white bg-slate-400">?</div>
-    </nav>
-
-    <main class="max-w-6xl mx-auto p-6 space-y-16">
-        
-        <header class="welcome-header">
-            <div class="deco-circle"></div>
-            <div class="relative z-10 space-y-5">
-                <div class="glass-tag">
-                    <i data-lucide="party-popper" class="w-4 h-4"></i>
-                    <span>Welcome 야린이!</span>
-                </div>
-                <h1 class="text-4xl md:text-5xl font-black leading-tight text-slate-950 tracking-tight">
-                    설레는 첫 직관,<br>
-                    <span class="text-blue-600">플레이스볼</span>과 함께 준비해요.
-                </h1>
-                <p class="text-slate-600 max-w-2xl font-semibold text-lg md:text-xl leading-relaxed">
-                    복잡한 전광판의 숫자부터 선수들의 수비 위치까지,<br class="hidden md:block"> 
-                    야구 초보자가 꼭 알아야 할 핵심 정보를 명쾌하게 알려드립니다.
-                </p>
-                <div class="flex items-center gap-3 pt-2 text-sm font-bold text-blue-700">
-                    <i data-lucide="help-circle" class="w-5 h-5"></i>
-                    아래 가이드에서 궁금한 항목을 클릭해보세요!
-                </div>
+    <!-- NAV -->
+    <header class="topnav">
+        <div class="topnav-inner">
+            <div class="logo-text" onclick="location.href='index.html'">
+                <span class="main">PLACE</span><span class="sub">BALL</span><span class="dot">.</span>
             </div>
-        </header>
+            <nav class="nav-links hidden md:flex">
+                <a href="index.html"  class="nav-link">대시보드</a>
+                <a href="map.html"    class="nav-link">구장 지도</a>
+                <a href="guide.html"  class="nav-link active">직관 가이드</a>
+                <a href="diary.html"  class="nav-link">다이어리</a>
+            </nav>
+            <div id="u_circle" class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black text-white bg-slate-700 cursor-pointer">?</div>
+        </div>
+    </header>
 
-        <section class="space-y-6">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <h2 class="text-2xl font-black italic flex items-center gap-2 text-slate-900 uppercase tracking-tighter">
-                    <span class="bg-red-600 text-white px-3 py-1 rounded text-sm not-italic mr-2">LIVE</span> Scoreboard Guide
-                </h2>
-                <p class="text-sm text-slate-500 font-bold underline underline-offset-4 decoration-blue-500">💡 전광판의 각 항목을 클릭해 의미를 확인해보세요!</p>
+    <main class="content space-y-10">
+
+        <!-- HERO -->
+        <div class="hero">
+            <div class="hero-tag">
+                <i data-lucide="party-popper" class="w-3.5 h-3.5"></i>
+                Welcome, 야린이!
             </div>
-            
-            <div class="scoreboard-container">
-                <div class="lineup-col">
-                    <div class="lineup-row" onclick="showPop(event, '<b>1번 박찬호 (SS)</b><br>유격수입니다. 팀의 수비 핵심이자 빠른 발을 가진 리드오프입니다.')"><span>1 박찬호</span><span>SS</span></div>
-                    <div class="lineup-row at-bat" onclick="showPop(event, '<b>2번 김도영 (3B)</b><br>현재 타석에 있는 타자입니다. 노란색 표시가 현재 타자를 의미해요.')"><span>2 김도영</span><span>3B</span></div>
-                    <div class="lineup-row" onclick="showPop(event, '<b>3번 나성범 (RF)</b><br>강력한 장타력을 가진 중심 타자입니다.')"><span>3 나성범</span><span>RF</span></div>
-                    <div class="lineup-row"><span>4 최형우</span><span>DH</span></div>
-                    <div class="lineup-row"><span>5 소크라테스</span><span>LF</span></div>
-                </div>
+            <h1 class="text-3xl md:text-4xl font-black text-white leading-tight mb-3 tracking-tight">
+                설레는 첫 직관,<br>
+                <span style="color:var(--t);">플레이스볼</span>이 알려드려요.
+            </h1>
+            <p class="text-sm text-slate-400 font-medium leading-relaxed max-w-xl">
+                전광판 숫자부터 선수 수비 위치까지 — 초보 팬이 꼭 알아야 할 핵심을 명쾌하게 설명합니다.<br>
+                아래 항목을 <span class="text-amber-400 font-bold">탭/클릭</span>해보세요!
+            </p>
+        </div>
 
-                <div class="center-board">
-                    <table class="score-table">
-                        <thead>
-                            <tr>
-                                <th onclick="showPop(event, '<b>TEAM</b><br>위쪽은 원정팀(방문), 아래쪽은 홈팀(주인)입니다.')">TEAM</th>
-                                <th onclick="showPop(event, '<b>INNING (1-9)</b><br>경기가 진행되는 이닝을 의미합니다.')">1</th><th>2</th><th>3</th>
-                                <th class="inning-active" onclick="showPop(event, '<b>현재 이닝</b><br>배경이 파란색인 곳이 현재 진행 중인 이닝입니다. (현재 4회말)')">4</th>
-                                <th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
-                                <th class="summary-col" onclick="showPop(event, '<b>R (RUN)</b><br>팀이 획득한 총 득점입니다.')">R</th>
-                                <th class="summary-col" onclick="showPop(event, '<b>H (HIT)</b><br>팀이 기록한 안타 개수입니다.')">H</th>
-                                <th class="summary-col" onclick="showPop(event, '<b>E (ERROR)</b><br>수비 실책 횟수입니다.')">E</th>
-                                <th class="summary-col" onclick="showPop(event, '<b>B (BALL ON BALLS)</b><br>볼넷(사사구)으로 출루한 횟수입니다.')">B</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="team-name text-blue-400">KIA</td>
-                                <td>0</td><td>2</td><td>0</td><td>1</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                                <td class="summary-col">3</td><td class="summary-col">6</td><td class="summary-col">0</td><td class="summary-col">2</td>
-                            </tr>
-                            <tr>
-                                <td class="team-name text-red-500">SSG</td>
-                                <td>1</td><td>0</td><td>0</td><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                                <td class="summary-col">1</td><td class="summary-col">3</td><td class="summary-col">1</td><td class="summary-col">1</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <div class="grid grid-cols-2 gap-4 mt-4 h-40">
-                        <div class="bso-box">
-                            <div class="flex gap-5 items-center" onclick="showPop(event, '<b>BALL (볼)</b><br>투수가 던진 공이 스트라이크 존을 벗어났을 때입니다. 4개가 모이면 출루합니다.')">
-                                <span class="text-green-500 font-black">B</span><div class="dot b-on"></div><div class="dot b-on"></div><div class="dot"></div>
+        <!-- SCOREBOARD GUIDE -->
+        <section>
+            <div class="section-hdr">
+                <span class="live-badge">LIVE</span>
+                Scoreboard Guide
+            </div>
+            <p class="text-xs text-slate-500 font-medium mb-4">전광판의 각 항목을 클릭해 의미를 확인하세요!</p>
+
+            <div class="scoreboard">
+                <div class="sc-grid">
+                    <!-- Lineup Left -->
+                    <div class="lineup-col">
+                        <div class="lineup-row" onclick="showPop(event,'<b>1번 박찬호 (SS)</b><br>유격수, 팀의 수비 핵심이자 리드오프입니다.')"><span>1 박찬호</span><span>SS</span></div>
+                        <div class="lineup-row at-bat" onclick="showPop(event,'<b style=&quot;color:#fbbf24&quot;>2번 김도영 (3B)</b><br>현재 타석에 있는 타자 (노란색 표시). KBO 최고 타자 중 한 명!')"><span>2 김도영</span><span>3B</span></div>
+                        <div class="lineup-row" onclick="showPop(event,'<b>3번 나성범 (RF)</b><br>강력한 장타력의 중심 타자입니다.')"><span>3 나성범</span><span>RF</span></div>
+                        <div class="lineup-row"><span>4 최형우</span><span>DH</span></div>
+                        <div class="lineup-row"><span>5 소크라테스</span><span>LF</span></div>
+                    </div>
+                    <!-- Center Board -->
+                    <div class="flex flex-col gap-3">
+                        <table class="score-table">
+                            <thead>
+                                <tr>
+                                    <th onclick="showPop(event,'<b>TEAM</b><br>위쪽 원정팀, 아래쪽 홈팀입니다.')">TEAM</th>
+                                    <th>1</th><th>2</th><th>3</th>
+                                    <th class="inning-active" onclick="showPop(event,'<b>현재 이닝</b><br>파란 배경이 현재 진행 중인 이닝. (현재 4회)')">4</th>
+                                    <th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+                                    <th class="summary-col" onclick="showPop(event,'<b>R</b> — Run. 총 득점')">R</th>
+                                    <th class="summary-col" onclick="showPop(event,'<b>H</b> — Hit. 안타 수')">H</th>
+                                    <th class="summary-col" onclick="showPop(event,'<b>E</b> — Error. 실책 수')">E</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="team-name" style="color:#38bdf8;">KIA</td>
+                                    <td>0</td><td>2</td><td>0</td><td>1</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
+                                    <td class="summary-col">3</td><td class="summary-col">6</td><td class="summary-col">0</td>
+                                </tr>
+                                <tr>
+                                    <td class="team-name" style="color:#f87171;">SSG</td>
+                                    <td>1</td><td>0</td><td>0</td><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
+                                    <td class="summary-col">1</td><td class="summary-col">3</td><td class="summary-col">1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="grid grid-cols-2 gap-3" style="height:120px;">
+                            <div class="bso-box">
+                                <div class="flex gap-4 items-center cursor-help" onclick="showPop(event,'<b>BALL</b><br>투수가 스트라이크 존을 벗어난 공을 던졌을 때. 4볼 → 볼넷 출루!')">
+                                    <span class="text-green-500 font-black text-sm">B</span>
+                                    <div class="bso-dot b-on"></div><div class="bso-dot b-on"></div><div class="bso-dot"></div>
+                                </div>
+                                <div class="flex gap-4 items-center cursor-help" onclick="showPop(event,'<b>STRIKE</b><br>존 안 투구 또는 헛스윙. 3스트라이크 → 삼진 아웃!')">
+                                    <span class="text-yellow-500 font-black text-sm">S</span>
+                                    <div class="bso-dot s-on"></div><div class="bso-dot"></div>
+                                </div>
+                                <div class="flex gap-4 items-center cursor-help" onclick="showPop(event,'<b>OUT</b><br>공격 팀이 기회를 잃음. 3아웃 → 공수 교대!')">
+                                    <span class="text-red-500 font-black text-sm">O</span>
+                                    <div class="bso-dot o-on"></div><div class="bso-dot"></div>
+                                </div>
                             </div>
-                            <div class="flex gap-5 items-center" onclick="showPop(event, '<b>STRIKE (스트라이크)</b><br>투수가 존 안에 공을 넣거나 타자가 헛스윙했을 때입니다. 3개가 모이면 아웃입니다.')">
-                                <span class="text-yellow-500 font-black">S</span><div class="dot s-on"></div><div class="dot"></div>
+                            <div class="velo-box" onclick="showPop(event,'<b>구속 (km/h)</b><br>투수가 방금 던진 공의 속도. 150km/h 이상이면 빠른 투수!')">
+                                <span class="text-[9px] text-slate-600 font-bold tracking-widest">VELOCITY</span>
+                                <span class="velo-val">152</span>
+                                <span class="text-[9px] text-slate-600 font-bold">km/h</span>
                             </div>
-                            <div class="flex gap-5 items-center" onclick="showPop(event, '<b>OUT (아웃)</b><br>타자가 공격 기회를 잃었을 때입니다. 3개가 모이면 이닝이 바뀝니다.')">
-                                <span class="text-red-500 font-black">O</span><div class="dot o-on"></div><div class="dot"></div>
-                            </div>
-                        </div>
-                        <div class="velo-box" onclick="showPop(event, '<b>PITCH VELOCITY</b><br>투수가 방금 던진 공의 구속(km/h)입니다.')">
-                            <span class="text-[10px] text-zinc-500 font-bold tracking-widest">PITCH VELOCITY</span>
-                            <span class="val">152</span>
                         </div>
                     </div>
-                </div>
-
-                <div class="lineup-col">
-                    <div class="lineup-row"><span>1 최지훈</span><span>CF</span></div>
-                    <div class="lineup-row"><span>2 박성한</span><span>SS</span></div>
-                    <div class="lineup-row"><span>3 최정</span><span>3B</span></div>
-                    <div class="lineup-row"><span>4 에레디아</span><span>LF</span></div>
-                    <div class="lineup-row"><span>5 한유섬</span><span>RF</span></div>
+                    <!-- Lineup Right -->
+                    <div class="lineup-col">
+                        <div class="lineup-row"><span>1 최지훈</span><span>CF</span></div>
+                        <div class="lineup-row"><span>2 박성한</span><span>SS</span></div>
+                        <div class="lineup-row"><span>3 최정</span><span>3B</span></div>
+                        <div class="lineup-row"><span>4 에레디아</span><span>LF</span></div>
+                        <div class="lineup-row"><span>5 한유섬</span><span>RF</span></div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <div class="grid lg:grid-cols-2 gap-12">
-            <section class="space-y-6">
-                <h2 class="text-xl font-black italic flex items-center gap-2 text-slate-800">
-                    <i data-lucide="shield-check" class="w-6 h-6 text-blue-500"></i> # 야구장_수비_위치
-                </h2>
-                <p class="text-sm text-slate-500 font-medium leading-relaxed">필드 위 선수들의 이름표를 눌러 각 역할의 중요성을 확인해 보세요.</p>
-                <div class="field-card">
+        <!-- FIELD MAP + FAQ -->
+        <div class="grid lg:grid-cols-2 gap-8">
+
+            <section>
+                <div class="section-hdr">
+                    <i data-lucide="shield-check" class="w-5 h-5" style="color:var(--t)"></i>
+                    수비 위치 가이드
+                </div>
+                <p class="text-xs text-slate-500 font-medium mb-4">선수 이름표를 탭해서 역할을 알아보세요!</p>
+                <div class="field-wrap">
                     <div class="field-area">
                         <div class="infield-dirt"></div>
-                        <div class="pos-btn" style="bottom:22px; left:50%; transform:translateX(-50%); border-color:#ef4444;" onclick="showPop(event, '<b>포수 (C)</b><br>홈 플레이트를 지키는 최후의 수비수.')">C</div>
-                        <div class="pos-btn" style="bottom:125px; left:50%; transform:translateX(-50%); border-color:#94a3b8;" onclick="showPop(event, '<b>투수 (P)</b><br>마운드 중앙에서 공을 던집니다.')">P</div>
-                        
-                        <div class="pos-btn" style="bottom:125px; left:265px;" onclick="showPop(event, '<b>1루수 (1B)</b><br>내야의 오른쪽 베이스를 지킵니다.')">1B</div>
-                        <div class="pos-btn" style="bottom:230px; left:50%; transform:translateX(-50%);" onclick="showPop(event, '<b>2루수 (2B)</b><br>2루 베이스 근처를 수비합니다.')">2B</div>
-                        <div class="pos-btn" style="bottom:125px; left:58px;" onclick="showPop(event, '<b>3루수 (3B)</b><br>내야의 왼쪽 베이스를 지킵니다.')">3B</div>
-                        
-                        <div class="pos-btn" style="bottom:195px; left:110px;" onclick="showPop(event, '<b>유격수 (SS)</b><br>2루와 3루 사이를 수비하는 핵심 포지션.')">SS</div>
-                        
-                        <div class="pos-btn" style="top:40px; left:50%; transform:translateX(-50%); background:var(--team-main); color:white;" onclick="showPop(event, '<b>중견수 (CF)</b><br>외야의 중심이자 수비의 사령관입니다. 가장 넓은 범위를 책임지기 때문에 팀 내에서 발이 가장 빠르고 수비 범위가 넓은 선수가 맡습니다. 좌/우익수의 수비 위치를 조정하기도 합니다.')">CF</div>
-                        
-                        <div class="pos-btn" style="top:110px; left:40px;" onclick="showPop(event, '<b>좌익수 (LF)</b><br>외야의 왼쪽 구역을 담당합니다. 주로 오른손 타자의 날카로운 타구가 많이 날아오며, 빠지는 공을 끝까지 쫓아가 처리하는 수비 능력이 중요합니다.')">LF</div>
-                        <div class="pos-btn" style="top:110px; right:40px;" onclick="showPop(event, '<b>우익수 (RF)</b><br>외야의 오른쪽 구역을 담당합니다. 3루까지 공을 길게 보내야 하는 상황이 잦아, 멀리 정확하게 던질 수 있는 강력한 어깨(강견)를 가진 선수가 배치됩니다.')">RF</div>
+                        <div class="pos-btn" style="bottom:18px;left:50%;transform:translateX(-50%);" onclick="showPop(event,'<b>포수 (C — Catcher)</b><br>홈 플레이트를 지키는 최후의 수비수. 투수의 신호를 받아 배터리를 이룹니다.')">C</div>
+                        <div class="pos-btn" style="bottom:110px;left:50%;transform:translateX(-50%);" onclick="showPop(event,'<b>투수 (P — Pitcher)</b><br>마운드에서 공을 던지는 핵심 포지션. 경기의 흐름을 좌우합니다.')">P</div>
+                        <div class="pos-btn" style="bottom:108px;left:235px;" onclick="showPop(event,'<b>1루수 (1B)</b><br>1루 베이스를 지키는 수비수. 내야 땅볼 대부분이 이쪽으로 연결됩니다.')">1B</div>
+                        <div class="pos-btn" style="bottom:205px;left:50%;transform:translateX(-50%);" onclick="showPop(event,'<b>2루수 (2B)</b><br>2루 베이스 인근을 수비. 병살타의 핵심 역할을 합니다.')">2B</div>
+                        <div class="pos-btn" style="bottom:108px;left:48px;" onclick="showPop(event,'<b>3루수 (3B)</b><br>3루 베이스를 수비. 강한 타구가 많아 핫코너라고도 불립니다.')">3B</div>
+                        <div class="pos-btn" style="bottom:175px;left:95px;" onclick="showPop(event,'<b>유격수 (SS — Short Stop)</b><br>2루와 3루 사이를 수비하는 핵심 포지션. 가장 많은 타구가 몰립니다.')">SS</div>
+                        <div class="pos-btn" style="top:35px;left:50%;transform:translateX(-50%);background:var(--t);color:white;border-color:transparent;" onclick="showPop(event,'<b>중견수 (CF — Center Field)</b><br>외야의 중심. 가장 넓은 범위를 커버하며 팀 내 발이 가장 빠른 선수가 맡습니다.')">CF</div>
+                        <div class="pos-btn" style="top:100px;left:30px;" onclick="showPop(event,'<b>좌익수 (LF — Left Field)</b><br>외야 왼쪽 담당. 오른손 타자의 당겨친 타구가 주로 날아옵니다.')">LF</div>
+                        <div class="pos-btn" style="top:100px;right:30px;" onclick="showPop(event,'<b>우익수 (RF — Right Field)</b><br>외야 오른쪽 담당. 멀리 던져야 하는 상황이 많아 강견 보유자가 배치됩니다.')">RF</div>
                     </div>
                 </div>
             </section>
 
-            <section class="space-y-6">
-                <h2 class="text-xl font-black italic flex items-center gap-2 text-slate-800">
-                    <i data-lucide="messages-square" class="w-6 h-6 text-orange-500"></i> # 야구_궁금증_해결
-                </h2>
-                <p class="text-sm text-slate-500 font-medium leading-relaxed">입문자들이 가장 많이 묻는 질문들을 모았어요. 야구 지식을 채워보세요!</p>
-                <div class="faq-section shadow-lg">
+            <section>
+                <div class="section-hdr">
+                    <i data-lucide="messages-square" class="w-5 h-5 text-amber-400"></i>
+                    FAQ — 자주 묻는 질문
+                </div>
+                <p class="text-xs text-slate-500 font-medium mb-4">입문자들이 가장 많이 묻는 질문들을 모았어요!</p>
+                <div class="faq-card">
                     <div class="faq-item">
                         <button class="faq-trigger" onclick="toggleFaq(this)">
-                            <span>야구 경기 시간은 정해져 있나요?</span><i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>야구 경기 시간은 정해져 있나요?</span>
+                            <i data-lucide="plus" class="w-4 h-4 shrink-0"></i>
                         </button>
-                        <div class="faq-content">야구는 시간 제한이 없는 스포츠예요. 보통 9회까지 진행되며, 평균 3시간 20분 정도 소요됩니다.</div>
+                        <div class="faq-content">야구는 시간 제한이 없는 스포츠예요. 보통 9회까지 진행되며, 평균 3시간 20분~3시간 40분 정도 소요됩니다. 연장전이 있을 경우 더 길어질 수 있어요.</div>
                     </div>
                     <div class="faq-item">
                         <button class="faq-trigger" onclick="toggleFaq(this)">
-                            <span>비가 오면 경기는 어떻게 되나요?</span><i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>비가 오면 경기는 어떻게 되나요?</span>
+                            <i data-lucide="plus" class="w-4 h-4 shrink-0"></i>
                         </button>
-                        <div class="faq-content">5회말까지 진행되면 정식 경기로 인정(강우 콜드), 그 전이면 노게임이 됩니다.</div>
+                        <div class="faq-content">5회말까지 완료되면 정식 경기 성립(강우 콜드), 그 전이면 노게임이 됩니다. 실내 돔구장(고척)은 날씨와 무관하게 진행됩니다.</div>
                     </div>
                     <div class="faq-item">
                         <button class="faq-trigger" onclick="toggleFaq(this)">
-                            <span>'병살타'가 무엇인가요?</span><i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>'병살타'가 무엇인가요?</span>
+                            <i data-lucide="plus" class="w-4 h-4 shrink-0"></i>
                         </button>
-                        <div class="faq-content">한 번의 타격으로 수비팀이 두 명의 공격수를 동시에 아웃시키는 플레이입니다.</div>
+                        <div class="faq-content">한 번의 타격으로 수비팀이 두 명의 공격수를 동시에 아웃시키는 플레이입니다. 주로 내야 땅볼이 2루 → 1루로 연결될 때 발생합니다.</div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-trigger" onclick="toggleFaq(this)">
+                            <span>응원가는 어떻게 따라 부르나요?</span>
+                            <i data-lucide="plus" class="w-4 h-4 shrink-0"></i>
+                        </button>
+                        <div class="faq-content">각 팀 공식 응원 영상을 미리 유튜브에서 들어보시면 좋아요! 구장에서 응원단장이 선창하면 팬들이 따라 부르는 방식입니다.</div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-trigger" onclick="toggleFaq(this)">
+                            <span>좌석 구분은 어떻게 되나요?</span>
+                            <i data-lucide="plus" class="w-4 h-4 shrink-0"></i>
+                        </button>
+                        <div class="faq-content">일반적으로 내야석(홈팀/원정팀 더그아웃 방향)과 외야석(응원석)으로 나뉩니다. 처음이라면 내야 1루 혹은 3루 테이블석을 추천드려요!</div>
                     </div>
                 </div>
             </section>
         </div>
 
-        <div class="flex justify-center pt-10">
-            <button onclick="location.href='index.html'" class="px-10 py-5 bg-slate-900 text-white rounded-full font-black text-lg shadow-2xl hover:scale-105 transition transform flex items-center gap-3">
-                <i data-lucide="home"></i> BACK TO BASE
+        <!-- Back button -->
+        <div class="flex justify-center pt-4">
+            <button onclick="location.href='index.html'"
+                    class="flex items-center gap-3 px-8 py-4 rounded-full font-black text-sm text-white transition"
+                    style="background:var(--t); box-shadow: 0 8px 24px rgba(var(--t-rgb),0.35);">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> 대시보드로 돌아가기
             </button>
         </div>
     </main>
 
-    <div id="quick-pop"></div>
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <button class="bnav-item" onclick="location.href='index.html'">
+            <i data-lucide="radio" class="w-5 h-5"></i> 라이브
+        </button>
+        <button class="bnav-item" onclick="location.href='map.html'">
+            <i data-lucide="map" class="w-5 h-5"></i> 지도
+        </button>
+        <button class="bnav-item active">
+            <i data-lucide="book-open" class="w-5 h-5"></i> 가이드
+        </button>
+        <button class="bnav-item" onclick="location.href='diary.html'">
+            <i data-lucide="calendar-heart" class="w-5 h-5"></i> 다이어리
+        </button>
+        <button class="bnav-item" onclick="location.href='community.html'">
+            <i data-lucide="messages-square" class="w-5 h-5"></i> 커뮤니티
+        </button>
+    </nav>
 
     <script>
-        const quickPop = document.getElementById('quick-pop');
+    // Theme
+    const u = JSON.parse(localStorage.getItem('curr') || 'null');
+    if (u?.color) {
+        document.documentElement.style.setProperty('--t', u.color);
+        const rgb = [1,3,5].map((i,_,__) => parseInt(u.color.slice(i,i+2),16)).join(',');
+        document.documentElement.style.setProperty('--t-rgb', rgb);
+        const circ = document.getElementById('u_circle');
+        circ.textContent = u.nick.charAt(0).toUpperCase();
+        circ.style.background = u.color;
+    }
 
-        function showPop(e, text) {
-            e.stopPropagation();
-            quickPop.innerHTML = text;
-            quickPop.style.display = 'block';
-            let posX = e.pageX + 15;
-            let posY = e.pageY + 15;
-            if (posX + 280 > window.innerWidth) posX = e.pageX - 295;
-            quickPop.style.left = posX + 'px';
-            quickPop.style.top = posY + 'px';
+    lucide.createIcons();
+
+    const quickPop = document.getElementById('quick-pop');
+    function showPop(e, html) {
+        e.stopPropagation();
+        quickPop.innerHTML = html;
+        quickPop.style.display = 'block';
+        const x = Math.min(e.clientX + 12, window.innerWidth - 275);
+        const y = Math.min(e.clientY + 12, window.innerHeight - 130);
+        quickPop.style.left = x + 'px';
+        quickPop.style.top  = y + 'px';
+    }
+    document.addEventListener('click', () => quickPop.style.display = 'none');
+
+    function toggleFaq(btn) {
+        const content = btn.nextElementSibling;
+        const icon = btn.querySelector('i');
+        const isOpen = content.classList.contains('open');
+        document.querySelectorAll('.faq-content').forEach(c => c.classList.remove('open'));
+        document.querySelectorAll('.faq-trigger i').forEach(i => i.setAttribute('data-lucide','plus'));
+        if (!isOpen) {
+            content.classList.add('open');
+            icon.setAttribute('data-lucide','minus');
         }
-
-        function toggleFaq(btn) {
-            const content = btn.nextElementSibling;
-            const icon = btn.querySelector('i');
-            const isOpen = content.classList.contains('open');
-            document.querySelectorAll('.faq-content').forEach(c => c.classList.remove('open'));
-            document.querySelectorAll('.faq-trigger i').forEach(i => i.setAttribute('data-lucide', 'plus'));
-            if (!isOpen) {
-                content.classList.add('open');
-                icon.setAttribute('data-lucide', 'minus');
-            }
-            lucide.createIcons();
-        }
-
-        document.addEventListener('click', () => quickPop.style.display = 'none');
         lucide.createIcons();
+    }
     </script>
 </body>
 </html>
