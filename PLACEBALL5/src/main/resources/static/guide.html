@@ -10,16 +10,20 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;900&display=swap');
         :root { --t: #334155; --t-rgb: 51,65,85; }
-        * { box-sizing: border-box; }
+        *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
         body {
             font-family: 'Pretendard', sans-serif;
-            background: #0a0e1a; color: #e2e8f0;
+            background: #0d1526; color: #f8fafc;
             margin: 0; padding-bottom: 90px;
+            background-image:
+                radial-gradient(ellipse 70% 50% at 100% 0%,   rgba(var(--t-rgb),.14) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 0%   100%, rgba(245,158,11,.08)  0%, transparent 55%);
+            background-attachment: fixed;
         }
 
         .topnav {
-            background: rgba(10,14,26,0.88); backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.07);
+            background: rgba(13,21,38,0.88); backdrop-filter: blur(24px) saturate(160%);
+            border-bottom: 1px solid rgba(255,255,255,0.09);
             position: sticky; top: 0; z-index: 100;
             padding: 0 16px;
         }
@@ -40,22 +44,22 @@
         .nav-links { display: flex; gap: 4px; }
         .nav-link {
             padding: 6px 12px; border-radius: 10px;
-            font-size: 12px; font-weight: 700; color: #475569;
+            font-size: 12px; font-weight: 700; color: #64748b;
             text-decoration: none; transition: all 0.2s;
         }
-        .nav-link:hover { color: #e2e8f0; background: rgba(255,255,255,0.05); }
-        .nav-link.active { color: var(--t); background: rgba(var(--t-rgb),0.12); }
+        .nav-link:hover { color: #f1f5f9; background: rgba(255,255,255,0.06); }
+        .nav-link.active { color: var(--t); background: rgba(var(--t-rgb),0.15); border:1px solid rgba(var(--t-rgb),0.25); }
 
         /* CONTENT */
         .content { max-width: 1100px; margin: 0 auto; padding: 28px 16px; }
 
         .hero {
-            background: linear-gradient(135deg, rgba(var(--t-rgb),0.12) 0%, rgba(17,24,39,0) 60%),
-                        linear-gradient(180deg, #111827 0%, #0f172a 100%);
-            border: 1px solid rgba(255,255,255,0.07);
+            background: linear-gradient(135deg, rgba(var(--t-rgb),0.14) 0%, rgba(13,21,38,0.5) 60%);
+            border: 1px solid rgba(255,255,255,0.09);
             border-left: 4px solid var(--t);
             border-radius: 24px; padding: 32px 28px; margin-bottom: 32px;
             position: relative; overflow: hidden;
+            backdrop-filter: blur(16px);
         }
         .hero-tag {
             display: inline-flex; align-items: center; gap: 6px;
@@ -67,9 +71,10 @@
 
         /* SCOREBOARD */
         .scoreboard {
-            background: #000; border: 2px solid #1e293b;
-            border-radius: 16px; padding: 20px; overflow: auto;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.5); border: 1.5px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 20px; overflow: auto;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+            backdrop-filter: blur(16px);
         }
         .sc-grid {
             display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 12px;
@@ -121,8 +126,9 @@
 
         /* FIELD */
         .field-wrap {
-            background: linear-gradient(135deg, #0f172a 0%, #111827 100%);
-            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.035);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.09);
             border-radius: 20px; padding: 28px 16px; overflow: hidden;
         }
         .field-area {
@@ -147,7 +153,8 @@
 
         /* FAQ */
         .faq-card {
-            background: #111827; border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09);
+            backdrop-filter: blur(16px);
             border-radius: 20px; padding: 24px; overflow: hidden;
         }
         .faq-item { border-bottom: 1px solid rgba(255,255,255,0.05); }
@@ -156,29 +163,31 @@
             width: 100%; padding: 18px 0; display: flex; justify-content: space-between;
             align-items: center; font-weight: 700; color: #e2e8f0; font-size: 14px;
             background: transparent; border: none; cursor: pointer; text-align: left;
+            transition: color .18s;
         }
         .faq-trigger:hover { color: var(--t); }
         .faq-content {
             max-height: 0; overflow: hidden; transition: all 0.3s ease;
-            color: #64748b; font-size: 13px; line-height: 1.7;
+            color: #94a3b8; font-size: 13px; line-height: 1.75;
         }
         .faq-content.open { max-height: 200px; padding-bottom: 18px; }
 
         /* POPUP */
         #quick-pop {
             position: fixed; display: none;
-            background: #1e293b; color: #e2e8f0;
-            padding: 16px 18px; border-radius: 14px; font-size: 13px; z-index: 9999;
-            pointer-events: none; width: 260px; line-height: 1.6;
-            border-left: 4px solid var(--t);
+            background: rgba(19,30,53,0.97); color: #e2e8f0;
+            backdrop-filter: blur(20px);
+            padding: 14px 18px; border-radius: 14px; font-size: 13px; z-index: 9999;
+            pointer-events: none; width: 260px; line-height: 1.65;
+            border-left: 4px solid var(--t); border: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 20px 50px rgba(0,0,0,0.6);
         }
 
         /* BOTTOM NAV */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-            background: rgba(10,14,26,0.95); backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,255,255,0.07);
+            background: rgba(10,16,28,0.96); backdrop-filter: blur(28px) saturate(180%);
+            border-top: 1px solid rgba(255,255,255,0.09);
             display: flex; padding-bottom: env(safe-area-inset-bottom);
         }
         .bnav-item {
@@ -189,6 +198,7 @@
             letter-spacing: 0.04em; border: none; background: transparent;
         }
         .bnav-item.active { color: var(--t); }
+        .bnav-item:active { opacity:.6; }
 
         .section-hdr {
             font-size: 18px; font-weight: 900; font-style: italic;

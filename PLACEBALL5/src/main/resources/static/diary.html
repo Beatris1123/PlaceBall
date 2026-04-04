@@ -9,17 +9,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@1,900&display=swap" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;900&display=swap');
-        :root { --t: #334155; --t-rgb: 51,65,85; --t-light: rgba(51,65,85,0.12); }
-        * { box-sizing: border-box; }
+        :root { --t: #334155; --t-rgb: 51,65,85; --t-light: rgba(51,65,85,0.15); }
+        *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
         body {
             font-family: 'Pretendard', sans-serif;
-            background: #0a0e1a; color: #e2e8f0;
+            background: #0d1526; color: #f8fafc;
             margin: 0; padding-bottom: 90px;
+            background-image:
+                radial-gradient(ellipse 70% 50% at 100% 0%,   rgba(var(--t-rgb),.14) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 0%   100%, rgba(245,158,11,.08)   0%, transparent 55%);
+            background-attachment: fixed;
         }
 
         .topnav {
-            background: rgba(10,14,26,0.88); backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.07);
+            background: rgba(13,21,38,0.88); backdrop-filter: blur(24px) saturate(160%);
+            border-bottom: 1px solid rgba(255,255,255,0.09);
             position: sticky; top: 0; z-index: 100; padding: 0 16px;
         }
         .topnav-inner {
@@ -32,7 +36,7 @@
             font-size: 1.3rem; font-weight: 900; letter-spacing: -0.06em;
             display: flex; align-items: baseline; cursor: pointer;
         }
-        .logo-text .main { color: #f1f5f9; }
+        .logo-text .main { color: #f8fafc; }
         .logo-text .sub  { color: var(--t); font-style: italic; }
         .logo-text .dot  { color: #fbbf24; }
 
@@ -43,10 +47,11 @@
             color: #334155; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.1em;
         }
         .day-card {
-            aspect-ratio: 1 / 1.2; background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
+            aspect-ratio: 1 / 1.2; background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px; padding: 8px; cursor: pointer; transition: all 0.2s;
             display: flex; flex-direction: column; gap: 3px; overflow: hidden;
+            backdrop-filter: blur(8px);
         }
         .day-card:hover { transform: translateY(-2px); border-color: rgba(var(--t-rgb),0.4); }
         .day-card.empty { background: transparent; border: none; cursor: default; }
@@ -69,7 +74,8 @@
             padding: 0;
         }
         .modal-card {
-            background: #111827; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(13,21,38,0.97); backdrop-filter: blur(28px);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 28px 28px 0 0; width: 100%; max-width: 480px;
             padding: 28px 24px 40px;
             animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);

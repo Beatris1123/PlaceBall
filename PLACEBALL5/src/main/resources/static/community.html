@@ -10,16 +10,20 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;900&display=swap');
         :root { --t: #334155; --t-rgb: 51,65,85; }
-        * { box-sizing: border-box; }
+        *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
         body {
             font-family: 'Pretendard', sans-serif;
-            background: #0a0e1a; color: #e2e8f0;
+            background: #0d1526; color: #f8fafc;
             margin: 0; padding-bottom: 90px;
+            background-image:
+                radial-gradient(ellipse 70% 50% at 100% 0%,   rgba(var(--t-rgb),.14) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 0%   100%, rgba(124,58,237,.08)   0%, transparent 55%);
+            background-attachment: fixed;
         }
 
         .topnav {
-            background: rgba(10,14,26,0.88); backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.07);
+            background: rgba(13,21,38,0.88); backdrop-filter: blur(24px) saturate(160%);
+            border-bottom: 1px solid rgba(255,255,255,0.09);
             position: sticky; top: 0; z-index: 100; padding: 0 16px;
         }
         .topnav-inner {
@@ -32,21 +36,23 @@
             font-size: 1.3rem; font-weight: 900; letter-spacing: -0.06em;
             display: flex; align-items: baseline; cursor: pointer;
         }
-        .logo-text .main { color: #f1f5f9; }
+        .logo-text .main { color: #f8fafc; }
         .logo-text .sub  { color: var(--t); font-style: italic; }
         .logo-text .dot  { color: #fbbf24; }
 
         /* WRITE BOX */
         .write-card {
-            background: #111827; border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.045);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.09);
             border-radius: 20px; padding: 18px; margin-bottom: 16px;
         }
         .write-input {
             width: 100%; height: 88px; padding: 12px 14px;
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.09);
             border-radius: 12px; outline: none; resize: none;
             font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 500;
-            color: #e2e8f0; transition: border-color 0.2s;
+            color: #f1f5f9; transition: border-color 0.2s;
         }
         .write-input::placeholder { color: #475569; }
         .write-input:focus { border-color: rgba(var(--t-rgb),0.5); }
@@ -60,12 +66,14 @@
 
         /* POST CARD */
         .post-card {
-            background: #111827; border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.09);
             border-left: 3px solid var(--t);
-            border-radius: 16px; padding: 16px; margin-bottom: 10px;
+            border-radius: 18px; padding: 16px; margin-bottom: 10px;
             transition: all 0.2s;
         }
-        .post-card:hover { border-color: rgba(var(--t-rgb),0.4); }
+        .post-card:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(0,0,0,.25); border-color: rgba(var(--t-rgb),0.3); }
 
         .post-author {
             font-size: 11px; font-weight: 800; text-transform: uppercase;
@@ -73,7 +81,7 @@
         }
         .post-content {
             font-size: 14px; font-weight: 500; color: #cbd5e1;
-            line-height: 1.6; margin: 8px 0;
+            line-height: 1.7; margin: 8px 0;
         }
         .action-btn {
             display: flex; align-items: center; gap: 5px;
@@ -87,8 +95,8 @@
         /* BOTTOM NAV */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-            background: rgba(10,14,26,0.95); backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,255,255,0.07);
+            background: rgba(10,16,28,0.96); backdrop-filter: blur(28px) saturate(180%);
+            border-top: 1px solid rgba(255,255,255,0.09);
             display: flex; padding-bottom: env(safe-area-inset-bottom);
         }
         .bnav-item {
@@ -99,6 +107,7 @@
             letter-spacing: 0.04em; border: none; background: transparent;
         }
         .bnav-item.active { color: var(--t); }
+        .bnav-item:active { opacity:.6; }
     </style>
 </head>
 <body>
