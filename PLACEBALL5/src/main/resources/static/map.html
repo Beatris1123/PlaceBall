@@ -17,15 +17,15 @@
             --t: #334155;
             --t-rgb: 51, 65, 85;
             --bg: #0d1526;
-            --card: rgba(13,21,38,0.96);
-            --border: rgba(255,255,255,0.09);
+            --card: rgba(255,255,255,0.96);
+            --border: rgba(0,0,0,0.09);
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Pretendard', sans-serif;
-            background: var(--bg); color: #f8fafc;
+            background: var(--bg); color: #0f172a;
             overflow: hidden; height: 100dvh; height: 100vh;
             display: flex; flex-direction: column;
             -webkit-tap-highlight-color: transparent;
@@ -38,13 +38,13 @@
             letter-spacing: -0.06em; line-height: 1;
             display: flex; align-items: baseline;
         }
-        .logo-text .main { color: #f8fafc; }
+        .logo-text .main { color: #0f172a; }
         .logo-text .sub  { color: var(--t); font-style: italic; }
         .logo-text .dot  { color: #fbbf24; }
 
         /* ─── TOP BAR ─── */
         .topbar {
-            background: rgba(13,21,38,0.92); backdrop-filter: blur(24px) saturate(160%);
+            background: rgba(255,255,255,0.94); backdrop-filter: blur(24px) saturate(160%);
             border-bottom: 1px solid var(--border);
             z-index: 200; flex-shrink: 0;
         }
@@ -60,7 +60,7 @@
         .stadium-pill {
             flex-shrink: 0; padding: 6px 14px;
             border-radius: 99px; font-size: 11px; font-weight: 700;
-            background: rgba(255,255,255,0.05); color: #64748b;
+            background: rgba(255,255,255,0.05); color: #475569;
             border: 1px solid var(--border); cursor: pointer;
             transition: all 0.2s; white-space: nowrap;
         }
@@ -80,7 +80,7 @@
             flex-shrink: 0; display: flex; align-items: center; gap: 6px;
             padding: 7px 14px; border-radius: 12px; font-size: 11px; font-weight: 700;
             border: 1px solid var(--border); background: rgba(255,255,255,0.04);
-            color: #64748b; cursor: pointer; transition: all 0.2s;
+            color: #475569; cursor: pointer; transition: all 0.2s;
         }
         .cat-btn.active-FOOD   { background: rgba(234,88,12,0.15);  color: #fb923c; border-color: rgba(234,88,12,0.3); }
         .cat-btn.active-STORE  { background: rgba(22,163,74,0.12);  color: #4ade80; border-color: rgba(22,163,74,0.3); }
@@ -139,7 +139,7 @@
             flex: 1; padding: 8px 0; border-radius: 10px;
             font-size: 11px; font-weight: 800; cursor: pointer;
             border: 1px solid var(--border); background: rgba(255,255,255,0.04);
-            color: #64748b; transition: all 0.2s;
+            color: #475569; transition: all 0.2s;
         }
         .vote-btn:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
         .vote-btn.voted-low  { background: rgba(34,197,94,0.15);  color: #4ade80; border-color: rgba(34,197,94,0.3); }

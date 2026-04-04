@@ -13,7 +13,7 @@
         *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
         body {
             font-family: 'Pretendard', sans-serif;
-            background: #0d1526; color: #f8fafc;
+            background: #f8fafc; color: #0f172a;
             margin: 0; padding-bottom: 90px;
             background-image:
                 radial-gradient(ellipse 70% 50% at 100% 0%,   rgba(var(--t-rgb),.14) 0%, transparent 60%),
@@ -22,8 +22,8 @@
         }
 
         .topnav {
-            background: rgba(13,21,38,0.88); backdrop-filter: blur(24px) saturate(160%);
-            border-bottom: 1px solid rgba(255,255,255,0.09);
+            background: rgba(255,255,255,0.92); backdrop-filter: blur(24px) saturate(160%);
+            border-bottom: 1px solid #e2e8f0;
             position: sticky; top: 0; z-index: 100;
             padding: 0 16px;
         }
@@ -44,7 +44,7 @@
         .nav-links { display: flex; gap: 4px; }
         .nav-link {
             padding: 6px 12px; border-radius: 10px;
-            font-size: 12px; font-weight: 700; color: #64748b;
+            font-size: 12px; font-weight: 700; color: #475569;
             text-decoration: none; transition: all 0.2s;
         }
         .nav-link:hover { color: #f1f5f9; background: rgba(255,255,255,0.06); }
@@ -186,8 +186,8 @@
         /* BOTTOM NAV */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-            background: rgba(10,16,28,0.96); backdrop-filter: blur(28px) saturate(180%);
-            border-top: 1px solid rgba(255,255,255,0.09);
+            background: rgba(255,255,255,0.96); backdrop-filter: blur(28px) saturate(180%);
+            border-top: 1px solid #e2e8f0;
             display: flex; padding-bottom: env(safe-area-inset-bottom);
         }
         .bnav-item {
