@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>PLACEBALL - 회원가입</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; background: #f8fafc; }
+        .signup-card { background: white; border-radius: 2.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+        .team-btn { border: 2px solid #f1f5f9; transition: all 0.2s; }
+        .team-btn.active { border-color: #334155; background: #f8fafc; }
+        .input-base { width: 100%; padding: 1rem; background: #f8fafc; border-radius: 1rem; outline: none; font-weight: bold; transition: all 0.2s; border: 2px solid transparent; }
+        .input-base:focus { border-color: #e2e8f0; background: white; }
+        .btn-action { padding: 0 1rem; background: #334155; color: white; border-radius: 1rem; font-weight: bold; font-size: 0.875rem; white-space: nowrap; transition: all 0.2s; }
+        .btn-action:hover { background: #0f172a; }
+        .btn-disabled { background: #cbd5e1 !important; cursor: not-allowed; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6 py-12">
+<div class="signup-card w-full max-w-lg p-10">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-black italic tracking-tighter text-slate-800 mb-2 cursor-pointer" onclick="location.href='index.html'">PLACEBALL</h1>
+        <p class="text-slate-400 font-bold text-sm">당신의 마이팀을 설정하고 시작하세요</p>
+    </div>
+
+    <div class="space-y-4">
+        <div>
+            <div class="flex gap-2">
+                <input type="email" id="email" placeholder="이메일 (example@mail.com)" class="input-base" oninput="resetEmailCheck()">
+                <button type="button" id="btn-email" onclick="checkEmail()" class="btn-action">중복확인</button>
+            </div>
+            <p id="email-msg" class="text-xs font-bold px-2 mt-1 hidden"></p>
+        </div>
+
+        <div>
+            <div class="flex gap-2">
+                <input type="text" id="nick" placeholder="사용할 닉네임" class="input-base" oninput="resetNickCheck()">
+                <button type="button" id="btn-nick" onclick="checkNick()" class="btn-action">중복확인</button>
+            </div>
+            <p id="nick-msg" class="text-xs font-bold px-2 mt-1 hidden"></p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <input type="password" id="pw" placeholder="비밀번호" class="input-base" oninput="validatePw()">
+            <input type="password" id="pw-confirm" placeholder="비밀번호 확인" class="input-base" oninput="validatePw()">
+        </div>
+        <p id="pw-msg" class="text-xs font-bold px-2 hidden"></p>
+
+        <div class="pt-4 border-t border-slate-100">
+            <label class="text-[10px] font-black text-slate-400 uppercase ml-2 mb-3 block">Choose Your Team</label>
+            <div class="grid grid-cols-3 gap-2" id="team-list"></div>
+        </div>
+
+        <div class="flex items-center gap-2 mt-4 px-2">
+            <input type="checkbox" id="terms" class="w-4 h-4 cursor-pointer" onchange="checkAllVerified()">
+            <label for="terms" class="text-sm font-bold text-slate-500 cursor-pointer">[필수] PLACEBALL 이용약관 및 개인정보 처리방침에 동의합니다.</label>
+        </div>
+
+        <button onclick="signup()" id="btn-signup" class="w-full bg-slate-800 text-white py-5 rounded-2xl font-black shadow-xl hover:bg-black transition-all mt-6 btn-disabled" disabled>모든 정보를 입력해주세요</button>
+    </div>
+</div>
+
+<script>
+    const teams = [
+        { name: 'LG 트윈스', color: '#C30452' }, { name: 'KIA 타이거즈', color: '#EA0029' },
+        { name: '삼성 라이온즈', color: '#074CA1' }, { name: '두산 베어스', color: '#131230' },
+        { name: 'SSG 랜더스', color: '#CE0E2D' }, { name: '롯데 자이언츠', color: '#041E42' },
+        { name: '한화 이글스', color: '#FF6600' }, { name: 'KT 위즈', color: '#333333' },
+        { name: 'NC 다이노스', color: '#315288' }, { name: '키움 히어로즈', color: '#820024' }
+    ];
+
+    let selectedTeam = null;
+    let isEmailChecked = false;
+    let isNickChecked = false;
+    let isPwMatched = false;
+
+    // 팀 버튼 세팅
+    const teamList = document.getElementById('team-list');
+    teams.forEach(t => {
+        const btn = document.createElement('button');
+        btn.className = 'team-btn p-3 rounded-xl text-[11px] font-bold text-slate-600';
+        btn.innerText = t.name;
+        btn.onclick = () => {
+            document.querySelectorAll('.team-btn').forEach(b => b.classList.remove('active', 'ring-2', 'ring-slate-800'));
+            btn.classList.add('active', 'ring-2', 'ring-slate-800');
+            selectedTeam = t;
+            checkAllVerified();
+        };
+        teamList.appendChild(btn);
+    });
+
+    // 1. 이메일 중복 확인
+    function checkEmail() {
+        const email = document.getElementById('email').value;
+        const msg = document.getElementById('email-msg');
+        if(!email) { alert('이메일을 입력해주세요.'); return; }
+
+        fetch('/api/users/check-email?email=' + email)
+            .then(res => res.json())
+            .then(isDup => {
+                msg.classList.remove('hidden');
+                if(isDup) {
+                    msg.innerText = "❌ 이미 사용 중인 이메일입니다.";
+                    msg.className = "text-xs font-bold px-2 mt-1 text-red-500";
+                    isEmailChecked = false;
+                } else {
+                    msg.innerText = "✅ 사용 가능한 이메일입니다.";
+                    msg.className = "text-xs font-bold px-2 mt-1 text-green-500";
+                    document.getElementById('btn-email').classList.add('btn-disabled');
+                    isEmailChecked = true;
+                }
+                checkAllVerified();
+            });
+    }
+    function resetEmailCheck() { isEmailChecked = false; document.getElementById('btn-email').classList.remove('btn-disabled'); document.getElementById('email-msg').classList.add('hidden'); checkAllVerified(); }
+
+    // 2. 닉네임 중복 확인 (새로 추가)
+    function checkNick() {
+        const nick = document.getElementById('nick').value;
+        const msg = document.getElementById('nick-msg');
+        if(!nick) { alert('닉네임을 입력해주세요.'); return; }
+
+        fetch('/api/users/check-nick?nick=' + nick)
+            .then(res => res.json())
+            .then(isDup => {
+                msg.classList.remove('hidden');
+                if(isDup) {
+                    msg.innerText = "❌ 이미 누군가 사용 중인 닉네임입니다.";
+                    msg.className = "text-xs font-bold px-2 mt-1 text-red-500";
+                    isNickChecked = false;
+                } else {
+                    msg.innerText = "✅ 멋진 닉네임이네요!";
+                    msg.className = "text-xs font-bold px-2 mt-1 text-green-500";
+                    document.getElementById('btn-nick').classList.add('btn-disabled');
+                    isNickChecked = true;
+                }
+                checkAllVerified();
+            });
+    }
+    function resetNickCheck() { isNickChecked = false; document.getElementById('btn-nick').classList.remove('btn-disabled'); document.getElementById('nick-msg').classList.add('hidden'); checkAllVerified(); }
+
+    // 3. 비밀번호 실시간 확인 (새로 추가)
+    function validatePw() {
+        const pw = document.getElementById('pw').value;
+        const pwConfirm = document.getElementById('pw-confirm').value;
+        const msg = document.getElementById('pw-msg');
+
+        if (pw === "" || pwConfirm === "") {
+            msg.classList.add('hidden');
+            isPwMatched = false;
+        } else if (pw !== pwConfirm) {
+            msg.classList.remove('hidden');
+            msg.innerText = "❌ 비밀번호가 일치하지 않습니다.";
+            msg.className = "text-xs font-bold px-2 text-red-500";
+            isPwMatched = false;
+        } else {
+            msg.classList.remove('hidden');
+            msg.innerText = "✅ 비밀번호가 일치합니다.";
+            msg.className = "text-xs font-bold px-2 text-green-500";
+            isPwMatched = true;
+        }
+        checkAllVerified();
+    }
+
+    // 4. 모든 조건 충족 시 가입 버튼 활성화
+    function checkAllVerified() {
+        const isTermsChecked = document.getElementById('terms').checked;
+        const btn = document.getElementById('btn-signup');
+
+        if(isEmailChecked && isNickChecked && isPwMatched && selectedTeam && isTermsChecked) {
+            btn.disabled = false;
+            btn.classList.remove('btn-disabled');
+            btn.innerText = "Create Account";
+        } else {
+            btn.disabled = true;
+            btn.classList.add('btn-disabled');
+            btn.innerText = "모든 정보를 올바르게 입력해주세요";
+        }
+    }
+
+    // 5. 최종 가입
+    function signup() {
+        const newUser = {
+            nick: document.getElementById('nick').value,
+            email: document.getElementById('email').value,
+            pw: document.getElementById('pw').value,
+            team: selectedTeam.name,
+            color: selectedTeam.color
+        };
+
+        fetch('/api/users/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newUser)
+        }).then(res => {
+            if (res.ok) {
+                alert('회원가입이 완료되었습니다! 로그인해주세요.');
+                location.href = 'login.html';
+            } else {
+                res.text().then(text => alert(text));
+            }
+        });
+    }
+</script>
+</body>
+</html>

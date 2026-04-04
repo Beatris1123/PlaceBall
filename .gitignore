@@ -1,0 +1,4 @@
+# Project exclude paths
+/PLACEBALL5/.gradle/
+/PLACEBALL5/build/
+/PLACEBALL5/build/classes/java/main/

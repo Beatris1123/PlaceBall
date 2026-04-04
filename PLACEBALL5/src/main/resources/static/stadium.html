@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"><title>구장별 팁</title><script src="https://cdn.tailwindcss.com"></script><script src="https://unpkg.com/lucide@latest"></script>
+    <style>:root { --t: #334155; } body { font-family: 'Pretendard', sans-serif; background: #f1f5f9; margin:0; }
+    .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .text-team { color: var(--t); } .bg-team { background: var(--t); }</style>
+</head>
+<body>
+    <nav class="glass sticky top-0 z-[100] px-6 py-3 flex justify-between items-center shadow-sm">
+        <h1 onclick="location.href='index.html'" class="text-xl font-black italic text-team cursor-pointer">PLACEBALL</h1>
+        <div class="flex gap-6 text-[13px] font-bold text-slate-500">
+            <a href="stadium.html" class="text-team border-b-2 border-team">구장별 팁</a>
+            <a href="community.html">커뮤니티</a>
+            <a href="diary.html">직관 다이어리</a>
+        </div>
+    </nav>
+    <main class="max-w-4xl mx-auto p-10 mt-10 bg-white rounded-[3rem] shadow-xl">
+        <h2 class="text-2xl font-black mb-10 italic">STADIUM TIPS</h2>
+        <div class="p-8 bg-slate-50 rounded-[2rem] border-l-8 border-team">
+            <span class="text-[10px] font-black text-team">FOOD TIP</span>
+            <h3 class="text-xl font-bold mt-1 text-slate-800">잠실 구장 추천 메뉴</h3>
+            <p class="text-slate-500 mt-2 text-sm leading-relaxed font-medium">원정 팀 팬이라면 잠실 새내역 인근 시장에서 깻잎 닭강정을 포장해오세요! 구장 안보다 훨씬 맛있습니다.</p>
+        </div>
+    </main>
+    <script>const u = JSON.parse(localStorage.getItem('curr')); document.documentElement.style.setProperty('--t', u.color); lucide.createIcons();</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"><title>PLACEBALL - 커뮤니티</title>
+    <script src="https://cdn.tailwindcss.com"></script><script src="https://unpkg.com/lucide@latest"></script>
+    <style>:root { --t: #334155; } body { font-family: 'Pretendard', sans-serif; background: #f1f5f9; margin:0; }
+    .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; }
+    .text-team { color: var(--t); } .bg-team { background: var(--t); }
+    .post-card { @apply bg-white p-6 rounded-[2rem] shadow-sm border-l-4 border-team mb-4; }
+    .action-btn { @apply flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-team; }
+    </style>
+</head>
+<body>
+    <nav class="glass sticky top-0 z-[100] px-8 py-4">
+        <div class="max-w-[1600px] mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-black italic tracking-tighter text-team cursor-pointer" onclick="location.href='index.html'">PLACEBALL</h1>
+            <div id="auth_zone" class="flex items-center gap-4"></div>
+        </div>
+    </nav>
+
+    <main class="max-w-xl mx-auto p-6 mt-6">
+        <div id="write_box" class="bg-white p-6 rounded-[2.5rem] shadow-lg mb-8">
+            <textarea id="inp" placeholder="오늘 경기에 대해 이야기해보세요!" class="w-full h-24 p-4 bg-slate-50 rounded-2xl outline-none resize-none font-medium text-sm"></textarea>
+            <button onclick="addPost()" class="w-full bg-team text-white py-4 rounded-2xl font-black mt-3 shadow-lg">글 남기기</button>
+        </div>
+        <div id="posts" class="space-y-4"></div>
+    </main>
+
+    <script>
+        const u = JSON.parse(localStorage.getItem('curr'));
+        if(u) {
+            document.documentElement.style.setProperty('--t', u.color);
+            document.getElementById('auth_zone').innerHTML = `<span class="text-xs font-bold text-slate-600">${u.nick}</span>`;
+        } else {
+            document.getElementById('write_box').innerHTML = `<div class="p-6 text-center font-bold text-slate-400 italic">로그인 후 응원글을 남길 수 있습니다.</div>`;
+            document.getElementById('auth_zone').innerHTML = `<button onclick="location.href='login.html'" class="text-xs font-bold text-slate-400">Login</button>`;
+        }
+
+        let dbPosts = JSON.parse(localStorage.getItem('community_posts')) || [
+            { author: "운영자", content: "환영합니다! 매너 있는 응원 문화를 만들어요.", likes: 10, liked: false, comments: [] }
+        ];
+
+        function renderPosts() {
+            const container = document.getElementById('posts'); container.innerHTML = '';
+            dbPosts.forEach((post, idx) => {
+                const d = document.createElement('div'); d.className = "post-card";
+                d.innerHTML = `<div class="flex items-center gap-2 mb-3"><span class="text-[11px] font-black text-slate-500 uppercase">${post.author}</span></div>
+                    <p class="text-slate-700 font-bold leading-relaxed mb-4">${post.content}</p>
+                    <div class="flex gap-4 pt-3 border-t border-slate-50">
+                        <button onclick="toggleLike(${idx})" class="action-btn ${post.liked ? 'text-red-500' : ''}"><i data-lucide="heart" class="w-4 h-4 ${post.liked ? 'fill-current' : ''}"></i><span>${post.likes}</span></button>
+                    </div>`;
+                container.appendChild(d);
+            });
+            lucide.createIcons();
+        }
+
+        function addPost() {
+            if(!u) { alert('로그인이 필요합니다.'); return; }
+            const v = document.getElementById('inp').value; if(!v) return;
+            dbPosts.unshift({ author: u.nick, content: v, likes: 0, liked: false, comments: [] });
+            localStorage.setItem('community_posts', JSON.stringify(dbPosts));
+            document.getElementById('inp').value = ''; renderPosts();
+        }
+
+        function toggleLike(idx) {
+            if(!u) { alert('로그인이 필요합니다.'); return; }
+            dbPosts[idx].liked ? (dbPosts[idx].likes--, dbPosts[idx].liked = false) : (dbPosts[idx].likes++, dbPosts[idx].liked = true);
+            localStorage.setItem('community_posts', JSON.stringify(dbPosts)); renderPosts();
+        }
+        renderPosts();
+    </script>
+</body>
+</html>

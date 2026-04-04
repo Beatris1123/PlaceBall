@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>구장내 지도 (카카오 맵) - 마커 증발 완벽 해결</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=a6b54298c1ed0eb5de93147ba633a285"></script>
+
+    <style>
+        :root { --t: #334155; }
+        body { font-family: 'Pretendard', sans-serif; background: #f1f5f9; margin:0; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .text-team { color: var(--t); }
+        .bg-team { background: var(--t); }
+
+        .stadium-scroll::-webkit-scrollbar { height: 6px; }
+        .stadium-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .stadium-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .stadium-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .map-marker-container { position: relative; width: 14px; height: 14px; cursor: pointer; }
+        .map-marker-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); transition: transform 0.2s; }
+
+        .cat-FOOD .map-marker-dot { background-color: #ea580c; }
+        .cat-STORE .map-marker-dot { background-color: #16a34a; }
+        .cat-BATH .map-marker-dot { background-color: #2563eb; }
+
+        .map-marker-container:hover .map-marker-dot { transform: scale(1.3); }
+
+        .map-marker-label { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); padding: 6px 12px; font-size: 13px; font-weight: bold; color: #334155; white-space: nowrap; background-color: white; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s; z-index: 10; pointer-events: none; }
+        .map-marker-container:hover .map-marker-label { opacity: 1; visibility: visible; }
+    </style>
+</head>
+<body>
+<nav class="glass sticky top-0 z-[100] px-6 py-3 flex justify-between items-center shadow-sm">
+    <h1 onclick="location.href='index.html'" class="text-xl font-black italic text-team cursor-pointer">PLACEBALL</h1>
+    <div class="flex gap-6 text-[13px] font-bold text-slate-500">
+        <a href="stadium.html" class="hover:text-team transition-colors">구장별 팁</a>
+        <a href="community.html" class="hover:text-team transition-colors">커뮤니티</a>
+        <a href="diary.html" class="hover:text-team transition-colors">직관 다이어리</a>
+    </div>
+</nav>
+
+<main class="max-w-4xl mx-auto p-10 mt-10 bg-white rounded-[3rem] shadow-xl text-center relative mb-20">
+    <h2 class="text-2xl font-black italic mb-2">STADIUM MAP</h2>
+    <p class="text-slate-400 font-bold mb-6 text-sm italic underline decoration-team decoration-2 underline-offset-4">원하는 구장과 시설을 선택하세요 (지도 클릭 시 좌표 복사 가능)</p>
+
+    <div class="flex gap-2 overflow-x-auto stadium-scroll py-2 mb-4 px-2 whitespace-nowrap border-b border-slate-100 pb-4">
+        <button id="btn-jamsil" onclick="changeStadium('jamsil')" class="stadium-btn px-4 py-2 rounded-full font-bold text-sm transition-colors shrink-0 bg-slate-800 text-white shadow-md">잠실 야구장</button>
+        <button id="btn-gocheok" onclick="changeStadium('gocheok')" class="stadium-btn px-4 py-2 rounded-full font-bold text-sm transition-colors shrink-0 bg-slate-100 text-slate-600 shadow-sm hover:bg-slate-200">고척 스카이돔</button>
+        <button id="btn-incheon" onclick="changeStadium('incheon')" class="stadium-btn px-4 py-2 rounded-full font-bold text-sm transition-colors shrink-0 bg-slate-100 text-slate-600 shadow-sm hover:bg-slate-200">SSG 랜더스필드</button>
+        <button id="btn-suwon" onclick="changeStadium('suwon')" class="stadium-btn px-4 py-2 rounded-full font-bold text-sm transition-colors shrink-0 bg-slate-100 text-slate-600 shadow-sm hover:bg-slate-200">수원 KT 위즈파크</button>
+        <button id="btn-gwangju" onclick="changeStadium('gwangju')" class="stadium-btn px-4 py-2 rounded-full font-bold text-sm transition-colors shrink-0 bg-slate-100 text-slate-600 shadow-sm hover:bg-slate-200">광주 챔피언스 필드</button>
+        <button id="btn-daegu" onclick="changeStadium('daegu')" class="stadium-btn px-4 py-2 rounded-full font-bold text-sm transition-colors shrink-0 bg-slate-100 text-slate-600 shadow-sm hover:bg-slate-200">대구 라이온즈 파크</button>
+        <button id="btn-sajik" onclick="changeStadium('sajik')" class="stadium-btn px-4 py-2 rounded-full font-bold text-sm transition-colors shrink-0 bg-slate-100 text-slate-600 shadow-sm hover:bg-slate-200">사직 야구장</button>
+        <button id="btn-changwon" onclick="changeStadium('changwon')" class="stadium-btn px-4 py-2 rounded-full font-bold text-sm transition-colors shrink-0 bg-slate-100 text-slate-600 shadow-sm hover:bg-slate-200">창원 NC 파크</button>
+        <button id="btn-daejeon" onclick="changeStadium('daejeon')" class="stadium-btn px-4 py-2 rounded-full font-bold text-sm transition-colors shrink-0 bg-slate-100 text-slate-600 shadow-sm hover:bg-slate-200">대전 이글스 파크</button>
+    </div>
+
+    <div class="text-center mb-6">
+        <button onclick="startNavigation()" class="bg-blue-600 text-white px-6 py-3 rounded-full font-black shadow-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2 mx-auto">
+            <i data-lucide="navigation" class="w-5 h-5"></i>
+            현재 선택된 야구장으로 길찾기
+        </button>
+    </div>
+
+    <div class="flex justify-center gap-3 mb-6">
+        <button id="filter-food" onclick="showFacilities('FOOD')" class="filter-btn bg-white text-orange-600 px-4 py-2 rounded-full font-bold text-sm shadow-sm border border-orange-100 flex items-center gap-1.5 hover:bg-orange-50 transition-colors">
+            <i data-lucide="utensils" class="w-4 h-4"></i> 음식점
+        </button>
+        <button id="filter-store" onclick="showFacilities('STORE')" class="filter-btn bg-white text-green-600 px-4 py-2 rounded-full font-bold text-sm shadow-sm border border-green-100 flex items-center gap-1.5 hover:bg-green-50 transition-colors">
+            <i data-lucide="store" class="w-4 h-4"></i> 편의점
+        </button>
+        <button id="filter-bath" onclick="showFacilities('BATH')" class="filter-btn bg-white text-blue-600 px-4 py-2 rounded-full font-bold text-sm shadow-sm border border-blue-100 flex items-center gap-1.5 hover:bg-blue-50 transition-colors">
+            <i data-lucide="bath" class="w-4 h-4"></i> 화장실
+        </button>
+    </div>
+
+    <div id="map" class="aspect-video bg-slate-100 rounded-[2rem] border-4 border-slate-200 overflow-hidden shadow-inner relative z-10 w-full"></div>
+</main>
+
+<script>
+    try {
+        const currData = localStorage.getItem('curr');
+        if(currData && currData !== "undefined") {
+            const u = JSON.parse(currData);
+            if(u && u.color) document.documentElement.style.setProperty('--t', u.color);
+        }
+    } catch(e) {}
+    lucide.createIcons();
+
+    let currentStadiumId = 'jamsil';
+    let currentFilter = 'FOOD';
+    let activeOverlays = [];
+    let map;
+    let stadiumCoords;
+
+    // ⭐ 핵심 수정: 데이터를 제일 위로 끌어올림! (그래야 밑에서 불러올 때 에러가 안 남)
+    const allStadiumData = {
+        'jamsil': [
+            // [음식점 - FOOD]
+            { name: "면당포", lat: 37.51160046879159, lng: 127.07107933812108, cat: "FOOD" },
+            { name: "명인만두", lat: 37.5113862364048, lng: 127.07148349168781, cat: "FOOD" },
+            { name: "짝태패밀리", lat: 37.512766445560565, lng: 127.07243492242264, cat: "FOOD" },
+            { name: "공씨네주먹밥", lat: 37.512703319794, lng: 127.07252534842611, cat: "FOOD" },
+            { name: "스테프핫도그", lat: 37.51271451805047, lng: 127.07262998488251, cat: "FOOD" },
+            { name: "로드쉐프", lat: 37.512664940251, lng: 127.07266669716923, cat: "FOOD" },
+            { name: "홈스테드", lat: 37.51263117696893, lng: 127.0726270764066, cat: "FOOD" },
+            { name: "올떡", lat: 37.512421683225675, lng: 127.07264383966188, cat: "FOOD" },
+            { name: "아모제", lat: 37.51235407664892, lng: 127.07269467284338, cat: "FOOD" },
+            { name: "망고식스", lat: 37.512270690296, lng: 127.07276528453725, cat: "FOOD" },
+            { name: "달콤커피", lat: 37.51219183680712, lng: 127.07279065728292, cat: "FOOD" },
+            { name: "BBQ치킨", lat: 37.512414714778565, lng: 127.07298598559564, cat: "FOOD" },
+            { name: "버거리", lat: 37.51231784816508, lng: 127.07300002979295, cat: "FOOD" },
+            { name: "죠스떡볶이", lat: 37.512040986621415, lng: 127.07268023071649, cat: "FOOD" },
+            { name: "잠실원샷", lat: 37.51195971847835, lng: 127.07296857639469, cat: "FOOD" },
+            { name: "꼬꼬닭", lat: 37.511840443676405, lng: 127.07279314371617, cat: "FOOD" },
+            { name: "BHC치킨", lat: 37.511698586116665, lng: 127.07271100319518, cat: "FOOD" },
+            { name: "앤티앤스", lat: 37.51228976886706, lng: 127.07102626542942, cat: "FOOD" },
+            { name: "브뤼셀 프라이", lat: 37.51285040312836, lng: 127.07142550587461, cat: "FOOD" },
+            { name: "도미노피자", lat: 37.512825813212785, lng: 127.0711144328348, cat: "FOOD" },
+            { name: "백미당", lat: 37.51240913312881, lng: 127.07105748332896, cat: "FOOD" },
+            { name: "갑또리닭강정", lat: 37.51280757467474, lng: 127.07147636407491, cat: "FOOD" },
+            { name: "신철판", lat: 37.51275582682289, lng: 127.07137734448935, cat: "FOOD" },
+
+            // [편의점 - STORE]
+            { name: "GS25 외야점", lat: 37.51129831832791, lng: 127.07159934215058, cat: "STORE" },
+            { name: "홈런마트", lat: 37.512602950828736, lng: 127.07088800415845, cat: "STORE" },
+            { name: "GS25", lat: 37.51220070896906, lng: 127.07301405420598, cat: "STORE" },
+
+            // [화장실 - BATH]
+            { name: "공용화장실",lat: 37.51205877818351, lng: 127.07305067597848,  cat: "BATH" },
+            { name: "공용화장실",lat: 37.5126142252501, lng: 127.07086822081153,  cat: "BATH" },
+            { name: "공용화장실",lat: 37.511572577701926, lng: 127.07249597755231,  cat: "BATH" },
+            { name: "공용화장실",lat: 37.511379171481856, lng: 127.07198963772125,  cat: "BATH" },
+            { name: "공용화장실",lat: 37.51151019451375, lng: 127.07136767526865,  cat: "BATH" },
+            { name: "공용화장실",lat: 37.51191361517189, lng: 127.07100045978007,  cat: "BATH" },
+
+        ],
+        'gocheok': [
+            // 고척 데이터 추가
+        ],
+        'incheon': [
+            // 인천 데이터 추가
+        ],
+        'suwon': [],
+        'gwangju': [],
+        'daegu': [],
+        'sajik': [],
+        'changwon': [],
+        'daejeon': []
+    };
+
+    kakao.maps.load(function() {
+        stadiumCoords = {
+            'jamsil': new kakao.maps.LatLng(37.5122, 127.0719),
+            'gocheok': new kakao.maps.LatLng(37.4982, 126.8670),
+            'incheon': new kakao.maps.LatLng(37.4370, 126.6933),
+            'suwon': new kakao.maps.LatLng(37.2997, 127.0097),
+            'gwangju': new kakao.maps.LatLng(35.1681, 126.8848),
+            'daegu': new kakao.maps.LatLng(35.8412, 128.6818),
+            'sajik': new kakao.maps.LatLng(35.1940, 129.0615),
+            'changwon': new kakao.maps.LatLng(35.2224, 128.5823),
+            'daejeon': new kakao.maps.LatLng(36.3171, 127.4292)
+        };
+
+        const mapContainer = document.getElementById('map');
+        const mapOption = { center: stadiumCoords['jamsil'], level: 3 };
+        map = new kakao.maps.Map(mapContainer, mapOption);
+
+        // 클릭 치트키
+        kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+            var latlng = mouseEvent.latLng;
+            prompt("복사해서 코드에 붙여넣으세요!", "lat: " + latlng.getLat() + ", lng: " + latlng.getLng());
+        });
+
+        // 맵 로드되자마자 마커 띄우기
+        showFacilities('FOOD');
+    });
+
+    function showFacilities(category) {
+        currentFilter = category;
+
+        const allFilters = document.querySelectorAll('.filter-btn');
+        allFilters.forEach(btn => {
+            btn.className = btn.className.replace(/bg-orange-50|bg-green-50|bg-blue-50|shadow-md/g, "bg-white").trim();
+            btn.classList.add('bg-white');
+        });
+
+        const activeFilter = document.getElementById('filter-' + category.toLowerCase());
+        if(activeFilter) {
+            activeFilter.classList.remove('bg-white');
+            activeFilter.classList.add('shadow-md');
+            if(category === 'FOOD') activeFilter.classList.add('bg-orange-50');
+            if(category === 'STORE') activeFilter.classList.add('bg-green-50');
+            if(category === 'BATH') activeFilter.classList.add('bg-blue-50');
+        }
+
+        renderMapData();
+    }
+
+    function changeStadium(stadiumId) {
+        if (!map) return;
+        currentStadiumId = stadiumId;
+        map.panTo(stadiumCoords[stadiumId]);
+
+        const allButtons = document.querySelectorAll('.stadium-btn');
+        allButtons.forEach(btn => {
+            btn.className = "stadium-btn px-4 py-2 rounded-full font-bold text-sm transition-colors shrink-0 bg-slate-100 text-slate-600 shadow-sm hover:bg-slate-200";
+        });
+        const activeBtn = document.getElementById('btn-' + stadiumId);
+        if(activeBtn) {
+            activeBtn.className = "stadium-btn px-4 py-2 rounded-full font-bold text-sm transition-colors shrink-0 bg-slate-800 text-white shadow-md";
+        }
+
+        renderMapData();
+    }
+
+    function clearMarkers() {
+        activeOverlays.forEach(overlay => overlay.setMap(null));
+        activeOverlays = [];
+    }
+
+    function renderMapData() {
+        if (!map) return;
+        clearMarkers();
+
+        const currentDataList = allStadiumData[currentStadiumId] || [];
+        const filteredData = currentDataList.filter(f => f.cat === currentFilter);
+
+        filteredData.forEach(f => {
+            const position = new kakao.maps.LatLng(f.lat, f.lng);
+            const content = `
+                <div class="map-marker-container cat-${f.cat}">
+                    <div class="map-marker-dot"></div>
+                    <div class="map-marker-label">${f.name}</div>
+                </div>
+            `;
+            const customOverlay = new kakao.maps.CustomOverlay({
+                position: position,
+                content: content,
+                yAnchor: 0.5,
+                xAnchor: 0.5
+            });
+            customOverlay.setMap(map);
+            activeOverlays.push(customOverlay);
+        });
+    }
+    function startNavigation() {
+    // 1. 현재 선택된 구장의 한글 이름 매칭
+        const stadiumNames = {
+                'jamsil': '잠실 야구장',
+                'gocheok': '고척 스카이돔',
+                'incheon': 'SSG 랜더스필드',
+                'suwon': '수원 KT 위즈파크',
+                'gwangju': '광주 챔피언스 필드',
+                'daegu': '대구 라이온즈 파크',
+                'sajik': '사직 야구장',
+                'changwon': '창원 NC 파크',
+                'daejeon': '대전 이글스 파크'
+    };
+
+        const name = stadiumNames[currentStadiumId];
+        const coord = stadiumCoords[currentStadiumId];
+
+        // 2. 카카오맵 길찾기 URL 생성 (도착지 이름, 위도, 경도)
+        const kakaoMapUrl = `https://map.kakao.com/link/to/${name},${coord.getLat()},${coord.getLng()}`;
+
+        // 3. 새 창으로 카카오맵 길찾기 열기
+        window.open(kakaoMapUrl, '_blank');
+    }
+</script>
+</body>
+</html>

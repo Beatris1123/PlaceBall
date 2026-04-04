@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLACEBALL - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Pretendard:wght@400;600;700;900&family=Montserrat:ital,wght@1,900&display=swap');
+        
+        :root { --team-main: #334155; --team-sub: #cecbcb; }
+        
+        body { font-family: 'Pretendard', sans-serif; background: #f8fafc; color: #1e293b; margin:0; overflow-x: hidden; }
+
+        .brand-logo { display: flex; align-items: center; cursor: pointer; transition: transform 0.2s ease; }
+        .brand-logo:hover { transform: scale(1.02); }
+
+        .logo-text {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.6rem; font-weight: 900; letter-spacing: -0.06em; line-height: 1;
+            display: flex; align-items: baseline;
+        }
+        .logo-text .main { color: #1e293b; }
+        .logo-text .sub { color: var(--team-main); font-style: italic; margin-left: 1px; }
+        .logo-text .dot { color: #fbbf24; margin-left: 1px; }
+
+        .nav-link { 
+            color: #64748b; font-weight: 700; font-size: 11px; text-transform: uppercase; 
+            letter-spacing: 0.05em; transition: 0.3s; position: relative; padding: 8px 0;
+        }
+        .nav-link::after { 
+            content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 3px; 
+            background: var(--team-main); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .nav-link:hover { color: var(--team-main); }
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+
+        /* 사이드바 애니메이션 및 호버 효과 */
+        .sidebar-item {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .sidebar-item:hover {
+            background-color: var(--team-main) !important;
+            color: white !important;
+        }
+        .sidebar-item:hover i {
+            color: white !important;
+        }
+
+        .live-scoreboard {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 1.5rem; padding: 1.5rem 2rem;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.3); color: white;
+            position: relative; border-bottom: 4px solid var(--team-main);
+        }
+        .score-font { font-family: 'Orbitron', sans-serif; line-height: 1; }
+        
+        .team-display-box {
+            width: 80px; height: 80px; border-radius: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; font-weight: 900; color: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4); overflow: hidden;
+        }
+
+        .stadium-diamond-ui { 
+            width: 100px; height: 100px; position: relative; 
+            transform: rotate(45deg); border: 2px solid rgba(255,255,255,0.1); 
+            background: rgba(255,255,255,0.03); 
+        }
+        .base-slot { 
+            width: 24px; height: 24px; position: absolute; z-index: 10;
+            background: #334155; border: 1px solid rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 3px; transform: rotate(-45deg); cursor: help;
+        }
+        .base-slot.active { 
+            background: #fbbf24; border: none; 
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.6); 
+            animation: basePulse 2s infinite;
+        }
+        @keyframes basePulse { 0%, 100% { transform: rotate(-45deg) scale(1); } 50% { transform: rotate(-45deg) scale(1.1); } }
+
+        .custom-tooltip {
+            position: absolute; background: white; color: #1e293b; padding: 18px; 
+            border-radius: 0.75rem; font-size: 13px; z-index: 9999; display: none;
+            border-top: 4px solid var(--team-main); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            max-width: 300px; line-height: 1.6; pointer-events: none;
+        }
+        .tooltip-title { font-weight: 900; color: var(--team-main); font-size: 14px; margin-bottom: 8px; display: block; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; }
+
+        .visual-card { 
+            background: white; border-radius: 1.5rem; overflow: hidden;
+            border: 1px solid #e2e8f0; transition: 0.3s; cursor: pointer; 
+        }
+        .visual-card:hover { transform: translateY(-5px); border-color: var(--team-main); }
+        .card-image-wrapper { width: 100%; height: 120px; position: relative; overflow: hidden; }
+        .card-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .card-content { padding: 1.25rem; }
+    </style>
+</head>
+<body>
+    <div id="baseballTooltip" class="custom-tooltip"></div>
+
+    <nav class="bg-white/95 backdrop-blur-md border-b border-slate-200 px-8 py-3 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-10">
+            <div onclick="location.href='index.html'" class="brand-logo">
+                <div class="logo-text">
+                    <span class="main">PLACE</span><span class="sub">BALL</span><span class="dot">.</span>
+                </div>
+            </div>
+            <div class="hidden lg:flex gap-8">
+                <a href="tips.html" class="nav-link">구단별 팁</a>
+                <a href="diary.html" class="nav-link">직관 다이어리</a>
+                <a href="guide.html" class="nav-link">초보자 가이드</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="u_nick" class="text-sm font-bold text-slate-700">Guest</span>
+            <div id="u_circle" class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-inner">?</div>
+            <button onclick="logout()" class="text-[9px] font-black text-slate-400 hover:text-red-500 uppercase tracking-widest">Logout</button>
+        </div>
+    </nav>
+
+    <div class="max-w-[1400px] mx-auto flex">
+        <aside class="w-64 p-6 hidden lg:block border-r border-slate-100">
+            <nav class="space-y-1 sticky top-24">
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Core Menu</p>
+                
+                <div id="menu-dashboard" onclick="location.href='index.html'" class="sidebar-item flex items-center gap-3 p-3 rounded-xl font-bold text-xs">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+                </div>
+
+                <div onclick="location.href='map.html'" class="sidebar-item flex items-center gap-3 p-3 text-slate-500 font-bold text-xs rounded-xl">
+                    <i data-lucide="map-pin" class="w-4 h-4"></i> Stadium Map
+                </div>
+
+                <div onclick="location.href='songs.html'" class="sidebar-item flex items-center gap-3 p-3 text-slate-500 font-bold text-xs rounded-xl">
+                    <i data-lucide="music" class="w-4 h-4"></i> 선수 응원가
+                </div>
+                
+                <div class="mt-10 p-4 rounded-xl bg-slate-900 text-white border-l-4" style="border-color: var(--team-main);">
+                    <p class="text-[8px] font-bold text-slate-500 uppercase mb-1">My Team</p>
+                    <h4 id="side_team_name" class="text-sm font-black italic tracking-tight">--</h4>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-6 space-y-6">
+            <section class="live-scoreboard">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center gap-3">
+                        <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                        <h2 id="match_title" class="text-xs font-bold text-slate-400 tracking-wider uppercase italic">--</h2>
+                    </div>
+                    <div class="bg-white/5 py-1.5 px-6 rounded-full border border-white/10 flex items-center gap-3 cursor-help" onclick="showTermHelp(event, 'INNING')">
+                        <span class="text-[9px] font-black text-slate-500 uppercase">Inning</span>
+                        <span class="score-font text-xl text-amber-400">7<span class="text-[10px] ml-0.5 text-white">TH</span></span>
+                    </div>
+                </div>
+
+                <div class="flex justify-around items-center mb-6">
+                    <div class="text-center">
+                        <div id="m_logo" class="team-display-box" style="background: linear-gradient(145deg, var(--team-main), #1e293b);">--</div>
+                        <p class="score-font text-6xl font-black italic tracking-tighter mt-3">4</p>
+                    </div>
+
+                    <div class="flex flex-col items-center">
+                        <div class="relative flex items-center justify-center" style="width: 140px; height: 140px;">
+                            <div class="stadium-diamond-ui"></div>
+                            <div class="base-slot active" style="top: -12px; left: 58px;" onclick="showTermHelp(event, 'BASE2')"><span class="score-font text-[9px] text-black">2</span></div>
+                            <div class="base-slot active" style="top: 58px; right: -12px;" onclick="showTermHelp(event, 'BASE1')"><span class="score-font text-[9px] text-black">1</span></div>
+                            <div class="base-slot" style="top: 58px; left: -12px;" onclick="showTermHelp(event, 'BASE3')"><span class="score-font text-[9px] text-slate-500">3</span></div>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center cursor-help" onclick="showTermHelp(event, 'RHE')">
+                                <span class="text-[8px] font-black text-slate-500 mb-1 tracking-tighter">R H E</span>
+                                <span class="score-font text-xl text-white tracking-widest">4 9 0</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-8 mt-6">
+                            <div onclick="showTermHelp(event, 'BALL')" class="cursor-help text-center"><div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-green-500"></div><div class="w-2.5 h-2.5 rounded-full bg-slate-800"></div><div class="w-2.5 h-2.5 rounded-full bg-slate-800"></div></div><p class="text-[8px] font-black text-slate-500 mt-1.5 uppercase">B</p></div>
+                            <div onclick="showTermHelp(event, 'STRIKE')" class="cursor-help text-center"><div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div><div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div><div class="w-2.5 h-2.5 rounded-full bg-slate-800"></div></div><p class="text-[8px] font-black text-slate-500 mt-1.5 uppercase">S</p></div>
+                            <div onclick="showTermHelp(event, 'OUT')" class="cursor-help text-center"><div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-red-600"></div><div class="w-2.5 h-2.5 rounded-full bg-slate-800"></div></div><p class="text-[8px] font-black text-slate-500 mt-1.5 uppercase">O</p></div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="team-display-box" style="background: linear-gradient(145deg, #c60c30, #000000); border: 3px solid #000;">LG</div>
+                        <p class="score-font text-6xl font-black italic tracking-tighter text-slate-800 mt-3">2</p>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-white/5 flex justify-center items-center gap-2 text-slate-500">
+                    <i data-lucide="mouse-pointer-2" class="w-3 h-3 text-amber-500"></i>
+                    <p class="text-[10px] font-bold">단어를 클릭하면 상세 용어 설명이 나옵니다.</p>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="visual-card">
+                    <div class="card-image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=800&auto=format&fit=crop">
+                        <div class="absolute top-3 right-3 bg-red-500 px-2 py-0.5 rounded-full shadow-sm">
+                            <span class="text-[10px] font-black text-white animate-pulse">LIVE</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-sm">잠실 원샷 (치킨)</h3>
+                            <span class="text-rose-500 font-black text-xs">45분 대기</span>
+                        </div>
+                        <div class="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-rose-500" style="width: 85%"></div>
+                        </div>
+                        <p class="text-[10px] text-slate-400 font-medium mt-2 italic">현재 주문 폭주 중 - 우회 주문 권장</p>
+                    </div>
+                </div>
+
+                <div class="visual-card">
+                    <div class="card-image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1506521781263-d8422e82f27a?q=80&w=800&auto=format&fit=crop">
+                        <div class="absolute top-3 right-3 bg-amber-500 px-2 py-0.5 rounded-full shadow-sm">
+                            <span class="text-[10px] font-black text-white">혼잡</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-sm">중앙 주차장 현황</h3>
+                            <span class="text-amber-600 font-black text-xs">잔여 12면</span>
+                        </div>
+                        <div class="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-amber-500" style="width: 92%"></div>
+                        </div>
+                        <p class="text-[10px] text-slate-400 font-medium mt-2 italic">탄천 공영 주차장 이용을 추천드려요</p>
+                    </div>
+                </div>
+
+                <div class="visual-card bg-slate-900 border-none">
+                    <div class="card-image-wrapper opacity-40">
+                        <img src="https://images.unsplash.com/photo-1521412644187-c49fa0b4e6a1?q=80&w=800&auto=format&fit=crop">
+                    </div>
+                    <div class="card-content relative z-10 -mt-8">
+                        <h3 class="font-bold text-xs mb-3 text-amber-400">인기 유니폼 재고</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-[10px] text-white">
+                                <span class="font-bold text-slate-400">홈 레플리카(L)</span>
+                                <span class="text-rose-500 font-black">품절 임박</span>
+                            </div>
+                            <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-rose-500" style="width: 95%"></div>
+                            </div>
+                            <div class="flex justify-between items-center text-[10px] text-white pt-1">
+                                <span class="font-bold text-slate-400">어웨이(XL)</span>
+                                <span class="text-emerald-400 font-black">여유</span>
+                            </div>
+                            <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-emerald-500" style="width: 30%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const u = JSON.parse(localStorage.getItem('curr'));
+        if (!u) location.href = 'login.html';
+
+        document.documentElement.style.setProperty('--team-main', u.color);
+        document.getElementById('u_nick').innerText = u.nick;
+        document.getElementById('side_team_name').innerText = u.team;
+        document.getElementById('match_title').innerText = `JAMSIL • ${u.team} VS LG`;
+        document.getElementById('u_circle').style.backgroundColor = u.color;
+        document.getElementById('u_circle').innerText = u.nick.substring(0,1).toUpperCase();
+        document.getElementById('m_logo').innerText = u.team.substring(0,2).toUpperCase();
+
+        // Dashboard 활성화 상태 표시 (사이드바 메뉴 강조)
+        const dashMenu = document.getElementById('menu-dashboard');
+        dashMenu.style.backgroundColor = u.color;
+        dashMenu.style.color = 'white';
+
+        const baseballDict = {
+            'INNING': '<span class="tooltip-title">이닝 (Inning)</span>양 팀이 공격과 수비를 한 번씩 마치는 경기 단위입니다.',
+            'BASE1': '<span class="tooltip-title">1루 (1st Base)</span>타자가 공을 친 후 처음으로 도달해야 하는 베이스입니다.',
+            'BASE2': '<span class="tooltip-title">2루 (2nd Base)</span>득점권 주자로 분류됩니다.',
+            'BASE3': '<span class="tooltip-title">3루 (3rd Base)</span>홈으로 들어오기 직전의 마지막 베이스입니다.',
+            'BALL': '<span class="tooltip-title">볼 (Ball)</span>투수가 던진 공이 스트라이크 존을 벗어났을 때입니다.',
+            'STRIKE': '<span class="tooltip-title">스트라이크 (Strike)</span>공이 존 안에 들어오거나 타자가 헛스윙했을 때입니다.',
+            'OUT': '<span class="tooltip-title">아웃 (Out)</span>공격 측이 기회를 잃는 것입니다. 3아웃이면 공수 교대됩니다.',
+            'RHE': `<div class="space-y-2"><span class="tooltip-title">R / H / E (지표)</span><p>• R: 득점 / H: 안타 수 / E: 실책 수</p></div>`
+        };
+
+        function showTermHelp(event, key) {
+            event.stopPropagation();
+            const tooltip = document.getElementById('baseballTooltip');
+            tooltip.innerHTML = baseballDict[key] || '정보가 없습니다.';
+            tooltip.style.display = 'block';
+            tooltip.style.left = (event.pageX + 10) + 'px';
+            tooltip.style.top = (event.pageY + 10) + 'px';
+        }
+
+        document.addEventListener('click', () => { document.getElementById('baseballTooltip').style.display = 'none'; });
+        function logout() { if(confirm('로그아웃 하시겠습니까?')) { localStorage.removeItem('curr'); location.href = 'login.html'; } }
+        document.addEventListener('DOMContentLoaded', () => { lucide.createIcons(); });
+    </script>
+</body>
+</html>

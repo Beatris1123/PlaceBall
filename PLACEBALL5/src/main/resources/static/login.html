@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>PLACEBALL - 로그인</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; background: #f8fafc; }
+        .login-card { background: white; border-radius: 2.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+        input { transition: all 0.2s; border: 2px solid #f1f5f9; }
+        input:focus { border-color: #334155; background: white; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+    <div class="login-card w-full max-w-md p-10">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-black italic tracking-tighter text-slate-800 mb-2 cursor-pointer" onclick="location.href='index.html'">PLACEBALL</h1>
+            <p class="text-slate-400 font-bold text-sm">다시 오신 것을 환영합니다!</p>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Email Address</label>
+                <input type="email" id="email" placeholder="example@mail.com" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold">
+            </div>
+            <div>
+                <label class="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Password</label>
+                <input type="password" id="pw" placeholder="••••••••" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold">
+            </div>
+            <button onclick="login()" class="w-full bg-slate-800 text-white py-5 rounded-2xl font-black shadow-xl hover:bg-black transition-all mt-4">Login</button>
+        </div>
+
+        <p class="text-center mt-8 text-sm font-bold text-slate-400">
+            아직 회원이 아니신가요? <a href="signup.html" class="text-slate-800 underline ml-1">회원가입</a>
+        </p>
+    </div>
+
+    <script>
+        function login() {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('pw').value;
+
+            // Fetch API로 스프링부트 백엔드에 POST 요청
+            fetch('/api/users/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: e, pw: p })
+            })
+            .then(res => {
+                if (res.ok) {
+                    return res.json(); // 성공 시 유저 정보 객체 반환
+                } else {
+                    throw new Error('이메일 또는 비밀번호가 일치하지 않습니다.');
+                }
+            })
+            .then(user => {
+                // 백엔드에서 받은 진짜 유저 정보를 브라우저 임시 세션용으로 저장
+                localStorage.setItem('curr', JSON.stringify(user));
+                location.href = 'index.html'; // 메인 화면으로 이동
+            })
+            .catch(error => {
+                alert(error.message);
+            });
+        }
+    </script>
+</body>
+</html>
