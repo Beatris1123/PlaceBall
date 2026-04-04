@@ -9,79 +9,99 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@1,900&display=swap" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;900&display=swap');
-        :root { --t: #334155; --t-rgb: 51,65,85; }
-        * { box-sizing: border-box; }
+
+        :root {
+            --t:     #334155;
+            --t-rgb: 51,65,85;
+            --bg:    #0d1526;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
             font-family: 'Pretendard', sans-serif;
-            background: #0a0e1a; color: #e2e8f0;
-            min-height: 100dvh; margin: 0;
-            padding: 24px 20px 40px;
+            background: var(--bg); color: #f8fafc;
+            min-height: 100dvh;
+            padding: 28px 16px 48px;
             position: relative; overflow-x: hidden;
         }
+
+        /* 배경 */
         body::before {
             content: '';
-            position: fixed; inset: 0;
-            background-image:
-                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-            background-size: 40px 40px;
-            pointer-events: none; z-index: 0;
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 100% 0%,   rgba(var(--t-rgb),.16) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 0%   100%, rgba(124,58,237,.10)   0%, transparent 55%),
+                radial-gradient(circle, rgba(255,255,255,.035) 1px, transparent 1px);
+            background-size: auto, auto, 28px 28px;
         }
 
         .glow-orb {
             position: fixed; border-radius: 50%;
-            filter: blur(90px); pointer-events: none; z-index: 0;
-            transition: all 1.2s ease;
+            filter: blur(100px); pointer-events: none; z-index: 0;
+            transition: all 1.4s ease;
         }
-        .orb1 { width: 400px; height: 400px; top: -100px; right: -100px; background: var(--t); opacity: 0.12; }
-        .orb2 { width: 300px; height: 300px; bottom: 0; left: -50px; background: #7c3aed; opacity: 0.08; }
+        .orb1 { width: 420px; height: 420px; top: -100px; right: -100px; background: var(--t); opacity: 0.14; }
+        .orb2 { width: 300px; height: 300px; bottom: 0; left: -60px; background: #7c3aed; opacity: 0.08; }
 
+        /* 카드 */
         .card {
             position: relative; z-index: 10;
-            width: 100%; max-width: 480px; margin: 0 auto;
-            background: rgba(17,24,39,0.85);
-            backdrop-filter: blur(24px);
-            border: 1px solid rgba(255,255,255,0.07);
+            width: 100%; max-width: 500px; margin: 0 auto;
+            background: rgba(13,21,38,0.84);
+            backdrop-filter: blur(28px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.09);
             border-radius: 28px;
-            padding: 32px 28px 28px;
-            box-shadow: 0 32px 64px rgba(0,0,0,0.5);
+            padding: 36px 28px 32px;
+            box-shadow: 0 40px 80px rgba(0,0,0,.55);
+        }
+        .card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--t) 0%, rgba(124,58,237,.5) 100%);
+            border-radius: 28px 28px 0 0;
+            transition: background 0.5s ease;
         }
 
+        /* 로고 */
         .logo-text {
             font-family: 'Montserrat', sans-serif;
             font-size: 1.8rem; font-weight: 900;
             letter-spacing: -0.08em; display: flex; align-items: baseline;
         }
         .logo-text .sub { color: var(--t); font-style: italic; }
-        .logo-text .dot { color: #fbbf24; }
+        .logo-text .dot { color: #f59e0b; }
 
-        .section-label {
-            font-size: 9px; font-weight: 900; text-transform: uppercase;
-            letter-spacing: 0.12em; color: #475569; margin-bottom: 10px;
-            display: block;
+        /* 라벨 */
+        .sec-label {
+            display: block; font-size: 9px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: .14em;
+            color: #475569; margin-bottom: 10px;
         }
 
+        /* 인풋 */
         .input-field {
             width: 100%; padding: 13px 16px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.05);
+            border: 1.5px solid rgba(255,255,255,0.09);
             border-radius: 12px; outline: none;
             font-family: 'Pretendard', sans-serif;
             font-size: 13px; font-weight: 600;
-            color: #e2e8f0; transition: all 0.2s;
+            color: #f1f5f9; transition: all 0.22s;
         }
-        .input-field::placeholder { color: #475569; }
+        .input-field::placeholder { color: #334155; }
         .input-field:focus {
-            border-color: rgba(var(--t-rgb), 0.5);
-            background: rgba(255,255,255,0.06);
+            border-color: rgba(var(--t-rgb), 0.55);
+            background: rgba(255,255,255,0.07);
             box-shadow: 0 0 0 3px rgba(var(--t-rgb), 0.12);
         }
-        .input-field.error { border-color: rgba(239,68,68,0.5); }
-        .input-field.success { border-color: rgba(34,197,94,0.4); }
+        .input-field.error   { border-color: rgba(239,68,68,0.5); }
+        .input-field.success { border-color: rgba(16,185,129,0.45); }
 
         .input-row { display: flex; gap: 8px; }
         .input-row .input-field { flex: 1; min-width: 0; }
 
+        /* 액션 버튼 */
         .action-btn {
             padding: 13px 16px; border-radius: 12px;
             font-size: 12px; font-weight: 800;
@@ -90,54 +110,59 @@
             cursor: pointer; white-space: nowrap; transition: all 0.2s;
             font-family: 'Pretendard', sans-serif;
         }
-        .action-btn:hover { background: rgba(var(--t-rgb), 0.25); }
+        .action-btn:hover:not(:disabled) { background: rgba(var(--t-rgb), 0.28); }
         .action-btn:disabled {
             background: rgba(255,255,255,0.04); color: #334155;
             border-color: rgba(255,255,255,0.05); cursor: not-allowed;
         }
 
+        /* 상태 메시지 */
         .status-msg {
-            font-size: 11px; font-weight: 700; margin-top: 6px;
+            font-size: 11px; font-weight: 700; margin-top: 7px;
             padding: 0 4px; display: none;
         }
         .status-msg.ok  { color: #4ade80; }
         .status-msg.err { color: #f87171; }
 
-        /* ── TEAM GRID ── */
+        /* 팀 그리드 */
         .team-grid {
             display: grid; grid-template-columns: repeat(2, 1fr);
             gap: 8px;
         }
-        @media (min-width: 400px) { .team-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 420px) { .team-grid { grid-template-columns: repeat(3, 1fr); } }
 
         .team-btn {
-            padding: 12px 10px; border-radius: 14px; cursor: pointer;
-            border: 1.5px solid rgba(255,255,255,0.07);
+            padding: 13px 10px; border-radius: 16px; cursor: pointer;
+            border: 1.5px solid rgba(255,255,255,0.08);
             background: rgba(255,255,255,0.03);
             display: flex; flex-direction: column;
             align-items: center; gap: 8px;
-            transition: all 0.2s; text-align: center;
+            transition: all 0.22s; text-align: center;
         }
-        .team-btn:hover { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); }
+        .team-btn:hover { border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); }
         .team-btn.active {
             border-color: var(--team-color);
-            background: rgba(var(--team-rgb), 0.12);
-            box-shadow: 0 0 0 3px rgba(var(--team-rgb), 0.15), inset 0 0 20px rgba(var(--team-rgb), 0.05);
+            background: rgba(var(--team-rgb), 0.13);
+            box-shadow: 0 0 0 3px rgba(var(--team-rgb), 0.18), inset 0 0 24px rgba(var(--team-rgb), 0.06);
         }
 
         .team-swatch {
-            width: 36px; height: 36px; border-radius: 10px;
+            width: 38px; height: 38px; border-radius: 11px;
             display: flex; align-items: center; justify-content: center;
             font-size: 11px; font-weight: 900; color: white;
-            transition: all 0.2s;
+            transition: all 0.22s; box-shadow: 0 4px 12px rgba(0,0,0,.3);
         }
         .team-name-text {
-            font-size: 11px; font-weight: 700; color: #64748b;
+            font-size: 11px; font-weight: 700; color: #475569;
             line-height: 1.3; transition: color 0.2s;
         }
         .team-btn.active .team-name-text { color: #e2e8f0; }
+        .team-btn.active .team-swatch {
+            box-shadow: 0 4px 16px rgba(var(--team-rgb), 0.5);
+            transform: scale(1.05);
+        }
 
-        /* ── SUBMIT BTN ── */
+        /* 제출 버튼 */
         .btn-submit {
             width: 100%; padding: 16px;
             border: none; border-radius: 14px;
@@ -145,35 +170,42 @@
             font-size: 14px; font-weight: 900;
             cursor: pointer; transition: all 0.25s;
             background: var(--t); color: white;
-            box-shadow: 0 8px 24px rgba(var(--t-rgb), 0.35);
+            box-shadow: 0 8px 28px rgba(var(--t-rgb), 0.4);
+            letter-spacing: 0.01em;
         }
         .btn-submit:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
         .btn-submit:disabled {
-            background: rgba(255,255,255,0.06); color: #334155;
+            background: rgba(255,255,255,0.07); color: #334155;
             box-shadow: none; cursor: not-allowed; transform: none;
         }
 
-        /* ── TERMS ── */
+        /* 약관 */
         .terms-row {
             display: flex; align-items: center; gap: 10px;
             padding: 12px 14px; border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.06);
-            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.025);
         }
         input[type="checkbox"] {
             width: 18px; height: 18px; cursor: pointer;
-            accent-color: var(--t);
+            accent-color: var(--t); flex-shrink: 0;
         }
 
-        /* divider */
-        .hr { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 20px 0; }
+        .hr { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 20px 0; }
 
-        /* Preview bar (team color hint) */
+        /* 미리보기 바 */
         .preview-bar {
             height: 3px; border-radius: 99px;
-            background: var(--t); transition: all 0.4s ease;
-            margin-bottom: 20px;
+            background: var(--t); transition: all 0.45s ease;
+            margin-bottom: 24px; position: relative; overflow: hidden;
         }
+        .preview-bar::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.35) 50%, transparent 100%);
+            animation: shimmer 2s ease-in-out infinite;
+        }
+        @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
     </style>
 </head>
 <body>
@@ -181,49 +213,45 @@
     <div class="glow-orb orb2"></div>
 
     <div class="card">
-        <!-- Logo -->
+        <!-- 헤더 -->
         <div class="flex items-center justify-between mb-6">
             <div class="logo-text cursor-pointer" onclick="location.href='index.html'">
-                <span style="color:#f1f5f9;">PLACE</span><span class="sub">BALL</span><span class="dot">.</span>
+                <span style="color:#f8fafc;">PLACE</span><span class="sub">BALL</span><span class="dot">.</span>
             </div>
-            <a href="login.html" class="text-xs font-bold text-slate-500 hover:text-white transition">
-                로그인 →
-            </a>
+            <a href="login.html" class="text-xs font-bold text-slate-500 hover:text-white transition">로그인 →</a>
         </div>
 
         <h2 class="text-xl font-black text-white mb-1">팬 계정 만들기</h2>
         <p class="text-xs text-slate-500 font-medium mb-5">마이팀을 설정하면 맞춤형 직관 대시보드가 시작됩니다.</p>
 
-        <!-- Team color preview bar -->
+        <!-- 팀컬러 미리보기 바 -->
         <div class="preview-bar" id="preview_bar"></div>
 
-        <!-- Email -->
+        <!-- 이메일 -->
         <div class="mb-4">
-            <span class="section-label">이메일</span>
+            <span class="sec-label">이메일</span>
             <div class="input-row">
-                <input type="email" id="email" placeholder="example@mail.com" class="input-field"
-                       oninput="resetEmailCheck()">
+                <input type="email" id="email" placeholder="example@mail.com" class="input-field" oninput="resetEmailCheck()">
                 <button type="button" id="btn-email" onclick="checkEmail()" class="action-btn">확인</button>
             </div>
             <p id="email-msg" class="status-msg"></p>
         </div>
 
-        <!-- Nickname -->
+        <!-- 닉네임 -->
         <div class="mb-4">
-            <span class="section-label">닉네임</span>
+            <span class="sec-label">닉네임</span>
             <div class="input-row">
-                <input type="text" id="nick" placeholder="사용할 닉네임" class="input-field"
-                       oninput="resetNickCheck()">
+                <input type="text" id="nick" placeholder="사용할 닉네임" class="input-field" oninput="resetNickCheck()">
                 <button type="button" id="btn-nick" onclick="checkNick()" class="action-btn">확인</button>
             </div>
             <p id="nick-msg" class="status-msg"></p>
         </div>
 
-        <!-- Password -->
+        <!-- 비밀번호 -->
         <div class="mb-4">
-            <span class="section-label">비밀번호</span>
+            <span class="sec-label">비밀번호</span>
             <div class="grid grid-cols-2 gap-2">
-                <input type="password" id="pw" placeholder="비밀번호" class="input-field" oninput="validatePw()">
+                <input type="password" id="pw"  placeholder="비밀번호"    class="input-field" oninput="validatePw()">
                 <input type="password" id="pw2" placeholder="비밀번호 확인" class="input-field" oninput="validatePw()">
             </div>
             <p id="pw-msg" class="status-msg"></p>
@@ -231,13 +259,13 @@
 
         <hr class="hr">
 
-        <!-- Team Selection -->
+        <!-- 팀 선택 -->
         <div class="mb-5">
-            <span class="section-label">마이팀 선택 <span class="text-amber-400">*</span></span>
+            <span class="sec-label">마이팀 선택 <span class="text-amber-400">*</span></span>
             <div class="team-grid" id="team_grid"></div>
         </div>
 
-        <!-- Terms -->
+        <!-- 약관 -->
         <div class="terms-row mb-5">
             <input type="checkbox" id="terms" onchange="checkAll()">
             <label for="terms" class="text-xs font-semibold text-slate-400 cursor-pointer">
@@ -245,7 +273,7 @@
             </label>
         </div>
 
-        <!-- Submit -->
+        <!-- 제출 -->
         <button onclick="signup()" id="btn-signup" class="btn-submit" disabled>
             모든 정보를 입력해주세요
         </button>
@@ -254,24 +282,24 @@
     <script>
     lucide.createIcons();
 
-    /* ── TEAMS DATA ── */
+    /* ── TEAMS ── */
     const teams = [
-        { name:'LG 트윈스',   abbr:'LG',  color:'#C30452', rgb:'195,4,82'   },
-        { name:'KIA 타이거즈', abbr:'KIA', color:'#EA0029', rgb:'234,0,41'   },
+        { name:'LG 트윈스',    abbr:'LG',  color:'#C30452', rgb:'195,4,82'   },
+        { name:'KIA 타이거즈',  abbr:'KIA', color:'#EA0029', rgb:'234,0,41'   },
         { name:'삼성 라이온즈', abbr:'SS',  color:'#074CA1', rgb:'7,76,161'   },
-        { name:'두산 베어스',  abbr:'OB',  color:'#131230', rgb:'19,18,48'   },
-        { name:'SSG 랜더스',  abbr:'SSG', color:'#CE0E2D', rgb:'206,14,45'  },
-        { name:'롯데 자이언츠', abbr:'L',   color:'#041E42', rgb:'4,30,66'    },
-        { name:'한화 이글스',  abbr:'HH',  color:'#FF6600', rgb:'255,102,0'  },
-        { name:'KT 위즈',     abbr:'KT',  color:'#333333', rgb:'51,51,51'   },
-        { name:'NC 다이노스',  abbr:'NC',  color:'#315288', rgb:'49,82,136'  },
-        { name:'키움 히어로즈', abbr:'HH',  color:'#820024', rgb:'130,0,36'   },
+        { name:'두산 베어스',   abbr:'OB',  color:'#1B3D7B', rgb:'27,61,123'  },
+        { name:'SSG 랜더스',   abbr:'SSG', color:'#CE0E2D', rgb:'206,14,45'  },
+        { name:'롯데 자이언츠', abbr:'L',   color:'#002F6C', rgb:'0,47,108'   },
+        { name:'한화 이글스',   abbr:'HH',  color:'#FF6600', rgb:'255,102,0'  },
+        { name:'KT 위즈',      abbr:'KT',  color:'#2E3033', rgb:'46,48,51'   },
+        { name:'NC 다이노스',   abbr:'NC',  color:'#315288', rgb:'49,82,136'  },
+        { name:'키움 히어로즈',  abbr:'KW',  color:'#820024', rgb:'130,0,36'   },
     ];
 
     let selectedTeam = null;
     let isEmailOk = false, isNickOk = false, isPwOk = false;
 
-    /* ── BUILD TEAM BUTTONS ── */
+    /* ── 팀 버튼 생성 ── */
     const grid = document.getElementById('team_grid');
     teams.forEach(t => {
         const btn = document.createElement('button');
@@ -280,9 +308,7 @@
         btn.style.setProperty('--team-color', t.color);
         btn.style.setProperty('--team-rgb', t.rgb);
         btn.innerHTML = `
-            <div class="team-swatch" style="background:${t.color};">
-                ${t.abbr.substring(0,2)}
-            </div>
+            <div class="team-swatch" style="background:${t.color};">${t.abbr.substring(0,3)}</div>
             <span class="team-name-text">${t.name}</span>
         `;
         btn.onclick = () => selectTeam(t, btn);
@@ -294,49 +320,42 @@
         btn.classList.add('active');
         selectedTeam = t;
 
-        // Update CSS vars → live theme preview
+        /* CSS 변수 → 즉시 테마 반영 */
         document.documentElement.style.setProperty('--t', t.color);
         document.documentElement.style.setProperty('--t-rgb', t.rgb);
         document.getElementById('preview_bar').style.background = t.color;
         document.getElementById('glowOrb').style.background = t.color;
-
         checkAll();
     }
 
-    /* ── VALIDATION ── */
+    /* ── 유효성 검사 ── */
     function checkEmail() {
         const email = document.getElementById('email').value.trim();
-        const msg = document.getElementById('email-msg');
+        const msg   = document.getElementById('email-msg');
         if (!email) { alert('이메일을 입력해주세요.'); return; }
 
         fetch('/api/users/check-email?email=' + encodeURIComponent(email))
             .then(r => r.json())
-            .then(isDup => {
-                msg.style.display = 'block';
-                if (isDup) {
-                    msg.textContent = '❌ 이미 사용 중인 이메일입니다.';
-                    msg.className = 'status-msg err';
-                    document.getElementById('email').className = 'input-field error';
-                    isEmailOk = false;
-                } else {
-                    msg.textContent = '✅ 사용 가능한 이메일입니다.';
-                    msg.className = 'status-msg ok';
-                    document.getElementById('email').className = 'input-field success';
-                    document.getElementById('btn-email').disabled = true;
-                    isEmailOk = true;
-                }
-                checkAll();
-            })
-            .catch(() => {
-                // Prototype fallback
-                msg.textContent = '✅ 사용 가능한 이메일입니다.';
-                msg.style.display = 'block';
-                msg.className = 'status-msg ok';
-                document.getElementById('email').className = 'input-field success';
-                document.getElementById('btn-email').disabled = true;
-                isEmailOk = true;
-                checkAll();
-            });
+            .then(isDup => setEmailResult(isDup))
+            .catch(() => setEmailResult(false)); // 프로토타입 fallback
+    }
+
+    function setEmailResult(isDup) {
+        const msg = document.getElementById('email-msg');
+        msg.style.display = 'block';
+        if (isDup) {
+            msg.textContent = '❌ 이미 사용 중인 이메일입니다.';
+            msg.className = 'status-msg err';
+            document.getElementById('email').className = 'input-field error';
+            isEmailOk = false;
+        } else {
+            msg.textContent = '✅ 사용 가능한 이메일입니다.';
+            msg.className = 'status-msg ok';
+            document.getElementById('email').className = 'input-field success';
+            document.getElementById('btn-email').disabled = true;
+            isEmailOk = true;
+        }
+        checkAll();
     }
 
     function resetEmailCheck() {
@@ -349,36 +368,30 @@
 
     function checkNick() {
         const nick = document.getElementById('nick').value.trim();
-        const msg = document.getElementById('nick-msg');
         if (!nick) { alert('닉네임을 입력해주세요.'); return; }
 
         fetch('/api/users/check-nick?nick=' + encodeURIComponent(nick))
             .then(r => r.json())
-            .then(isDup => {
-                msg.style.display = 'block';
-                if (isDup) {
-                    msg.textContent = '❌ 이미 사용 중인 닉네임입니다.';
-                    msg.className = 'status-msg err';
-                    document.getElementById('nick').className = 'input-field error';
-                    isNickOk = false;
-                } else {
-                    msg.textContent = '✅ 멋진 닉네임입니다!';
-                    msg.className = 'status-msg ok';
-                    document.getElementById('nick').className = 'input-field success';
-                    document.getElementById('btn-nick').disabled = true;
-                    isNickOk = true;
-                }
-                checkAll();
-            })
-            .catch(() => {
-                msg.textContent = '✅ 멋진 닉네임입니다!';
-                msg.style.display = 'block';
-                msg.className = 'status-msg ok';
-                document.getElementById('nick').className = 'input-field success';
-                document.getElementById('btn-nick').disabled = true;
-                isNickOk = true;
-                checkAll();
-            });
+            .then(isDup => setNickResult(isDup))
+            .catch(() => setNickResult(false));
+    }
+
+    function setNickResult(isDup) {
+        const msg = document.getElementById('nick-msg');
+        msg.style.display = 'block';
+        if (isDup) {
+            msg.textContent = '❌ 이미 사용 중인 닉네임입니다.';
+            msg.className = 'status-msg err';
+            document.getElementById('nick').className = 'input-field error';
+            isNickOk = false;
+        } else {
+            msg.textContent = '✅ 멋진 닉네임입니다!';
+            msg.className = 'status-msg ok';
+            document.getElementById('nick').className = 'input-field success';
+            document.getElementById('btn-nick').disabled = true;
+            isNickOk = true;
+        }
+        checkAll();
     }
 
     function resetNickCheck() {
@@ -390,7 +403,7 @@
     }
 
     function validatePw() {
-        const pw = document.getElementById('pw').value;
+        const pw  = document.getElementById('pw').value;
         const pw2 = document.getElementById('pw2').value;
         const msg = document.getElementById('pw-msg');
 
@@ -425,11 +438,11 @@
         } else {
             btn.disabled = true;
             const missing = [];
-            if (!isEmailOk) missing.push('이메일');
-            if (!isNickOk) missing.push('닉네임');
-            if (!isPwOk) missing.push('비밀번호');
+            if (!isEmailOk)   missing.push('이메일');
+            if (!isNickOk)    missing.push('닉네임');
+            if (!isPwOk)      missing.push('비밀번호');
             if (!selectedTeam) missing.push('팀 선택');
-            if (!isTerms) missing.push('약관 동의');
+            if (!isTerms)     missing.push('약관 동의');
             btn.textContent = missing.length ? `${missing[0]} 확인 필요` : '모든 정보를 입력해주세요';
         }
     }
@@ -449,14 +462,9 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(user)
         }).then(res => {
-            if (res.ok) {
-                alert('🎉 회원가입 완료! 로그인해주세요.');
-                location.href = 'login.html';
-            } else {
-                res.text().then(t => alert(t));
-            }
+            if (res.ok) { alert('🎉 회원가입 완료! 로그인해주세요.'); location.href = 'login.html'; }
+            else res.text().then(t => alert(t));
         }).catch(() => {
-            // Prototype: skip backend
             alert('🎉 회원가입 완료!');
             location.href = 'login.html';
         });
