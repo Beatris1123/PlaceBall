@@ -336,8 +336,8 @@
 
         fetch('/api/users/check-email?email=' + encodeURIComponent(email))
             .then(r => r.json())
-            .then(isDup => setEmailResult(isDup))
-            .catch(() => setEmailResult(false)); // 프로토타입 fallback
+            .then(data => setEmailResult(data.duplicate))  // { duplicate: true/false }
+            .catch(() => setEmailResult(false));
     }
 
     function setEmailResult(isDup) {
@@ -372,7 +372,7 @@
 
         fetch('/api/users/check-nick?nick=' + encodeURIComponent(nick))
             .then(r => r.json())
-            .then(isDup => setNickResult(isDup))
+            .then(data => setNickResult(data.duplicate))  // { duplicate: true/false }
             .catch(() => setNickResult(false));
     }
 
@@ -447,27 +447,38 @@
         }
     }
 
-    function signup() {
+    async function signup() {
         if (!selectedTeam) return;
-        const user = {
-            nick:  document.getElementById('nick').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            pw:    document.getElementById('pw').value,
-            team:  selectedTeam.name,
-            color: selectedTeam.color
+
+        // ✅ 필드명을 서버 SignupRequest DTO와 일치시킴다
+        const payload = {
+            email:    document.getElementById('email').value.trim(),
+            password: document.getElementById('pw').value,    // pw → password
+            nick:     document.getElementById('nick').value.trim(),
+            team:     selectedTeam.name,
+            color:    selectedTeam.color
         };
 
-        fetch('/api/users/signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(user)
-        }).then(res => {
-            if (res.ok) { alert('🎉 회원가입 완료! 로그인해주세요.'); location.href = 'login.html'; }
-            else res.text().then(t => alert(t));
-        }).catch(() => {
-            alert('🎉 회원가입 완료!');
+        try {
+            const res = await fetch('/api/users/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert('🎉 회원가입이 완료되었습니다! 로그인해주세요.');
+                location.href = 'login.html';
+            } else {
+                const err = await res.json().catch(() => ({}));
+                // 서버에서 다양한 형식으로 에러를 내릴 수 있음
+                const msg = err.error || err.email || err.nick || err.password || '회원가입 실패';
+                alert('❌ ' + msg);
+            }
+        } catch (e) {
+            alert('⚠️ 서버에 연결할 수 없습니다. 데모 모드: 로그인 페이지로 이동합니다.');
             location.href = 'login.html';
-        });
+        }
     }
     </script>
 </body>

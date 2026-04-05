@@ -1,12 +1,12 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '4.0.3'
+	id 'org.springframework.boot' version '3.4.5'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-description = 'Demo project for Spring Boot'
+description = 'PLACEBALL - KBO 직관 정보 통합 플랫폼'
 
 java {
 	toolchain {
@@ -25,18 +25,33 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-h2console'
+	// ── Web & MVC ──────────────────────────────────
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// ── JPA & Database ─────────────────────────────
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
-	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
+	runtimeOnly    'com.h2database:h2'                          // 개발용 H2
+	runtimeOnly    'com.mysql:mysql-connector-j'                // 운영용 MySQL
+
+	// ── Security ───────────────────────────────────
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	// ── JWT (JJWT 0.12.x) ──────────────────────────
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+	runtimeOnly    'io.jsonwebtoken:jjwt-impl:0.12.6'
+	runtimeOnly    'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+	// ── Validation (@Valid) ────────────────────────
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// ── Lombok ─────────────────────────────────────
+	compileOnly    'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// ── Test ───────────────────────────────────────
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly    'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {

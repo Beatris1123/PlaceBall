@@ -220,26 +220,45 @@
     <script>
     lucide.createIcons();
 
-    function login() {
-        const email = document.getElementById('email').value.trim();
-        const pw    = document.getElementById('pw').value;
+    async function login() {
+        const email    = document.getElementById('email').value.trim();
+        const password = document.getElementById('pw').value;
 
-        if (!email || !pw) { showErr('이메일과 비밀번호를 모두 입력해주세요.'); return; }
+        if (!email || !password) { showErr('이메일과 비밀번호를 모두 입력해주세요.'); return; }
 
-        fetch('/api/users/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, pw })
-        })
-        .then(res => {
-            if (res.ok) return res.json();
-            throw new Error('이메일 또는 비밀번호가 일치하지 않습니다.');
-        })
-        .then(user => {
-            localStorage.setItem('curr', JSON.stringify(user));
+        try {
+            const res = await fetch('/api/users/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                // ✅ 필드명 password 로 변경 (서버 LoginRequest DTO와 일치)
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || '이메일 또는 비밀번호가 일치하지 않습니다.');
+            }
+
+            // ✅ 서버가 JWT 토큰과 사용자 정보를 함께 반환
+            const data = await res.json();
+            // { token, email, nick, team, color }
+
+            // JWT 토큰 저장 (API 요청 시 Authorization 헤더에 사용)
+            localStorage.setItem('jwt_token', data.token);
+
+            // 기존 curr 형식 유지 (프론트 UI 호환성)
+            localStorage.setItem('curr', JSON.stringify({
+                email: data.email,
+                nick:  data.nick,
+                team:  data.team,
+                color: data.color
+            }));
+
             location.href = 'index.html';
-        })
-        .catch(err => showErr(err.message));
+
+        } catch (err) {
+            showErr(err.message);
+        }
     }
 
     function demoLogin() {
