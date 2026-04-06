@@ -103,6 +103,9 @@ public class SecurityConfig {
                 // ✅ 시설 조회는 비로그인도 가능
                 .requestMatchers(HttpMethod.GET, "/api/facilities/**").permitAll()
 
+                // ✅ 날씨 조회는 비로그인도 가능
+                .requestMatchers(HttpMethod.GET, "/api/weather/**").permitAll()
+
                 // ✅ OPTIONS (CORS preflight)
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 

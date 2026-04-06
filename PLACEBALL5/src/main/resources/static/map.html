@@ -6,7 +6,6 @@
     <title>PLACEBALL — Stadium Map</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Leaflet CSS/JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@1,900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
@@ -42,7 +41,7 @@
 
         /* ─── TOP BAR ─── */
         .topbar {
-            background: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.97);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid #e2e8f0;
             z-index: 200; flex-shrink: 0;
@@ -86,36 +85,55 @@
         .cat-btn.active-BATH   { background: #eff6ff; color: #2563eb; border-color: #93c5fd; }
         .cat-btn.active-GOODS  { background: rgba(var(--t-rgb),0.08); color: var(--t); border-color: rgba(var(--t-rgb),0.3); }
 
+        /* ─── QUICK INFO TOGGLE ─── */
+        #quick_toggle {
+            flex-shrink: 0; display: flex; align-items: center; gap: 5px;
+            padding: 7px 13px; border-radius: 10px; font-size: 11px; font-weight: 700;
+            border: 1.5px solid #e2e8f0; background: #f8fafc;
+            color: #64748b; cursor: pointer; transition: all 0.2s; margin-left: auto;
+        }
+        #quick_toggle.open {
+            background: rgba(var(--t-rgb),0.08); color: var(--t);
+            border-color: rgba(var(--t-rgb),0.3);
+        }
+
         /* ─── MAP ─── */
         #map_wrap { flex: 1; position: relative; overflow: hidden; }
         #map { width: 100%; height: 100%; z-index: 1; }
 
-        /* Leaflet override */
         .leaflet-container { font-family: 'Pretendard', sans-serif; }
-        .leaflet-control-zoom a {
-            border-radius: 8px !important;
-            font-weight: 900 !important;
-        }
+        .leaflet-control-zoom a { border-radius: 8px !important; font-weight: 900 !important; }
 
         /* ─── FAB BUTTONS ─── */
         .fab {
             position: absolute; right: 14px;
             width: 46px; height: 46px; border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s; z-index: 50;
-            border: none;
+            cursor: pointer; transition: all 0.2s; z-index: 50; border: none;
         }
         .fab:active { transform: scale(0.95); }
         #fab_locate {
-            bottom: 320px; background: #ffffff;
+            bottom: 330px; background: #ffffff;
             border: 1.5px solid #e2e8f0; color: #64748b;
             box-shadow: 0 4px 16px rgba(0,0,0,0.1);
         }
         #fab_locate:hover { background: #f8fafc; }
         #fab_nav {
-            bottom: 264px; background: var(--t); color: white;
+            bottom: 274px; background: var(--t); color: white;
             box-shadow: 0 4px 16px rgba(var(--t-rgb),0.35);
         }
+
+        /* ─── QUICK INFO PANEL ─── */
+        #quick_panel {
+            position: absolute; top: 0; left: 0; right: 0; z-index: 120;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            transform: translateY(-100%);
+            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            max-height: 55vh; overflow-y: auto;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+        }
+        #quick_panel.open { transform: translateY(0); }
 
         /* ─── BOTTOM SHEET ─── */
         #bottom_sheet {
@@ -214,6 +232,44 @@
             color: #64748b; pointer-events: none;
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
         }
+
+        /* ─── QUICK INFO CARDS ─── */
+        .qi-card {
+            background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 14px; padding: 12px 14px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .qi-icon {
+            width: 40px; height: 40px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
+        }
+
+        /* Weather card special */
+        .weather-card {
+            background: linear-gradient(135deg, rgba(var(--t-rgb),0.08) 0%, rgba(var(--t-rgb),0.04) 100%);
+            border: 1.5px solid rgba(var(--t-rgb),0.15);
+            border-radius: 16px; padding: 14px 16px;
+        }
+        .weather-big-icon { font-size: 36px; line-height: 1; }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 8px; border-radius: 99px;
+            font-size: 10px; font-weight: 800;
+        }
+        .badge-green  { background: #f0fdf4; color: #16a34a; }
+        .badge-yellow { background: #fffbeb; color: #d97706; }
+        .badge-red    { background: #fef2f2; color: #dc2626; }
+        .badge-blue   { background: #eff6ff; color: #2563eb; }
+
+        /* ─── FOOTER ─── */
+        .site-footer {
+            background: #1e293b; color: #94a3b8;
+            padding: 20px 20px 16px; flex-shrink: 0;
+            display: none; /* map은 스크롤 없어서 숨김; 다른 페이지에서만 표시 */
+        }
     </style>
 </head>
 <body>
@@ -248,7 +304,7 @@
             <button id="pill-daejeon"  onclick="changeStadium('daejeon')"  class="stadium-pill">대전 이글스파크</button>
         </div>
 
-        <!-- Category tabs -->
+        <!-- Category tabs + Quick Info toggle -->
         <div class="cat-bar">
             <button id="cat-FOOD"  onclick="setCategory('FOOD')"  class="cat-btn">
                 <i data-lucide="utensils" class="w-3.5 h-3.5"></i> 음식점
@@ -262,19 +318,119 @@
             <button id="cat-GOODS" onclick="setCategory('GOODS')" class="cat-btn">
                 <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i> 팀 스토어
             </button>
-            <!-- Legend -->
-            <div class="flex items-center gap-3 ml-auto pl-2 shrink-0">
-                <div class="flex items-center gap-1.5"><div class="legend-dot bg-orange-500"></div><span class="text-[9px] text-slate-400 font-bold">음식</span></div>
-                <div class="flex items-center gap-1.5"><div class="legend-dot bg-green-600"></div><span class="text-[9px] text-slate-400 font-bold">편의점</span></div>
-                <div class="flex items-center gap-1.5"><div class="legend-dot bg-blue-600"></div><span class="text-[9px] text-slate-400 font-bold">화장실</span></div>
-                <div class="flex items-center gap-1.5"><div class="legend-dot" style="background:var(--t)"></div><span class="text-[9px] text-slate-400 font-bold">스토어</span></div>
-            </div>
+            <!-- Quick Info Toggle -->
+            <button id="quick_toggle" onclick="toggleQuickPanel()">
+                <i data-lucide="info" class="w-3.5 h-3.5"></i> QUICK INFO
+            </button>
         </div>
     </header>
 
-    <!-- ══ MAP ══ -->
+    <!-- ══ MAP WRAP ══ -->
     <div id="map_wrap">
         <div id="map"></div>
+
+        <!-- ══ QUICK INFO PANEL (슬라이드 다운) ══ -->
+        <div id="quick_panel">
+            <div class="px-4 py-4">
+                <!-- Panel header -->
+                <div class="flex items-center justify-between mb-3">
+                    <h3 id="qi_title" class="text-sm font-black text-slate-800">잠실 야구장 — 빠른 정보</h3>
+                    <button onclick="closeQuickPanel()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition">
+                        <i data-lucide="x" class="w-3.5 h-3.5 text-slate-500"></i>
+                    </button>
+                </div>
+
+                <!-- ① 날씨 카드 -->
+                <div class="weather-card mb-3" id="weather_card">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="weather-big-icon" id="w_icon">⏳</div>
+                            <div>
+                                <p class="text-[11px] font-bold text-slate-400 mb-0.5">현재 구장 날씨</p>
+                                <p class="text-xl font-black text-slate-800" id="w_temp">--°C</p>
+                                <p class="text-xs font-semibold text-slate-500" id="w_desc">불러오는 중...</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="flex flex-col gap-1 items-end">
+                                <div class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                                    <i data-lucide="wind" class="w-3 h-3"></i>
+                                    <span id="w_wind">-- m/s</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                                    <i data-lucide="droplets" class="w-3 h-3"></i>
+                                    <span id="w_humidity">--%</span>
+                                </div>
+                            </div>
+                            <p id="w_mock_badge" class="text-[9px] text-slate-300 font-medium mt-2" style="display:none;">※ 목업 데이터</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ② 구장 정보 그리드 -->
+                <div class="grid grid-cols-2 gap-2.5 mb-3">
+                    <!-- 운영 상태 -->
+                    <div class="qi-card flex-col items-start gap-1.5">
+                        <div class="flex items-center gap-2 w-full">
+                            <div class="qi-icon" style="background:#f0fdf4;">🏟️</div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400">운영 상태</p>
+                                <p id="qi_status" class="text-xs font-black text-slate-800">--</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 홈팀 -->
+                    <div class="qi-card flex-col items-start gap-1.5">
+                        <div class="flex items-center gap-2 w-full">
+                            <div class="qi-icon" style="background:#eff6ff;">⚾</div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400">홈팀</p>
+                                <p id="qi_team" class="text-xs font-black text-slate-800">--</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ③ 주차장 현황 (목업) -->
+                <div class="qi-card mb-2.5">
+                    <div class="qi-icon" style="background:#fefce8;">🅿️</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-[10px] font-bold text-slate-400">주차장 현황</p>
+                            <span id="qi_park_badge" class="status-badge badge-green">여유</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                            <div id="qi_park_bar" class="h-full rounded-full bg-green-400 transition-all" style="width:25%"></div>
+                        </div>
+                        <p id="qi_park_text" class="text-[10px] text-slate-400 font-medium mt-1">예상 잔여 <strong class="text-slate-600" id="qi_park_remain">--</strong> 면 (목업)</p>
+                    </div>
+                </div>
+
+                <!-- ④ 최단 게이트 (목업) -->
+                <div class="qi-card mb-2.5">
+                    <div class="qi-icon" style="background:#fdf4ff;">🚪</div>
+                    <div class="flex-1">
+                        <p class="text-[10px] font-bold text-slate-400 mb-0.5">최단 게이트</p>
+                        <p id="qi_gate" class="text-xs font-black text-slate-800">--</p>
+                        <p class="text-[10px] text-slate-400 font-medium mt-0.5" id="qi_gate_sub">--</p>
+                    </div>
+                </div>
+
+                <!-- ⑤ 오늘 경기 -->
+                <div class="qi-card">
+                    <div class="qi-icon" style="background:#fff7ed;">📅</div>
+                    <div class="flex-1">
+                        <p class="text-[10px] font-bold text-slate-400 mb-0.5">오늘의 경기</p>
+                        <p id="qi_game" class="text-xs font-black text-slate-800">--</p>
+                        <p id="qi_game_sub" class="text-[10px] text-slate-400 font-medium mt-0.5">--</p>
+                    </div>
+                </div>
+
+                <p class="text-[9px] text-slate-300 font-medium text-center mt-3">
+                    날씨: 기상청 단기예보 API | 주차·게이트: 목업 데이터
+                </p>
+            </div>
+        </div>
 
         <!-- FAB -->
         <button class="fab" id="fab_locate" onclick="locateMe()">
@@ -390,7 +546,121 @@
 
 lucide.createIcons();
 
-/* ── DATA ── */
+/* ══════════════════════════════════════════════
+   QUICK INFO DATA — 구장별 정보
+══════════════════════════════════════════════ */
+const quickInfoData = {
+    jamsil: {
+        name: '잠실 야구장',
+        teams: 'LG 트윈스 / 두산 베어스',
+        status: '시즌 운영 중',
+        statusType: 'green',
+        gate: '1번 게이트 (정문)',
+        gateSub: '지하철 2호선 잠실역 8번 출구 — 도보 5분',
+        park: { remain: 320, total: 1200, status: 'green', label: '여유' },
+        todayGame: 'LG vs 두산 (18:30)',
+        todayGameSub: '잠실 구장 | 오늘 경기 예정',
+        teamColor: '#C30452'
+    },
+    gocheok: {
+        name: '고척 스카이돔',
+        teams: '키움 히어로즈',
+        status: '시즌 운영 중',
+        statusType: 'green',
+        gate: '1번 게이트 (메인)',
+        gateSub: '지하철 1호선 구일역 2번 출구 — 도보 10분',
+        park: { remain: 180, total: 600, status: 'yellow', label: '보통' },
+        todayGame: '키움 vs KT (18:30)',
+        todayGameSub: '고척 스카이돔 | 오늘 경기 예정',
+        teamColor: '#570514'
+    },
+    incheon: {
+        name: 'SSG 랜더스필드',
+        teams: 'SSG 랜더스',
+        status: '시즌 운영 중',
+        statusType: 'green',
+        gate: '1번 게이트 (정문)',
+        gateSub: '지하철 수인분당선 문학경기장역 1번 출구 — 도보 3분',
+        park: { remain: 410, total: 1500, status: 'green', label: '여유' },
+        todayGame: 'SSG vs 롯데 (14:00)',
+        todayGameSub: 'SSG 랜더스필드 | 오늘 경기 예정',
+        teamColor: '#CE0E2D'
+    },
+    suwon: {
+        name: '수원 KT 위즈파크',
+        teams: 'KT 위즈',
+        status: '시즌 운영 중',
+        statusType: 'green',
+        gate: '1번 게이트 (주 출입구)',
+        gateSub: '지하철 1호선 수원역 버스 환승 — 20분',
+        park: { remain: 250, total: 800, status: 'yellow', label: '보통' },
+        todayGame: 'KT vs 키움 (18:30)',
+        todayGameSub: 'KT 위즈파크 | 오늘 경기 예정',
+        teamColor: '#000000'
+    },
+    gwangju: {
+        name: '광주 챔피언스필드',
+        teams: 'KIA 타이거즈',
+        status: '시즌 운영 중',
+        statusType: 'green',
+        gate: '1번 게이트 (메인 게이트)',
+        gateSub: '광주 지하철 상무역 → 버스 10분 / 택시 5분',
+        park: { remain: 520, total: 1800, status: 'green', label: '여유' },
+        todayGame: 'KIA vs NC (18:30)',
+        todayGameSub: '광주 챔피언스필드 | 오늘 경기 예정',
+        teamColor: '#EA0029'
+    },
+    daegu: {
+        name: '대구 라이온즈파크',
+        teams: '삼성 라이온즈',
+        status: '시즌 운영 중',
+        statusType: 'green',
+        gate: '1루 게이트 (정문)',
+        gateSub: '대구 지하철 2호선 대공원역 — 도보 8분',
+        park: { remain: 600, total: 2000, status: 'green', label: '여유' },
+        todayGame: '삼성 vs 한화 (18:30)',
+        todayGameSub: '라이온즈파크 | 오늘 경기 예정',
+        teamColor: '#074CA1'
+    },
+    sajik: {
+        name: '사직 야구장',
+        teams: '롯데 자이언츠',
+        status: '시즌 운영 중',
+        statusType: 'green',
+        gate: '1번 게이트 (정문)',
+        gateSub: '부산 지하철 3호선 사직역 5번 출구 — 도보 5분',
+        park: { remain: 120, total: 500, status: 'red', label: '혼잡' },
+        todayGame: '롯데 vs SSG (18:30)',
+        todayGameSub: '사직 야구장 | 오늘 경기 예정',
+        teamColor: '#D9261C'
+    },
+    changwon: {
+        name: '창원 NC파크',
+        teams: 'NC 다이노스',
+        status: '시즌 운영 중',
+        statusType: 'green',
+        gate: '1번 게이트 (메인 게이트)',
+        gateSub: '창원 버스 이용 — 창원역에서 택시 10분',
+        park: { remain: 350, total: 1200, status: 'green', label: '여유' },
+        todayGame: 'NC vs KIA (18:30)',
+        todayGameSub: 'NC파크 | 오늘 경기 예정',
+        teamColor: '#071D3E'
+    },
+    daejeon: {
+        name: '대전 이글스파크',
+        teams: '한화 이글스',
+        status: '시즌 운영 중',
+        statusType: 'green',
+        gate: '1번 게이트 (정문)',
+        gateSub: '대전 지하철 1호선 용문역 — 도보 10분',
+        park: { remain: 280, total: 900, status: 'yellow', label: '보통' },
+        todayGame: '한화 vs 삼성 (18:30)',
+        todayGameSub: '이글스파크 | 오늘 경기 예정',
+        teamColor: '#FF6600'
+    }
+};
+
+/* ── FACILITY DATA ── */
 const facilityData = {
     jamsil: [
         { name:"면당포",        lat:37.51160, lng:127.07108, cat:"FOOD",  loc:"1루 게이트 진입 후 좌측 첫 번째 매장",              crowd:40 },
@@ -438,6 +708,7 @@ const catMeta = {
 /* ── STATE ── */
 let currentStadiumId = 'jamsil', currentCategory = 'FOOD';
 let activeMarkers = [], selectedFacility = null, voteState = {};
+let quickPanelOpen = false;
 
 /* ── LEAFLET MAP ── */
 const map = L.map('map', {
@@ -452,11 +723,104 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap'
 }).addTo(map);
 
-// Map click = close sheet
-map.on('click', () => closeSheet());
+map.on('click', () => { closeSheet(); closeQuickPanel(); });
 
 // Initial render
 setCategory('FOOD');
+
+/* ══════════════════════════════════════════════
+   QUICK INFO 패널
+══════════════════════════════════════════════ */
+function toggleQuickPanel() {
+    quickPanelOpen ? closeQuickPanel() : openQuickPanel();
+}
+
+function openQuickPanel() {
+    closeSheet();
+    quickPanelOpen = true;
+    document.getElementById('quick_panel').classList.add('open');
+    document.getElementById('quick_toggle').classList.add('open');
+    updateQuickInfo(currentStadiumId);
+    lucide.createIcons();
+}
+
+function closeQuickPanel() {
+    quickPanelOpen = false;
+    document.getElementById('quick_panel').classList.remove('open');
+    document.getElementById('quick_toggle').classList.remove('open');
+}
+
+function updateQuickInfo(stadiumId) {
+    const qi = quickInfoData[stadiumId];
+    if (!qi) return;
+
+    // 제목
+    document.getElementById('qi_title').textContent = `${qi.name} — 빠른 정보`;
+
+    // 운영 상태
+    const statusEl = document.getElementById('qi_status');
+    statusEl.textContent = qi.status;
+    statusEl.className = `text-xs font-black ${qi.statusType === 'green' ? 'text-green-600' : 'text-red-500'}`;
+
+    // 홈팀
+    document.getElementById('qi_team').textContent = qi.teams;
+
+    // 주차장
+    const park = qi.park;
+    const pct = Math.round((1 - park.remain / park.total) * 100);
+    document.getElementById('qi_park_bar').style.width = pct + '%';
+    document.getElementById('qi_park_bar').className = `h-full rounded-full transition-all ${
+        park.status === 'green' ? 'bg-green-400' : park.status === 'yellow' ? 'bg-amber-400' : 'bg-red-400'
+    }`;
+    document.getElementById('qi_park_badge').textContent = park.label;
+    document.getElementById('qi_park_badge').className = `status-badge badge-${park.status}`;
+    document.getElementById('qi_park_remain').textContent = park.remain;
+
+    // 최단 게이트
+    document.getElementById('qi_gate').textContent = qi.gate;
+    document.getElementById('qi_gate_sub').textContent = qi.gateSub;
+
+    // 오늘 경기
+    document.getElementById('qi_game').textContent = qi.todayGame;
+    document.getElementById('qi_game_sub').textContent = qi.todayGameSub;
+
+    // 날씨 로드
+    loadWeather(stadiumId);
+}
+
+/* ── 날씨 API 호출 ── */
+async function loadWeather(stadiumId) {
+    const iconEl    = document.getElementById('w_icon');
+    const tempEl    = document.getElementById('w_temp');
+    const descEl    = document.getElementById('w_desc');
+    const windEl    = document.getElementById('w_wind');
+    const humidEl   = document.getElementById('w_humidity');
+    const mockBadge = document.getElementById('w_mock_badge');
+
+    iconEl.textContent = '⏳';
+    tempEl.textContent = '--°C';
+    descEl.textContent = '날씨 불러오는 중...';
+
+    try {
+        const res = await fetch(`/api/weather?stadiumId=${stadiumId}`);
+        if (!res.ok) throw new Error('API 오류');
+        const data = await res.json();
+
+        iconEl.textContent    = data.icon;
+        tempEl.textContent    = data.temp;
+        descEl.textContent    = data.desc;
+        windEl.textContent    = data.wind;
+        humidEl.textContent   = data.humidity;
+        mockBadge.style.display = data.mock ? 'block' : 'none';
+    } catch(e) {
+        iconEl.textContent  = '🌤️';
+        tempEl.textContent  = '--°C';
+        descEl.textContent  = '날씨 정보 없음';
+        windEl.textContent  = '--';
+        humidEl.textContent = '--';
+    }
+    lucide.createIcons();
+}
 
 /* ── STADIUM CHANGE ── */
 function changeStadium(id) {
@@ -470,6 +834,11 @@ function changeStadium(id) {
     clearMarkers();
     renderMarkers();
     closeSheet();
+
+    // Quick Panel이 열려있으면 해당 구장 정보로 업데이트
+    if (quickPanelOpen) {
+        updateQuickInfo(id);
+    }
 }
 
 /* ── CATEGORY ── */
@@ -500,10 +869,6 @@ function renderMarkers() {
         const el = document.createElement('div');
         el.className = `mk mk-${f.cat}`;
         el.innerHTML = `<span class="mk-inner">${f.name.charAt(0)}</span>`;
-        el.addEventListener('click', (e) => {
-            L.DomEvent.stopPropagation(e);
-            openSheet(f);
-        });
 
         const icon = L.divIcon({
             html: el.outerHTML,
@@ -521,6 +886,7 @@ function renderMarkers() {
 
 /* ── BOTTOM SHEET ── */
 function openSheet(f) {
+    closeQuickPanel();
     selectedFacility = f;
     const meta = catMeta[f.cat];
 
@@ -528,7 +894,6 @@ function openSheet(f) {
     document.getElementById('bs_cat_label').textContent = meta.label;
     document.getElementById('bs_loc').textContent = f.loc || '위치 정보 없음';
 
-    // Cat icon
     const iconWrap = document.getElementById('bs_cat_icon');
     const teamColor = getComputedStyle(document.documentElement).getPropertyValue('--t').trim();
     const goodsBg = `rgba(${getComputedStyle(document.documentElement).getPropertyValue('--t-rgb').trim()},0.1)`;
