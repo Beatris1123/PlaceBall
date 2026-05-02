@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLACEBALL - KBO 경기일정</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/schedule.css">
+</head>
+<body>
+
+<!-- 상단 헤더 -->
+<header class="site-header">
+  <div class="header-inner">
+    <!-- 로고 -->
+    <a href="index.html" class="logo-area">
+      <div class="logo-icon">P</div>
+      <div class="logo-text">
+        <span class="logo-title">PLACEBALL</span>
+        <span class="logo-sub">AI Baseball Analytics</span>
+      </div>
+    </a>
+
+    <!-- 네비게이션 -->
+    <nav class="main-nav">
+      <a href="index.html" class="nav-link">대시보드</a>
+      <a href="schedule.html" class="nav-link active">경기일정</a>
+    </nav>
+
+    <!-- 우측 유저 영역 -->
+    <div class="header-right">
+      <button id="login-btn" class="btn-login" onclick="location.href='login.html'">로그인</button>
+      <div id="user-info-section" style="display:none;" class="user-info">
+        <span class="welcome-text">⚾ <span id="user-nickname" class="nickname"></span>님 환영합니다!</span>
+        <button id="logout-btn" class="btn-logout">로그아웃</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 페이지 타이틀 배너 -->
+<section class="page-banner">
+  <div class="banner-inner">
+    <div class="banner-badge">⚾ LIVE 경기 정보</div>
+    <h1 class="banner-title">KBO 경기일정</h1>
+    <p class="banner-sub">2025 KBO 리그 경기 일정 및 결과를 확인하세요</p>
+  </div>
+</section>
+
+<!-- 메인 컨텐츠 -->
+<main class="schedule-main">
+
+  <!-- ── 월 선택 네비게이터 ── -->
+  <div class="month-nav-wrap">
+    <div class="month-nav">
+      <button class="month-arrow" id="prevMonthBtn">&#8249;</button>
+      <span class="month-label" id="currentMonthLabel">2025년 5월</span>
+      <button class="month-arrow" id="nextMonthBtn">&#8250;</button>
+    </div>
+  </div>
+
+  <!-- ── 팀 필터 ── -->
+  <div class="team-filter-wrap">
+    <div class="team-filter" id="teamFilter">
+      <button class="team-btn active" data-team="all">전체</button>
+      <button class="team-btn kia"    data-team="KIA">
+        <span class="team-dot" style="background:#C8102E"></span>KIA
+      </button>
+      <button class="team-btn lg"     data-team="LG">
+        <span class="team-dot" style="background:#C30452"></span>LG
+      </button>
+      <button class="team-btn samsung" data-team="삼성">
+        <span class="team-dot" style="background:#074CA1"></span>삼성
+      </button>
+      <button class="team-btn doosan" data-team="두산">
+        <span class="team-dot" style="background:#131230"></span>두산
+      </button>
+      <button class="team-btn lotte"  data-team="롯데">
+        <span class="team-dot" style="background:#002B5B"></span>롯데
+      </button>
+      <button class="team-btn ssg"    data-team="SSG">
+        <span class="team-dot" style="background:#CE0E2D"></span>SSG
+      </button>
+      <button class="team-btn nc"     data-team="NC">
+        <span class="team-dot" style="background:#315288"></span>NC
+      </button>
+      <button class="team-btn kt"     data-team="KT">
+        <span class="team-dot" style="background:#000000"></span>KT
+      </button>
+      <button class="team-btn hanwha" data-team="한화">
+        <span class="team-dot" style="background:#FF6600"></span>한화
+      </button>
+      <button class="team-btn kiwoom" data-team="키움">
+        <span class="team-dot" style="background:#820024"></span>키움
+      </button>
+    </div>
+  </div>
+
+  <!-- ── 캘린더 + 경기 목록 레이아웃 ── -->
+  <div class="content-grid">
+
+    <!-- 좌측: 미니 캘린더 -->
+    <aside class="calendar-aside">
+      <div class="mini-calendar">
+        <div class="cal-header">
+          <span id="calMonthLabel">5월 2025</span>
+        </div>
+        <div class="cal-weekdays">
+          <span class="sun">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span>
+        </div>
+        <div class="cal-days" id="calDays">
+          <!-- JS로 동적 생성 -->
+        </div>
+      </div>
+
+      <!-- 오늘의 요약 카드 -->
+      <div class="today-card">
+        <div class="today-card-header">
+          <span class="today-icon">📅</span>
+          <span class="today-label">오늘의 경기</span>
+          <span class="live-badge">LIVE</span>
+        </div>
+        <div id="todayGamesSummary" class="today-games">
+          <!-- JS로 동적 생성 -->
+        </div>
+      </div>
+
+      <!-- 순위표 미니 -->
+      <div class="standings-mini">
+        <div class="standings-header">
+          <span class="standings-icon">🏆</span>
+          <span>팀 순위</span>
+        </div>
+        <div class="standings-list" id="standingsList">
+          <!-- JS로 동적 생성 -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- 우측: 날짜별 경기 목록 -->
+    <section class="games-section">
+
+      <!-- 탭: 전체 / 예정 / 완료 -->
+      <div class="game-tabs">
+        <button class="tab-btn active" data-tab="all">전체</button>
+        <button class="tab-btn" data-tab="upcoming">예정</button>
+        <button class="tab-btn" data-tab="finished">완료</button>
+        <button class="tab-btn" data-tab="today">오늘</button>
+      </div>
+
+      <!-- 경기 카드 목록 -->
+      <div class="games-list" id="gamesList">
+        <!-- JS로 동적 생성 -->
+      </div>
+
+      <!-- 로딩 / 빈 상태 -->
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <span class="empty-icon">⚾</span>
+        <p>해당 조건의 경기가 없습니다.</p>
+      </div>
+
+    </section>
+  </div>
+</main>
+
+<script src="js/schedule.js"></script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLACEBALL - 회원가입</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/signup.css">
+</head>
+<body>
+
+<div class="signup-wrapper">
+  <div class="signup-card">
+    <div class="logo-area">
+      <div class="logo-icon">P</div>
+      <div class="logo-text">
+        <span class="title">PLACEBALL</span>
+        <span class="subtitle">AI Baseball Analytics</span>
+      </div>
+    </div>
+
+    <h2 class="signup-title">회원가입</h2>
+
+    <!-- 아이디 입력 및 중복확인 -->
+    <div class="form-group">
+      <div class="input-with-btn">
+        <input type="text" id="signupId" placeholder="사용할 아이디를 입력하세요">
+        <button id="checkIdBtn" class="btn-check">중복확인</button>
+      </div>
+      <p id="idMessage" class="status-text"></p>
+    </div>
+
+    <!-- ★ 닉네임 입력 및 중복확인 (추가된 부분) -->
+    <div class="form-group">
+      <div class="input-with-btn">
+        <input type="text" id="signupNickname" placeholder="사용할 닉네임을 입력하세요">
+        <button id="checkNicknameBtn" class="btn-check">중복확인</button>
+      </div>
+      <p id="nicknameMessage" class="status-text"></p>
+    </div>
+
+    <!-- 비밀번호 입력 -->
+    <div class="form-group">
+      <input type="password" id="signupPw" placeholder="비밀번호를 입력하세요">
+    </div>
+
+    <!-- 비밀번호 확인 -->
+    <div class="form-group">
+      <input type="password" id="signupPwConfirm" placeholder="비밀번호를 다시 입력하세요">
+      <p id="pwMessage" class="status-text"></p>
+    </div>
+
+    <!-- 버튼 영역 -->
+    <div class="button-group">
+      <button id="submitSignupBtn" class="btn-primary">가입하기</button>
+      <button id="cancelBtn" class="btn-secondary">돌아가기</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/signup.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLACEBALL - 로그인</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="logo-area">
+            <div class="logo-icon">P</div>
+            <div class="logo-text">
+                <span class="title">PLACEBALL</span>
+                <span class="subtitle">AI Baseball Analytics</span>
+            </div>
+        </div>
+
+        <h2 class="login-title">환영합니다!</h2>
+
+        <div class="input-group">
+            <input type="text" id="userId" placeholder="아이디를 입력하세요">
+        </div>
+        <div class="input-group">
+            <input type="password" id="userPw" placeholder="비밀번호를 입력하세요">
+        </div>
+
+        <p id="loginErrorText" class="error-text">아이디 또는 비밀번호가 일치하지 않습니다.</p>
+
+        <div class="button-group">
+            <button id="loginSubmitBtn" class="btn-primary">로그인</button>
+            <button id="signupBtn" class="btn-secondary">회원가입</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/login.js"></script>
+</body>
+</html>
