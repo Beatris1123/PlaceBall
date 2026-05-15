@@ -364,12 +364,75 @@ function initLoginState() {
 }
 
 // ──────────────────────────────────────────────────────────────
-// 14. 초기화
+// 14. 헤더 스코어보드 동적 로딩
+// ──────────────────────────────────────────────────────────────
+const TEAM_COLORS_HEADER = {
+  'KIA':'#EF4444','기아':'#EF4444','LG':'#3B82F6','두산':'#1E3A8A',
+  '삼성':'#1D4ED8','롯데':'#EF4444','SSG':'#CE0E2D','NC':'#0EA5E9',
+  'KT':'#DC2626','한화':'#F97316','키움':'#820024'
+};
+function headerTeamColor(name) { return TEAM_COLORS_HEADER[name] || '#94A3B8'; }
+
+async function loadHeaderScoreboard() {
+  const board = document.getElementById('header-scoreboard');
+  if (!board) return;
+  try {
+    const res   = await fetch('/api/games/today');
+    if (!res.ok) return;
+    const games = await res.json();
+    if (!games.length) return;
+
+    const myTeam = localStorage.getItem('favoriteTeam') || '';
+    let game = games[0];
+    if (myTeam) {
+      const found = games.find(g => g.homeTeam === myTeam || g.awayTeam === myTeam);
+      if (found) game = found;
+    }
+
+    const ht = game.homeTeam || 'HOME';
+    const at = game.awayTeam || 'AWAY';
+    const hs = (game.homeScore != null && game.homeScore >= 0) ? game.homeScore : '-';
+    const as_ = (game.awayScore != null && game.awayScore >= 0) ? game.awayScore : '-';
+    const hc = headerTeamColor(ht);
+    const ac = headerTeamColor(at);
+
+    document.getElementById('sch-away-badge').textContent       = at.slice(0, 1);
+    document.getElementById('sch-away-badge').style.background  = ac;
+    document.getElementById('sch-away-name').textContent        = at;
+    document.getElementById('sch-away-score').textContent       = String(as_);
+    document.getElementById('sch-away-score').style.color       = ac;
+    document.getElementById('sch-home-badge').textContent       = ht.slice(0, 1);
+    document.getElementById('sch-home-badge').style.background  = hc;
+    document.getElementById('sch-home-name').textContent        = ht;
+    document.getElementById('sch-home-score').textContent       = String(hs);
+    document.getElementById('sch-home-score').style.color       = hc;
+
+    const statusBadge = document.getElementById('sch-status-badge');
+    const inningEl    = document.getElementById('sch-inning');
+    const s = (game.status || '').toLowerCase();
+    if (s.includes('live') || s.includes('진행')) {
+      statusBadge.textContent        = 'LIVE';
+      statusBadge.style.background   = '#22C55E';
+      if (game.inning) inningEl.textContent = game.inning;
+    } else if (s.includes('종료') || s.includes('final')) {
+      statusBadge.textContent        = '종료';
+      statusBadge.style.background   = '#64748B';
+    } else {
+      statusBadge.textContent        = game.gameTime ? game.gameTime.slice(0, 5) : '예정';
+      statusBadge.style.background   = '#3B82F6';
+    }
+    board.style.visibility = 'visible';
+  } catch(e) { /* 조용히 무시 */ }
+}
+
+// ──────────────────────────────────────────────────────────────
+// 15. 초기화
 // ──────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   initLoginState();
   updateMonthLabel();
   renderStandings();
+  loadHeaderScoreboard();
   await renderTodaySummary();
   await fetchGames();   // API 호출 → renderCalendar + renderGames 내부 실행
 });

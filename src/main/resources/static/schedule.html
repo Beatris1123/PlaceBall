@@ -22,21 +22,21 @@
       </div>
     </a>
 
-    <!-- 스코어보드 -->
-    <div class="header-score">
+    <!-- 스코어보드 (동적 로딩) -->
+    <div class="header-score" id="header-scoreboard" style="visibility:hidden;">
       <div class="score-team">
-        <div class="score-team-badge" style="background:#EF4444;">T</div>
-        <div class="score-team-name">KIA</div>
-        <span class="score-num" style="color:#EF4444;">128</span>
+        <div class="score-team-badge" id="sch-away-badge" style="background:#555;">A</div>
+        <div class="score-team-name" id="sch-away-name">AWAY</div>
+        <span class="score-num" id="sch-away-score" style="color:#fff;">-</span>
       </div>
       <div class="score-mid">
-        <span class="live-pill">LIVE</span>
-        <span class="score-inning">9회말</span>
+        <span class="live-pill" id="sch-status-badge">LIVE</span>
+        <span class="score-inning" id="sch-inning"></span>
       </div>
       <div class="score-team">
-        <span class="score-num" style="color:#3B82F6;">116</span>
-        <div class="score-team-name">LG</div>
-        <div class="score-team-badge" style="background:#3B82F6;">W</div>
+        <span class="score-num" id="sch-home-score" style="color:#fff;">-</span>
+        <div class="score-team-name" id="sch-home-name">HOME</div>
+        <div class="score-team-badge" id="sch-home-badge" style="background:#555;">H</div>
       </div>
     </div>
 
