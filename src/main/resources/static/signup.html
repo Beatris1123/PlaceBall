@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLACEBALL - 회원가입</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: #060D1A;
+      position: relative; overflow-x: hidden;
+    }
+
+    .bg-layer {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 100%, rgba(220,38,38,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 60% at 50% 100%, rgba(29,78,216,0.14) 0%, transparent 60%),
+        linear-gradient(180deg, #03070F 0%, #060D1F 40%, #0A1628 100%);
+    }
+    .stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .star  { position: absolute; border-radius: 50%; background: white; animation: twinkle 3s ease-in-out infinite; }
+    @keyframes twinkle { 0%,100%{opacity:0.6} 50%{opacity:0.15} }
+
+    .page-wrap {
+      position: relative; z-index: 2;
+      width: 100%; max-width: 480px;
+      margin: 0 auto; padding: 2rem 1rem;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 1.25rem;
+    }
+
+    /* ─── 로고 ─── */
+    .logo-row { display: flex; align-items: center; gap: 0.75rem; }
+    .logo-mark {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: #fff; border: 2px solid rgba(220,38,38,0.4);
+      box-shadow: 0 0 20px rgba(220,38,38,0.3);
+      position: relative; overflow: hidden; flex-shrink: 0;
+    }
+    .logo-mark::before {
+      content: ''; position: absolute; width: 24px; height: 50px; left: 4px; top: -4px;
+      border: 2.5px solid transparent; border-right-color: #DC2626; border-radius: 50%; transform: rotate(14deg);
+    }
+    .logo-mark::after {
+      content: ''; position: absolute; width: 24px; height: 50px; right: 4px; top: -4px;
+      border: 2.5px solid transparent; border-left-color: #DC2626; border-radius: 50%; transform: rotate(-14deg);
+    }
+    .logo-name { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.08em; color: #F1F5F9; }
+    .logo-sub  { font-size: 10px; color: #64748B; letter-spacing: 0.2em; text-transform: uppercase; }
+
+    /* ─── 카드 ─── */
+    .auth-card {
+      width: 100%;
+      background: rgba(10,18,30,0.82);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 24px;
+      padding: 2rem 1.75rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .panel-heading { font-size: 1.2rem; font-weight: 900; color: #F1F5F9; text-align: center; margin-bottom: 0.3rem; }
+    .panel-sub     { font-size: 11px; color: #64748B; text-align: center; margin-bottom: 1.5rem; }
+
+    /* ─── 입력 ─── */
+    .input-group { margin-bottom: 0.9rem; }
+    .input-label { font-size: 11px; font-weight: 700; color: #94A3B8; margin-bottom: 5px; letter-spacing: 0.06em; display: block; }
+    .input-field {
+      width: 100%; padding: 0.8rem 1rem;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 12px; color: #F1F5F9; font-size: 14px; font-family: inherit;
+      outline: none; transition: all 0.15s;
+    }
+    .input-field::placeholder { color: #475569; }
+    .input-field:focus {
+      border-color: rgba(59,130,246,0.5); background: rgba(59,130,246,0.07);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+    .input-field.error { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.05); }
+
+    /* ─── 팀 선택 ─── */
+    .team-section { margin-bottom: 1rem; }
+    .team-section-label {
+      font-size: 11px; font-weight: 700; color: #94A3B8;
+      letter-spacing: 0.06em; margin-bottom: 8px; display: block;
+    }
+    .team-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .team-pick-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      padding: 8px 4px;
+      background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 10px; cursor: pointer; transition: all 0.18s; font-family: inherit;
+    }
+    .team-pick-btn .t-dot {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 900; color: #fff; transition: transform 0.15s;
+    }
+    .team-pick-btn .t-name { font-size: 9.5px; font-weight: 700; color: #64748B; transition: color 0.15s; }
+    .team-pick-btn:hover {
+      background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); transform: translateY(-2px);
+    }
+    .team-pick-btn:hover .t-dot { transform: scale(1.1); }
+    .team-pick-btn.selected {
+      border-color: var(--tc, #3B82F6);
+      background: rgba(var(--tr, 59,130,246), 0.12);
+      box-shadow: 0 0 0 2px rgba(var(--tr, 59,130,246), 0.25);
+    }
+    .team-pick-btn.selected .t-name { color: #F1F5F9; font-weight: 800; }
+
+    /* ─── 메시지 ─── */
+    .msg-text { font-size: 12px; font-weight: 700; text-align: center; margin-bottom: 0.75rem; display: none; }
+    .msg-text.visible { display: block; }
+    .msg-text.error   { color: #EF4444; }
+    .msg-text.success { color: #4ADE80; }
+
+    /* ─── 버튼 ─── */
+    .btn-primary {
+      width: 100%; padding: 0.9rem; background: #1D4ED8; color: #fff;
+      border: none; border-radius: 12px; font-size: 15px; font-weight: 800;
+      font-family: inherit; cursor: pointer; transition: all 0.15s;
+      box-shadow: 0 4px 16px rgba(29,78,216,0.35); margin-bottom: 0.5rem;
+    }
+    .btn-primary:hover { background: #1E40AF; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-secondary {
+      width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); color: #94A3B8;
+      border: 1px solid rgba(255,255,255,0.10); border-radius: 12px;
+      font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.09); color: #F1F5F9; }
+  </style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="stars" id="stars"></div>
+
+<div class="page-wrap">
+  <!-- 로고 -->
+  <div class="logo-row">
+    <div class="logo-mark"></div>
+    <div>
+      <div class="logo-name">PLACEBALL</div>
+      <div class="logo-sub">Ballpark Battle Community</div>
+    </div>
+  </div>
+
+  <!-- 카드 -->
+  <div class="auth-card">
+    <div class="panel-heading">새 계정 만들기</div>
+    <div class="panel-sub">PlaceBall에 오신 것을 환영합니다</div>
+
+    <!-- 아이디 -->
+    <div class="input-group">
+      <label class="input-label">아이디</label>
+      <input class="input-field" type="text" id="regId" placeholder="영문, 숫자 4~20자">
+    </div>
+
+    <!-- 닉네임 -->
+    <div class="input-group">
+      <label class="input-label">닉네임</label>
+      <input class="input-field" type="text" id="regNick" placeholder="닉네임을 입력하세요">
+    </div>
+
+    <!-- 비밀번호 -->
+    <div class="input-group">
+      <label class="input-label">비밀번호</label>
+      <input class="input-field" type="password" id="regPw" placeholder="8자 이상">
+    </div>
+    <div class="input-group">
+      <label class="input-label">비밀번호 확인</label>
+      <input class="input-field" type="password" id="regPw2" placeholder="비밀번호를 다시 입력하세요">
+    </div>
+
+    <!-- 팀 선택 -->
+    <div class="team-section">
+      <span class="team-section-label">⚾ 응원 팀 선택 <span style="color:#475569;font-weight:400;">(선택)</span></span>
+      <div class="team-grid">
+        <button type="button" class="team-pick-btn" data-team="LG"   style="--tc:#C30452;--tr:195,4,82;"    onclick="pickTeam(this)"><span class="t-dot" style="background:#C30452">L</span><span class="t-name">LG</span></button>
+        <button type="button" class="team-pick-btn" data-team="KIA"  style="--tc:#C8102E;--tr:200,16,46;"   onclick="pickTeam(this)"><span class="t-dot" style="background:#C8102E">K</span><span class="t-name">KIA</span></button>
+        <button type="button" class="team-pick-btn" data-team="삼성" style="--tc:#074CA1;--tr:7,76,161;"    onclick="pickTeam(this)"><span class="t-dot" style="background:#074CA1">삼</span><span class="t-name">삼성</span></button>
+        <button type="button" class="team-pick-btn" data-team="두산" style="--tc:#2E2E6E;--tr:46,46,110;"   onclick="pickTeam(this)"><span class="t-dot" style="background:#2E2E6E">두</span><span class="t-name">두산</span></button>
+        <button type="button" class="team-pick-btn" data-team="롯데" style="--tc:#002B5B;--tr:0,43,91;"     onclick="pickTeam(this)"><span class="t-dot" style="background:#002B5B">롯</span><span class="t-name">롯데</span></button>
+        <button type="button" class="team-pick-btn" data-team="SSG"  style="--tc:#CE0E2D;--tr:206,14,45;"   onclick="pickTeam(this)"><span class="t-dot" style="background:#CE0E2D">S</span><span class="t-name">SSG</span></button>
+        <button type="button" class="team-pick-btn" data-team="NC"   style="--tc:#315288;--tr:49,82,136;"   onclick="pickTeam(this)"><span class="t-dot" style="background:#315288">N</span><span class="t-name">NC</span></button>
+        <button type="button" class="team-pick-btn" data-team="KT"   style="--tc:#444444;--tr:68,68,68;"    onclick="pickTeam(this)"><span class="t-dot" style="background:#444">K</span><span class="t-name">KT</span></button>
+        <button type="button" class="team-pick-btn" data-team="한화" style="--tc:#FF6600;--tr:255,102,0;"   onclick="pickTeam(this)"><span class="t-dot" style="background:#FF6600">한</span><span class="t-name">한화</span></button>
+        <button type="button" class="team-pick-btn" data-team="키움" style="--tc:#820024;--tr:130,0,36;"    onclick="pickTeam(this)"><span class="t-dot" style="background:#820024">키</span><span class="t-name">키움</span></button>
+      </div>
+      <input type="hidden" id="selectedTeam" value="">
+    </div>
+
+    <p class="msg-text" id="signupMsg"></p>
+
+    <!-- 가입하기 -->
+    <button class="btn-primary" id="signupSubmitBtn">가입하기</button>
+    <button class="btn-secondary" onclick="location.href='login.html'">이미 계정이 있으신가요? 로그인 →</button>
+  </div>
+</div>
+
+<script src="js/signup.js"></script>
+</body>
+</html>

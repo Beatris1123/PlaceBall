@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLACEBALL - 커뮤니티</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        :root {
+          --bg:#060D1A; --bg-mid:#0A1628;
+          --surface:rgba(10,22,44,0.82); --surface-2:rgba(15,28,52,0.70);
+          --border:rgba(255,255,255,0.08); --border-md:rgba(255,255,255,0.14);
+          --red:#DC2626; --red-dark:#B91C1C;
+          --blue:#3B82F6; --blue-dark:#1D4ED8;
+          --gold:#F5C842; --green:#22C55E;
+          --text-1:#F1F5F9; --text-2:#CBD5E1; --text-3:#64748B; --text-4:#334155;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text-1);min-height:100vh;}
+        body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+          background:radial-gradient(ellipse 70% 50% at 15% 0%,rgba(220,38,38,0.10) 0%,transparent 60%),
+                     radial-gradient(ellipse 60% 40% at 85% 0%,rgba(29,78,216,0.10) 0%,transparent 60%);}
+        header{position:sticky;top:0;z-index:100;background:rgba(6,13,26,0.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(255,255,255,0.04),0 4px 24px rgba(0,0,0,0.4);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;height:64px;display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+        .logo-area{display:flex;align-items:center;gap:0.6rem;text-decoration:none;}
+        .logo-mark{width:36px;height:36px;border-radius:50%;background:#fff;border:1.5px solid rgba(220,38,38,0.25);box-shadow:0 0 12px rgba(220,38,38,0.2);position:relative;overflow:hidden;flex-shrink:0;}
+        .logo-mark::before{content:'';position:absolute;width:20px;height:42px;left:3px;top:-3px;border:2px solid transparent;border-right-color:#DC2626;border-radius:50%;transform:rotate(14deg);}
+        .logo-mark::after{content:'';position:absolute;width:20px;height:42px;right:3px;top:-3px;border:2px solid transparent;border-left-color:#DC2626;border-radius:50%;transform:rotate(-14deg);}
+        .logo-name{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.06em;color:var(--text-1);}
+        .header-right{display:flex;align-items:center;gap:0.75rem;}
+        .user-persona-badge{display:none;align-items:center;gap:6px;padding:5px 12px 5px 8px;border-radius:99px;border:1.5px solid;font-size:12px;font-weight:800;white-space:nowrap;}
+        .user-persona-badge.visible{display:flex;}
+        .user-nick-wrap{display:none;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text-2);}
+        .user-nick-wrap.visible{display:flex;}
+        .user-nick{color:var(--blue);font-weight:800;}
+        .btn-header{padding:7px 16px;background:rgba(255,255,255,0.07);color:var(--text-2);border:1px solid var(--border-md);border-radius:9px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:all 0.15s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+        .btn-header:hover{background:rgba(255,255,255,0.12);color:var(--text-1);}
+        .page-banner{position:relative;z-index:1;background:linear-gradient(135deg,rgba(15,28,52,0.9) 0%,rgba(6,13,26,0.95) 100%);border-bottom:1px solid var(--border);padding:2rem 1.5rem 1.75rem;}
+        .banner-inner{max-width:1200px;margin:0 auto;}
+        .banner-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--blue);background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);padding:4px 10px;border-radius:99px;margin-bottom:0.75rem;}
+        .banner-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:0.04em;color:var(--text-1);margin-bottom:0.4rem;}
+        .banner-sub{font-size:12px;color:var(--text-3);}
+        .main-wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:1.75rem 1.5rem 4rem;display:grid;grid-template-columns:200px 1fr;gap:1.5rem;align-items:start;}
+        .sidebar{position:sticky;top:80px;}
+        .sidebar-title{font-size:10px;font-weight:700;color:var(--text-3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.6rem;padding:0 0.25rem;}
+        .tab-list{display:flex;flex-direction:column;gap:3px;margin-bottom:1.5rem;}
+        .tab-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:700;color:var(--text-3);cursor:pointer;transition:all 0.15s;border:1px solid transparent;background:none;font-family:inherit;text-align:left;width:100%;}
+        .tab-item:hover{background:rgba(255,255,255,0.05);color:var(--text-2);}
+        .tab-item.active{background:rgba(59,130,246,0.12);color:var(--blue);border-color:rgba(59,130,246,0.22);}
+        .tab-item .tab-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0;}
+        .tab-count{margin-left:auto;font-size:10px;font-weight:800;background:rgba(255,255,255,0.08);color:var(--text-3);padding:2px 7px;border-radius:99px;}
+        .tab-item.active .tab-count{background:rgba(59,130,246,0.2);color:var(--blue);}
+        .sidebar-divider{height:1px;background:var(--border);margin:1rem 0;}
+        .sort-list{display:flex;flex-direction:column;gap:3px;}
+        .sort-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:9px;font-size:12px;font-weight:700;color:var(--text-3);cursor:pointer;transition:all 0.15s;border:none;background:none;font-family:inherit;text-align:left;width:100%;}
+        .sort-item:hover{background:rgba(255,255,255,0.05);color:var(--text-2);}
+        .sort-item.active{color:var(--gold);}
+        .btn-write{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:0.75rem;background:linear-gradient(135deg,var(--red),var(--red-dark));color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 16px rgba(220,38,38,0.3);margin-bottom:1.25rem;}
+        .btn-write:hover{transform:translateY(-1px);}
+        .board-wrap{min-width:0;}
+        .search-bar{display:flex;gap:8px;margin-bottom:1rem;}
+        .search-input{flex:1;padding:0.7rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-1);font-size:13px;font-family:inherit;outline:none;transition:border-color 0.15s;}
+        .search-input::placeholder{color:var(--text-3);}
+        .search-input:focus{border-color:rgba(59,130,246,0.4);}
+        .btn-search{padding:0.7rem 1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-2);font-size:13px;font-family:inherit;cursor:pointer;}
+        .board-header{display:grid;grid-template-columns:68px 1fr 110px 90px 60px 60px;padding:0.6rem 1rem;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px 10px 0 0;font-size:11px;font-weight:700;color:var(--text-3);letter-spacing:0.05em;}
+        .board-header span{padding:0 6px;text-align:center;}
+        .board-header span:nth-child(2){text-align:left;}
+        .post-list{border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;overflow:hidden;}
+        .post-row{display:grid;grid-template-columns:68px 1fr 110px 90px 60px 60px;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:background 0.12s;}
+        .post-row:last-child{border-bottom:none;}
+        .post-row:hover{background:rgba(255,255,255,0.04);}
+        .post-row>*{padding:0.85rem 6px;display:flex;align-items:center;}
+        .post-row .col-tab{padding-left:1rem;justify-content:flex-start;}
+        .post-row .col-title-cell{min-width:0;}
+        .post-row .col-center{justify-content:center;}
+        .post-tab-badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;white-space:nowrap;}
+        .badge-chat{background:rgba(59,130,246,0.15);color:#60A5FA;}
+        .badge-photo{background:rgba(139,92,246,0.15);color:#A78BFA;}
+        .badge-analysis{background:rgba(245,200,66,0.15);color:#F5C842;}
+        .badge-cheer{background:rgba(220,38,38,0.15);color:#F87171;}
+        .badge-info{background:rgba(34,197,94,0.15);color:#4ADE80;}
+        .post-title-text{font-size:13.5px;font-weight:600;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
+        .post-author{font-size:12px;color:var(--text-2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;}
+        .post-date{font-size:11px;color:var(--text-3);white-space:nowrap;}
+        .post-views{font-size:12px;color:var(--text-3);}
+        .post-likes{font-size:12px;font-weight:800;display:flex;align-items:center;gap:3px;}
+        .post-likes.hot{color:var(--red);} .post-likes.warm{color:var(--gold);} .post-likes.cool{color:var(--text-3);}
+        .post-has-img{display:inline-flex;align-items:center;font-size:10px;color:var(--text-3);margin-left:6px;flex-shrink:0;}
+        .empty-state{padding:4rem 2rem;text-align:center;border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;}
+        .empty-icon{font-size:3rem;margin-bottom:0.75rem;display:block;}
+        .empty-text{font-size:14px;color:var(--text-3);}
+        .pagination{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:1.25rem;}
+        .page-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:700;color:var(--text-3);cursor:pointer;transition:all 0.15s;font-family:inherit;}
+        .page-btn:hover{background:rgba(255,255,255,0.08);color:var(--text-1);}
+        .page-btn.active{background:var(--blue-dark);color:#fff;border-color:transparent;}
+        .page-btn:disabled{opacity:0.35;cursor:not-allowed;}
+        .modal-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:1.25rem;}
+        .modal-overlay.open{display:flex;}
+        .write-modal{width:100%;max-width:640px;max-height:90vh;background:rgba(8,16,32,0.97);border:1px solid var(--border-md);border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,0.6);display:flex;flex-direction:column;overflow:hidden;}
+        .modal-header{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);flex-shrink:0;}
+        .modal-title{font-size:15px;font-weight:900;color:var(--text-1);}
+        .modal-close{background:rgba(255,255,255,0.07);border:none;color:var(--text-3);width:30px;height:30px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-family:inherit;}
+        .modal-close:hover{background:rgba(255,255,255,0.14);color:var(--text-1);}
+        .modal-body{flex:1;overflow-y:auto;padding:1.25rem 1.5rem;scrollbar-width:thin;}
+        .write-tab-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:1.1rem;}
+        .write-tab-btn{padding:8px 4px;border-radius:9px;border:1.5px solid var(--border);background:rgba(255,255,255,0.03);font-size:11px;font-weight:700;color:var(--text-3);cursor:pointer;transition:all 0.15s;font-family:inherit;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px;}
+        .write-tab-btn .wt-icon{font-size:1.1rem;}
+        .write-tab-btn.selected{border-color:var(--blue);background:rgba(59,130,246,0.12);color:var(--blue);}
+        .write-input{width:100%;padding:0.8rem 1rem;margin-bottom:0.75rem;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;color:var(--text-1);font-size:14px;font-family:inherit;outline:none;transition:border-color 0.15s;}
+        .write-input::placeholder{color:var(--text-4);}
+        .write-input:focus{border-color:rgba(59,130,246,0.4);}
+        .write-input.error{border-color:rgba(239,68,68,0.5);}
+        .write-textarea{width:100%;padding:0.9rem 1rem;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;color:var(--text-1);font-size:13px;font-family:inherit;line-height:1.7;resize:vertical;min-height:160px;max-height:320px;outline:none;transition:border-color 0.15s;margin-bottom:0.75rem;}
+        .write-textarea::placeholder{color:var(--text-4);}
+        .write-textarea:focus{border-color:rgba(59,130,246,0.4);}
+        .write-textarea.error{border-color:rgba(239,68,68,0.5);}
+        .image-attach-area{border:1.5px dashed rgba(255,255,255,0.10);border-radius:10px;padding:1rem;margin-bottom:0.75rem;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all 0.15s;}
+        .image-attach-area:hover{border-color:rgba(59,130,246,0.3);background:rgba(59,130,246,0.04);}
+        .image-attach-area .ia-icon{font-size:1.3rem;flex-shrink:0;}
+        .image-attach-area .ia-text{font-size:12px;color:var(--text-3);}
+        .image-attach-area .ia-text strong{color:var(--text-2);font-weight:700;display:block;margin-bottom:1px;}
+        #imageFileInput{display:none;}
+        .image-preview-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:0.75rem;}
+        .image-preview-item{position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+        .image-preview-item img{width:100%;height:100%;object-fit:cover;}
+        .image-remove-btn{position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.65);border:none;color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+        .write-error{font-size:12px;color:#F87171;margin-bottom:0.75rem;display:none;}
+        .write-error.visible{display:block;}
+        .modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;}
+        .btn-cancel{flex:1;padding:0.75rem;background:rgba(255,255,255,0.05);color:var(--text-3);border:1px solid var(--border);border-radius:10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;transition:all 0.15s;}
+        .btn-cancel:hover{background:rgba(255,255,255,0.09);color:var(--text-2);}
+        .btn-submit{flex:2;padding:0.75rem;background:linear-gradient(135deg,var(--red),var(--red-dark));color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;transition:all 0.15s;box-shadow:0 3px 12px rgba(220,38,38,0.3);}
+        .btn-submit:hover{transform:translateY(-1px);}
+        .btn-submit:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+        .detail-modal{width:100%;max-width:680px;max-height:90vh;background:rgba(8,16,32,0.97);border:1px solid var(--border-md);border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,0.6);display:flex;flex-direction:column;overflow:hidden;}
+        .detail-body{flex:1;overflow-y:auto;padding:1.5rem;scrollbar-width:thin;}
+        .detail-tab{margin-bottom:0.75rem;}
+        .detail-title{font-size:1.3rem;font-weight:900;color:var(--text-1);line-height:1.5;margin-bottom:1rem;}
+        .detail-meta{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;padding-bottom:1rem;border-bottom:1px solid var(--border);margin-bottom:1.25rem;}
+        .detail-meta-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-3);}
+        .detail-content{font-size:14px;color:var(--text-2);line-height:1.8;margin-bottom:1.5rem;white-space:pre-wrap;}
+        .detail-images{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.5rem;}
+        .detail-images img{max-width:200px;border-radius:10px;cursor:pointer;border:1px solid var(--border);}
+        .detail-footer-action{display:flex;align-items:center;justify-content:center;gap:12px;padding-top:1rem;border-top:1px solid var(--border);}
+        .btn-like{display:flex;align-items:center;gap:7px;padding:9px 24px;border-radius:99px;background:rgba(220,38,38,0.10);border:1.5px solid rgba(220,38,38,0.25);color:var(--red);font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;transition:all 0.2s;}
+        .btn-like:hover{background:rgba(220,38,38,0.18);}
+        .btn-like.liked{background:var(--red);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(220,38,38,0.4);}
+        @media(max-width:768px){
+          .main-wrap{grid-template-columns:1fr;}
+          .sidebar{position:static;}
+          .tab-list{flex-direction:row;flex-wrap:wrap;gap:4px;}
+          .tab-item{width:auto;flex:1;justify-content:center;font-size:12px;padding:7px 8px;}
+          .board-header,.post-row{grid-template-columns:60px 1fr 80px 0 0 50px;}
+          .post-row .col-date-cell,.post-row .col-views-cell{display:none;}
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <a href="index.html" class="logo-area">
+            <div class="logo-mark"></div>
+            <span class="logo-name">PLACEBALL</span>
+        </a>
+        <div class="header-right">
+            <div class="user-persona-badge" id="headerPersonaBadge">
+                <span class="upb-emoji" id="hpbEmoji">⚾</span>
+                <span id="hpbLabel">유형</span>
+            </div>
+            <div class="user-nick-wrap" id="headerNickWrap">
+                <span class="user-nick" id="headerNick"></span>
+                <span style="color:var(--text-3)">님</span>
+            </div>
+            <a href="index.html" class="btn-header">← 홈으로</a>
+            <button class="btn-header" id="headerLogoutBtn">로그아웃</button>
+        </div>
+    </div>
+</header>
+<div class="page-banner">
+    <div class="banner-inner">
+        <div class="banner-badge">⚾ PLACEBALL COMMUNITY</div>
+        <h1 class="banner-title">커뮤니티</h1>
+        <p class="banner-sub">야구 팬들의 이야기, 인증샷, 분석까지 — 모든 직관 기록을 나눠요</p>
+    </div>
+</div>
+<div class="main-wrap">
+    <aside class="sidebar">
+        <button class="btn-write" id="openWriteBtn">✏️ 글쓰기</button>
+        <div class="sidebar-title">카테고리</div>
+        <div class="tab-list" id="tabList">
+            <button class="tab-item active" data-tab="all"><span class="tab-icon">📋</span> 전체<span class="tab-count" id="cnt-all">0</span></button>
+            <button class="tab-item" data-tab="chat"><span class="tab-icon">💬</span> 잡담<span class="tab-count" id="cnt-chat">0</span></button>
+            <button class="tab-item" data-tab="photo"><span class="tab-icon">📸</span> 사진/인증샷<span class="tab-count" id="cnt-photo">0</span></button>
+            <button class="tab-item" data-tab="analysis"><span class="tab-icon">📊</span> 경기 분석<span class="tab-count" id="cnt-analysis">0</span></button>
+            <button class="tab-item" data-tab="cheer"><span class="tab-icon">🔥</span> 응원/선수<span class="tab-count" id="cnt-cheer">0</span></button>
+            <button class="tab-item" data-tab="info"><span class="tab-icon">📢</span> 정보/팁<span class="tab-count" id="cnt-info">0</span></button>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-title">정렬</div>
+        <div class="sort-list" id="sortList">
+            <button class="sort-item active" data-sort="likes"><span class="sort-icon">🏆</span> 추천순</button>
+            <button class="sort-item" data-sort="date"><span class="sort-icon">🕐</span> 최신순</button>
+            <button class="sort-item" data-sort="views"><span class="sort-icon">👁️</span> 조회순</button>
+        </div>
+    </aside>
+    <section class="board-wrap">
+        <div class="search-bar">
+            <input class="search-input" type="text" id="searchInput" placeholder="제목 또는 작성자 검색...">
+            <button class="btn-search" onclick="renderBoard()">🔍</button>
+        </div>
+        <div class="board-header">
+            <span style="text-align:center;">탭</span>
+            <span>제목</span>
+            <span style="text-align:center;">글쓴이</span>
+            <span style="text-align:center;">날짜</span>
+            <span style="text-align:center;">조회</span>
+            <span style="text-align:center;">추천</span>
+        </div>
+        <div id="postList"></div>
+        <div class="pagination" id="pagination"></div>
+    </section>
+</div>
+<div class="modal-overlay" id="writeOverlay">
+    <div class="write-modal">
+        <div class="modal-header">
+            <span class="modal-title">✏️ 글쓰기</span>
+            <button class="modal-close" onclick="closeWriteModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div style="font-size:11px;font-weight:700;color:var(--text-3);margin-bottom:8px;letter-spacing:0.06em;">카테고리 선택</div>
+            <div class="write-tab-grid">
+                <button class="write-tab-btn" data-tab="chat"     onclick="selectWriteTab(this)"><span class="wt-icon">💬</span>잡담</button>
+                <button class="write-tab-btn" data-tab="photo"    onclick="selectWriteTab(this)"><span class="wt-icon">📸</span>사진/인증샷</button>
+                <button class="write-tab-btn" data-tab="analysis" onclick="selectWriteTab(this)"><span class="wt-icon">📊</span>경기 분석</button>
+                <button class="write-tab-btn" data-tab="cheer"    onclick="selectWriteTab(this)"><span class="wt-icon">🔥</span>응원/선수</button>
+                <button class="write-tab-btn" data-tab="info"     onclick="selectWriteTab(this)"><span class="wt-icon">📢</span>정보/팁</button>
+            </div>
+            <input class="write-input" type="text" id="writeTitle" placeholder="제목을 입력하세요 (최대 60자)" maxlength="60">
+            <textarea class="write-textarea" id="writeContent" placeholder="내용을 입력하세요..."></textarea>
+            <div class="image-attach-area" onclick="document.getElementById('imageFileInput').click()">
+                <span class="ia-icon">🖼️</span>
+                <div class="ia-text"><strong>이미지 첨부 (선택)</strong>JPG, PNG, GIF · 최대 3장</div>
+            </div>
+            <input type="file" id="imageFileInput" accept="image/*" multiple>
+            <div class="image-preview-row" id="imagePreviewRow"></div>
+            <p class="write-error" id="writeError"></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeWriteModal()">취소</button>
+            <button class="btn-submit" id="submitPostBtn">등록하기</button>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="detailOverlay">
+    <div class="detail-modal">
+        <div class="modal-header">
+            <span class="modal-title" id="detailModalTitle">게시글</span>
+            <button class="modal-close" onclick="closeDetailModal()">✕</button>
+        </div>
+        <div class="detail-body">
+            <div class="detail-tab" id="detailTab"></div>
+            <div class="detail-title" id="detailTitle"></div>
+            <div class="detail-meta" id="detailMeta"></div>
+            <div class="detail-content" id="detailContent"></div>
+            <div class="detail-images" id="detailImages"></div>
+            <div class="detail-footer-action">
+                <button class="btn-like" id="detailLikeBtn" onclick="toggleLike()">
+                    <span>👍</span><span id="detailLikeCount">0</span><span>추천</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="js/community.js"></script>
+</body>
+</html>

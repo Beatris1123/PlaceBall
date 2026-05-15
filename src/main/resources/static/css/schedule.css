@@ -1,0 +1,415 @@
+/* ============================================================
+   PLACEBALL - schedule.css  (index.html 다크 테마 통일)
+   ============================================================ */
+
+:root {
+  --kia: #EF4444;
+  --kia-dark: #B91C1C;
+  --lg: #3B82F6;
+  --lg-dark: #1D4ED8;
+  --surface: rgba(10,18,30,0.72);
+  --surface-2: rgba(8,14,24,0.60);
+  --border: rgba(255,255,255,0.08);
+  --border-md: rgba(255,255,255,0.14);
+  --text-1: #F1F5F9;
+  --text-2: #CBD5E1;
+  --text-3: #64748B;
+  --green: #22C55E;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.25);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.3);
+  --radius: 1rem;
+  --radius-lg: 1.5rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #060D1A;
+  color: var(--text-1);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* 배경 일러스트와 동일한 다크 오버레이 */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    linear-gradient(180deg, rgba(6,13,26,0.72) 0%, rgba(6,13,26,0.45) 40%, rgba(6,13,26,0.55) 100%),
+    radial-gradient(ellipse 60% 30% at 28% 80%, rgba(220,38,38,0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 30% at 72% 80%, rgba(29,78,216,0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(0,60,30,0.45) 0%, transparent 65%),
+    linear-gradient(180deg, #060D1A 0%, #0A1628 60%, #071A0F 100%);
+  pointer-events: none;
+}
+
+.site-header, .schedule-main, .page-banner { position: relative; z-index: 1; }
+
+/* ── 헤더 (index.html 완전 동일) ── */
+.site-header {
+  background: rgba(6,13,26,0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 4px 24px rgba(0,0,0,0.4);
+}
+.header-inner {
+  max-width: 1440px; margin: 0 auto; padding: 0 2rem;
+  height: 72px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center; gap: 1.5rem;
+}
+
+/* 로고 */
+.logo-area {
+  display: flex; align-items: center; gap: 0.75rem;
+  text-decoration: none;
+}
+.logo-mark {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: #FFFFFF;
+  border: 1.5px solid rgba(220,38,38,0.2);
+  box-shadow: 0 2px 8px rgba(220,38,38,0.12);
+  position: relative; flex-shrink: 0; overflow: hidden;
+}
+.logo-mark::before {
+  content: '';
+  position: absolute;
+  width: 24px; height: 48px;
+  left: 3px; top: -4px;
+  border: 2.5px solid transparent;
+  border-right-color: var(--kia);
+  border-radius: 50%;
+  transform: rotate(14deg);
+}
+.logo-mark::after {
+  content: '';
+  position: absolute;
+  width: 24px; height: 48px;
+  right: 3px; top: -4px;
+  border: 2.5px solid transparent;
+  border-left-color: var(--kia);
+  border-radius: 50%;
+  transform: rotate(-14deg);
+}
+.logo-text { display: flex; flex-direction: column; line-height: 1; }
+.logo-title {
+  font-family: 'Bebas Neue', 'Noto Sans KR', sans-serif;
+  font-size: 1.6rem; letter-spacing: 0.06em; color: var(--text-1);
+}
+.logo-sub {
+  font-size: 9px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--text-3); font-weight: 700;
+}
+
+/* 헤더 스코어보드 */
+.header-score {
+  display: flex; align-items: center; gap: 1.25rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 2rem; padding: 0.5rem 1.25rem;
+}
+.score-team { display: flex; align-items: center; gap: 0.6rem; }
+.score-team-badge {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 900; color: #fff;
+}
+.score-team-name { font-size: 12px; font-weight: 800; color: var(--text-2); letter-spacing: -0.02em; }
+.score-num {
+  font-family: 'Bebas Neue', 'Noto Sans KR', sans-serif;
+  font-size: 2rem; letter-spacing: -0.02em; line-height: 1;
+}
+.score-mid { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.live-pill {
+  font-size: 9px; font-weight: 900;
+  background: var(--green); color: #fff;
+  padding: 2px 7px; border-radius: 99px;
+  letter-spacing: 0.1em;
+  animation: pulse-live 2s ease-in-out infinite;
+}
+.score-inning { font-size: 9px; color: var(--text-3); font-weight: 700; }
+
+/* 헤더 우측 */
+.header-right { display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; }
+.btn-login {
+  padding: 8px 20px; background: var(--kia); color: #fff;
+  border: none; border-radius: 10px; font-weight: 700; font-size: 13px;
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.btn-login:hover { background: var(--kia-dark); transform: translateY(-1px); }
+.btn-logout {
+  padding: 6px 14px; background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14); border-radius: 8px;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  font-family: inherit; color: var(--text-2); transition: all 0.15s;
+}
+.btn-logout:hover { background: rgba(255,255,255,0.14); }
+.user-info { display: flex; align-items: center; gap: 10px; }
+.welcome-text { font-size: 13px; font-weight: 600; color: var(--text-2); }
+.nickname { color: var(--lg); font-weight: 800; }
+
+/* ── 배너 ── */
+.page-banner { padding: 3rem 2rem 2rem; text-align: center; }
+.banner-inner { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
+.banner-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: var(--text-1); font-size: 12px; font-weight: 700;
+  padding: 5px 16px; border-radius: 999px;
+  backdrop-filter: blur(8px);
+}
+.banner-title {
+  font-family: 'Bebas Neue', 'Noto Sans KR', sans-serif;
+  font-size: 3rem; letter-spacing: 0.06em; color: var(--text-1);
+  text-shadow: 0 2px 16px rgba(0,0,0,0.4);
+}
+.banner-sub { font-size: 14px; color: var(--text-3); font-weight: 500; }
+
+/* ── 메인 래퍼 ── */
+.schedule-main {
+  max-width: 1440px; margin: 0 auto;
+  padding: 0 2rem 5rem;
+}
+
+/* ── 월 네비 ── */
+.month-nav-wrap { display: flex; justify-content: center; margin-bottom: 1rem; }
+.month-nav {
+  display: flex; align-items: center; gap: 0.85rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 999px; padding: 6px 8px;
+  backdrop-filter: blur(12px);
+}
+.month-label { font-size: 1rem; font-weight: 900; color: var(--text-1); min-width: 120px; text-align: center; }
+.month-arrow {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: 1px solid var(--border);
+  cursor: pointer; font-size: 1.2rem; color: var(--text-2);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s; font-family: inherit;
+}
+.month-arrow:hover { background: rgba(255,255,255,0.15); transform: scale(1.08); }
+
+/* ── 팀 필터 ── */
+.team-filter-wrap { display: flex; justify-content: center; margin-bottom: 1.5rem; }
+.team-filter {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 0.65rem 0.9rem;
+  backdrop-filter: blur(20px); justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+.team-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05); font-size: 12px; font-weight: 700;
+  color: var(--text-2); cursor: pointer; font-family: inherit; transition: all .2s;
+}
+.team-btn:hover { border-color: rgba(59,130,246,0.4); background: rgba(59,130,246,0.1); color: #93c5fd; }
+.team-btn.active { background: var(--lg); color: #fff; border-color: var(--lg); }
+.team-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+/* ── 콘텐츠 그리드 ── */
+.content-grid {
+  display: grid; grid-template-columns: 275px 1fr;
+  gap: 1.25rem; align-items: start;
+}
+
+/* ── 사이드바 카드 ── */
+.calendar-aside { display: flex; flex-direction: column; gap: 1rem; }
+
+.mini-calendar,
+.today-card,
+.standings-mini {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.1rem 1.2rem;
+  backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* 미니 캘린더 */
+.cal-header { font-size: 13px; font-weight: 900; color: var(--text-1); text-align: center; margin-bottom: 0.7rem; }
+.cal-weekdays {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  text-align: center; font-size: 10px; font-weight: 700; color: var(--text-3);
+  margin-bottom: 0.35rem;
+}
+.cal-weekdays .sun { color: var(--kia); }
+.cal-weekdays .sat { color: var(--lg); }
+.cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-day {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: var(--text-2);
+  border-radius: 8px; cursor: pointer; transition: all .15s; position: relative;
+}
+.cal-day:hover { background: rgba(59,130,246,0.15); color: #93c5fd; }
+.cal-day.today { background: var(--lg); color: #fff !important; font-weight: 900; }
+.cal-day.selected { background: rgba(59,130,246,0.2); color: #93c5fd; font-weight: 800; }
+.cal-day.has-game::after {
+  content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 4px; background: #F59E0B; border-radius: 50%;
+}
+.cal-day.today::after { background: #fff; }
+.cal-day.empty { cursor: default; }
+.cal-day.sun-col { color: var(--kia); }
+.cal-day.sat-col { color: var(--lg); }
+
+/* 오늘의 경기 */
+.today-card-header {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 0.8rem;
+  font-size: 13px; font-weight: 800; color: var(--text-1);
+}
+.today-label { flex: 1; }
+.live-badge {
+  background: var(--kia); color: #fff;
+  font-size: 9px; font-weight: 900;
+  padding: 2px 7px; border-radius: 99px;
+  animation: pulse-live 2s infinite;
+}
+.today-game-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 10px; background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border); border-radius: 8px;
+  margin-bottom: 6px; font-size: 12px;
+}
+.tg-teams { font-weight: 700; color: var(--text-2); }
+.tg-time  { font-size: 11px; color: var(--text-3); font-weight: 600; }
+.tg-score { font-weight: 900; color: var(--lg); font-size: 13px; }
+.no-game-today { text-align: center; color: var(--text-3); font-size: 12px; padding: 0.85rem 0; }
+
+/* 순위표 */
+.standings-header {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 800; color: var(--text-1); margin-bottom: 0.7rem;
+}
+.standing-row {
+  display: grid; grid-template-columns: 20px 1fr 36px 40px;
+  align-items: center; gap: 4px;
+  padding: 5px 2px; border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.standing-row:last-child { border-bottom: none; }
+.st-rank { font-weight: 900; color: var(--text-3); text-align: center; }
+.st-rank.top3 { color: #F59E0B; }
+.st-team { font-weight: 700; color: var(--text-1); }
+.st-stat { text-align: center; color: var(--text-3); font-weight: 600; }
+.st-pct  { text-align: right; color: var(--lg); font-weight: 800; }
+
+/* ── 경기 목록 ── */
+.games-section { display: flex; flex-direction: column; gap: 0.85rem; }
+
+/* 탭 */
+.game-tabs {
+  display: flex; gap: 4px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 4px;
+  backdrop-filter: blur(20px); width: fit-content;
+  box-shadow: var(--shadow-sm);
+}
+.tab-btn {
+  padding: 7px 22px; border-radius: 8px; border: none;
+  background: transparent; font-size: 13px; font-weight: 700;
+  color: var(--text-3); cursor: pointer; font-family: inherit; transition: all .2s;
+}
+.tab-btn:hover  { background: rgba(255,255,255,0.07); color: var(--text-1); }
+.tab-btn.active { background: var(--lg); color: #fff; box-shadow: 0 2px 6px rgba(29,78,216,.4); }
+
+/* 날짜 구분자 */
+.date-divider { display: flex; align-items: center; gap: 0.7rem; margin: 0.6rem 0 0.35rem; }
+.date-divider-text { font-size: 13px; font-weight: 800; color: var(--text-2); white-space: nowrap; }
+.date-divider-line { flex: 1; height: 1px; background: var(--border); }
+.date-divider-badge {
+  background: rgba(255,255,255,0.08); color: var(--text-3);
+  font-size: 10px; font-weight: 800; padding: 2px 10px;
+  border-radius: 99px; border: 1px solid var(--border);
+}
+
+/* 경기 카드 */
+.game-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.1rem 1.4rem;
+  backdrop-filter: blur(20px);
+  display: grid; grid-template-columns: 1fr auto 1fr auto;
+  align-items: center; gap: 0.85rem;
+  transition: all .2s; cursor: pointer;
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.06);
+  animation: fadeSlideIn .25s ease both;
+}
+.game-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-md);
+}
+.game-card.is-live {
+  border-color: rgba(239,68,68,0.35);
+  background: rgba(30,10,10,0.75);
+}
+
+/* 팀 블록 */
+.team-block { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; }
+.team-block.home { align-items: flex-end; }
+.team-block.away { align-items: flex-start; }
+.team-logo-wrap {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; font-weight: 900; color: #fff;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+}
+.team-name-full { font-size: 12px; font-weight: 800; color: var(--text-2); }
+
+/* 스코어 중앙 */
+.score-center { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 110px; }
+.score-display { display: flex; align-items: center; gap: 10px; }
+.score-num { font-family: 'Bebas Neue', 'Noto Sans KR', sans-serif; font-size: 2.4rem; font-weight: 900; color: var(--text-1); line-height: 1; }
+.score-sep { font-size: 1.1rem; color: var(--border-md); font-weight: 300; }
+.game-status-badge { font-size: 10px; font-weight: 900; padding: 3px 10px; border-radius: 99px; }
+.badge-live     { background: rgba(239,68,68,0.15); color: var(--kia); border: 1px solid rgba(239,68,68,0.3); animation: pulse-live 2s infinite; }
+.badge-upcoming { background: rgba(29,78,216,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+.badge-finished { background: rgba(22,163,74,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
+.game-time  { font-size: 12px; color: var(--text-3); font-weight: 700; }
+.game-venue { font-size: 11px; color: var(--text-3); font-weight: 500; }
+.inning-info { font-size: 12px; font-weight: 700; color: var(--text-2); }
+
+/* 우측 날씨 */
+.game-extra { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 36px; }
+.weather-info { font-size: 1.1rem; }
+
+/* 빈 상태 */
+.empty-state {
+  text-align: center; padding: 4rem 2rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); backdrop-filter: blur(20px);
+}
+.empty-icon { font-size: 3rem; display: block; margin-bottom: 0.75rem; }
+.empty-state p { color: var(--text-3); font-weight: 700; font-size: 14px; }
+
+/* ── 애니메이션 ── */
+@keyframes pulse-live { 0%,100%{opacity:1} 50%{opacity:0.6} }
+@keyframes fadeSlideIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── 반응형 ── */
+@media (max-width: 1000px) {
+  .content-grid { grid-template-columns: 1fr; }
+  .calendar-aside { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .game-card { grid-template-columns: 1fr auto 1fr; }
+  .game-extra { display: none; }
+  .header-score { display: none; }
+}
+@media (max-width: 640px) {
+  .banner-title { font-size: 2rem; }
+  .team-filter { gap: 0.3rem; }
+  .team-btn { padding: 5px 10px; font-size: 11px; }
+  .calendar-aside { grid-template-columns: 1fr; }
+  .header-inner { padding: 0 1rem; }
+}

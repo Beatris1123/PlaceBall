@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLACEBALL - 로그인</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: #060D1A;
+      position: relative; overflow-x: hidden;
+    }
+    .bg-layer {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 100%, rgba(220,38,38,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 60% at 50% 100%, rgba(29,78,216,0.14) 0%, transparent 60%),
+        linear-gradient(180deg, #03070F 0%, #060D1F 40%, #0A1628 100%);
+    }
+    .stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .star  { position: absolute; border-radius: 50%; background: white; animation: twinkle 3s ease-in-out infinite; }
+    @keyframes twinkle { 0%,100%{opacity:0.6} 50%{opacity:0.15} }
+
+    .page-wrap {
+      position: relative; z-index: 2;
+      width: 100%; max-width: 480px;
+      margin: 0 auto; padding: 2rem 1rem;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 1.25rem;
+    }
+
+    /* ─── 로고 ─── */
+    .logo-row { display: flex; align-items: center; gap: 0.75rem; }
+    .logo-mark {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: #fff; border: 2px solid rgba(220,38,38,0.4);
+      box-shadow: 0 0 20px rgba(220,38,38,0.3);
+      position: relative; overflow: hidden; flex-shrink: 0;
+    }
+    .logo-mark::before {
+      content: ''; position: absolute; width: 24px; height: 50px; left: 4px; top: -4px;
+      border: 2.5px solid transparent; border-right-color: #DC2626; border-radius: 50%; transform: rotate(14deg);
+    }
+    .logo-mark::after {
+      content: ''; position: absolute; width: 24px; height: 50px; right: 4px; top: -4px;
+      border: 2.5px solid transparent; border-left-color: #DC2626; border-radius: 50%; transform: rotate(-14deg);
+    }
+    .logo-name { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.08em; color: #F1F5F9; }
+    .logo-sub  { font-size: 10px; color: #64748B; letter-spacing: 0.2em; text-transform: uppercase; }
+
+    /* ─── 카드 ─── */
+    .auth-card {
+      width: 100%;
+      background: rgba(10,18,30,0.82);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 24px;
+      padding: 2rem 1.75rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .card-greeting {
+      font-size: 1.25rem; font-weight: 900; color: #F1F5F9;
+      text-align: center; margin-bottom: 1.75rem;
+    }
+
+    /* ─── 입력 ─── */
+    .input-group { margin-bottom: 0.9rem; }
+    .input-label { font-size: 11px; font-weight: 700; color: #94A3B8; margin-bottom: 5px; letter-spacing: 0.06em; display: block; }
+    .input-field {
+      width: 100%; padding: 0.8rem 1rem;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 12px; color: #F1F5F9; font-size: 14px; font-family: inherit;
+      outline: none; transition: all 0.15s;
+    }
+    .input-field::placeholder { color: #475569; }
+    .input-field:focus {
+      border-color: rgba(59,130,246,0.5); background: rgba(59,130,246,0.07);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+
+    /* ─── 성향 테스트 버튼 ─── */
+    .persona-section { margin: 0.25rem 0 1.1rem; }
+    .persona-toggle-btn {
+      width: 100%; padding: 0.75rem 1rem;
+      background: rgba(245,200,66,0.06);
+      border: 1.5px dashed rgba(245,200,66,0.30);
+      border-radius: 12px;
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; transition: all 0.2s;
+      font-family: inherit; text-align: left;
+    }
+    .persona-toggle-btn:hover {
+      background: rgba(245,200,66,0.11);
+      border-color: rgba(245,200,66,0.5);
+    }
+    .persona-toggle-btn.done {
+      border-style: solid;
+      background: rgba(34,197,94,0.07);
+      border-color: rgba(34,197,94,0.35);
+    }
+    .pt-icon  { font-size: 1.2rem; flex-shrink: 0; }
+    .pt-body  { flex: 1; }
+    .pt-title { font-size: 12px; font-weight: 800; color: #FDE68A; display: block; line-height: 1.4; }
+    .pt-desc  { font-size: 10px; color: #64748B; display: block; margin-top: 1px; }
+    .persona-toggle-btn.done .pt-title { color: #86EFAC; }
+    .pt-arrow { font-size: 14px; color: #F5C842; flex-shrink: 0; }
+    .persona-toggle-btn.done .pt-arrow { color: #4ADE80; }
+
+    /* 칭호 미리보기 */
+    .title-preview {
+      display: none; align-items: center; gap: 8px;
+      margin-top: 8px; padding: 8px 12px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 9px; border: 1px solid rgba(255,255,255,0.07);
+    }
+    .title-preview.visible { display: flex; }
+    .title-preview-label { font-size: 10px; color: #64748B; }
+    .title-preview-value {
+      font-size: 12px; font-weight: 800;
+      padding: 2px 10px; border-radius: 99px; border: 1.5px solid;
+    }
+    .title-preview-change {
+      font-size: 10px; color: #64748B; cursor: pointer;
+      margin-left: auto; text-decoration: underline;
+      background: none; border: none; font-family: inherit;
+    }
+    .title-preview-change:hover { color: #94A3B8; }
+
+    /* ─── 에러 ─── */
+    .error-text {
+      font-size: 12px; font-weight: 700; color: #EF4444;
+      text-align: center; margin-bottom: 0.75rem; display: none;
+    }
+    .error-text.visible { display: block; }
+
+    /* ─── 버튼 ─── */
+    .btn-primary {
+      width: 100%; padding: 0.9rem; background: #1D4ED8; color: #fff;
+      border: none; border-radius: 12px; font-size: 15px; font-weight: 800;
+      font-family: inherit; cursor: pointer; transition: all 0.15s;
+      box-shadow: 0 4px 16px rgba(29,78,216,0.35); margin-bottom: 0.5rem;
+    }
+    .btn-primary:hover { background: #1E40AF; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-secondary {
+      width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); color: #94A3B8;
+      border: 1px solid rgba(255,255,255,0.10); border-radius: 12px;
+      font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.09); color: #F1F5F9; }
+    .divider { display: flex; align-items: center; gap: 10px; margin: 1rem 0 0.75rem; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
+    .divider span { font-size: 11px; color: #475569; white-space: nowrap; }
+
+    /* ══════════════════════════════
+       성향 테스트 모달
+    ══════════════════════════════ */
+    .quiz-overlay {
+      display: none; position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.80); backdrop-filter: blur(14px);
+      align-items: center; justify-content: center; padding: 1.25rem;
+    }
+    .quiz-overlay.open { display: flex; }
+    .quiz-modal {
+      width: 100%; max-width: 540px; max-height: 88vh;
+      background: rgba(6,13,26,0.98);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 22px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    /* 모달 헤더 */
+    .qm-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.4rem;
+      border-bottom: 1px solid rgba(255,255,255,0.07); flex-shrink: 0;
+    }
+    .qm-title { font-size: 14px; font-weight: 900; color: #F1F5F9; }
+    .qm-close {
+      background: rgba(255,255,255,0.07); border: none; color: #64748B;
+      width: 28px; height: 28px; border-radius: 50%; font-size: 1rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .qm-close:hover { background: rgba(255,255,255,0.13); color: #F1F5F9; }
+
+    /* 진행 바 */
+    .qm-progress { padding: 0.9rem 1.4rem 0; flex-shrink: 0; }
+    .qm-progress-bar { height: 3px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; }
+    .qm-progress-fill {
+      height: 100%; background: linear-gradient(90deg, #DC2626, #F5C842);
+      border-radius: 99px; transition: width 0.35s ease; width: 0%;
+    }
+    .qm-progress-num { font-size: 10px; font-weight: 700; color: #64748B; text-align: right; margin-top: 5px; }
+
+    /* 질문 본문 */
+    .qm-body { flex: 1; overflow-y: auto; padding: 1.25rem 1.4rem 1.4rem; scrollbar-width: thin; }
+
+    .quiz-slide { display: none; }
+    .quiz-slide.active { display: block; animation: qSlide 0.22s ease; }
+    @keyframes qSlide { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:none} }
+
+    .q-num  { font-size: 10px; font-weight: 700; color: #64748B; letter-spacing: 1px; margin-bottom: 7px; }
+    .q-text { font-size: 16px; font-weight: 800; color: #F1F5F9; line-height: 1.5; margin-bottom: 1.1rem; }
+
+    .choice-list { display: flex; flex-direction: column; gap: 8px; }
+    .choice-item {
+      display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px;
+      background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 12px; cursor: pointer; transition: all 0.16s;
+      font-family: inherit; text-align: left; color: #CBD5E1; font-size: 13px;
+      line-height: 1.5; width: 100%;
+    }
+    .choice-item:hover { background: rgba(29,78,216,0.12); border-color: rgba(59,130,246,0.38); color: #F1F5F9; transform: translateX(3px); }
+    .choice-item.selected { background: rgba(245,200,66,0.09); border-color: rgba(245,200,66,0.42); color: #F1F5F9; }
+    .choice-label {
+      width: 22px; height: 22px; border-radius: 50%; background: #1D4ED8; color: #fff;
+      font-size: 11px; font-weight: 900; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+    .choice-item:nth-child(2) .choice-label { background: #374151; }
+
+    /* 결과 화면 */
+    .quiz-result { display: none; text-align: center; }
+    .quiz-result.show { display: block; animation: qSlide 0.3s ease; }
+    .r-emoji { font-size: 5rem; line-height: 1; margin-bottom: 0.6rem; }
+    .r-name  { font-size: 1.5rem; font-weight: 900; color: #F1F5F9; margin-bottom: 0.5rem; }
+    .r-desc  { font-size: 12.5px; color: #94A3B8; line-height: 1.7; margin-bottom: 1rem; }
+    .r-quote {
+      background: rgba(255,255,255,0.04); border-left: 3px solid #F5C842;
+      border-radius: 0 9px 9px 0; padding: 9px 13px;
+      font-size: 12px; color: #FDE68A; font-style: italic;
+      text-align: left; margin-bottom: 1.25rem;
+    }
+    .r-title-card {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 20px; border-radius: 12px; margin-bottom: 1.5rem; border: 1.5px solid;
+    }
+    .r-title-card .rtc-label { font-size: 11px; color: #64748B; }
+    .r-title-card .rtc-title { font-size: 14px; font-weight: 900; }
+
+    .btn-apply {
+      width: 100%; padding: 0.9rem;
+      background: linear-gradient(135deg, #DC2626, #1D4ED8);
+      color: #fff; border: none; border-radius: 12px;
+      font-size: 14px; font-weight: 800; font-family: inherit;
+      cursor: pointer; transition: all 0.15s;
+      box-shadow: 0 4px 18px rgba(220,38,38,0.32);
+    }
+    .btn-apply:hover { transform: translateY(-1px); }
+  </style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="stars" id="stars"></div>
+
+<div class="page-wrap">
+  <!-- 로고 -->
+  <div class="logo-row">
+    <div class="logo-mark"></div>
+    <div>
+      <div class="logo-name">PLACEBALL</div>
+      <div class="logo-sub">Ballpark Battle Community</div>
+    </div>
+  </div>
+
+  <!-- 카드 -->
+  <div class="auth-card">
+    <div class="card-greeting">환영합니다!</div>
+
+    <!-- 성향 테스트 버튼 -->
+    <div class="persona-section">
+      <button class="persona-toggle-btn" id="personaToggleBtn" onclick="openQuiz()">
+        <span class="pt-icon">⚾</span>
+        <span class="pt-body">
+          <span class="pt-title">야구장 부캐 성향 테스트 <span style="color:#64748B;font-weight:600;">(선택)</span></span>
+          <span class="pt-desc">완료하면 닉네임 옆에 칭호가 부여됩니다</span>
+        </span>
+        <span class="pt-arrow" id="ptArrow">→</span>
+      </button>
+      <!-- 칭호 미리보기 -->
+      <div class="title-preview" id="titlePreview">
+        <span class="title-preview-label">내 칭호</span>
+        <span class="title-preview-value" id="titlePreviewVal"></span>
+        <button class="title-preview-change" onclick="retakeQuiz()">다시 하기</button>
+      </div>
+    </div>
+
+    <!-- 아이디 -->
+    <div class="input-group">
+      <label class="input-label">아이디</label>
+      <input class="input-field" type="text" id="loginId" placeholder="아이디를 입력하세요" autocomplete="username">
+    </div>
+
+    <!-- 비밀번호 -->
+    <div class="input-group">
+      <label class="input-label">비밀번호</label>
+      <input class="input-field" type="password" id="loginPw" placeholder="비밀번호를 입력하세요" autocomplete="current-password">
+    </div>
+
+    <p class="error-text" id="loginError"></p>
+
+    <button class="btn-primary" id="loginSubmitBtn">로그인</button>
+    <div class="divider"><span>또는</span></div>
+    <button class="btn-secondary" id="signupBtn">회원가입</button>
+  </div>
+</div>
+
+<!-- 성향 테스트 모달 -->
+<div class="quiz-overlay" id="quizOverlay">
+  <div class="quiz-modal">
+    <div class="qm-header">
+      <span class="qm-title">⚾ 나의 야구장 부캐 찾기</span>
+      <button class="qm-close" onclick="closeQuiz()">✕</button>
+    </div>
+    <div class="qm-progress">
+      <div class="qm-progress-bar"><div class="qm-progress-fill" id="qFill"></div></div>
+      <div class="qm-progress-num" id="qNum">0 / 12</div>
+    </div>
+    <div class="qm-body">
+      <div id="quizSlides">
+        <div class="quiz-slide active" data-q="0"><div class="q-num">Q1 / 12</div><div class="q-text">야구장 도착 시간은?</div><div class="choice-list"><button class="choice-item" onclick="qAnswer(0,'A')"><span class="choice-label">A</span>경기 시작 1~2시간 전! 선수 연습도 봐야지.</button><button class="choice-item" onclick="qAnswer(0,'B')"><span class="choice-label">B</span>경기 직전 혹은 조금 늦게. 먹거리 사느라 바쁨.</button></div></div>
+        <div class="quiz-slide" data-q="1"><div class="q-num">Q2 / 12</div><div class="q-text">좌석을 예매할 때 기준은?</div><div class="choice-list"><button class="choice-item" onclick="qAnswer(1,'A')"><span class="choice-label">A</span>응원단상 앞! 무조건 일어나서 응원해야 함.</button><button class="choice-item" onclick="qAnswer(1,'B')"><span class="choice-label">B</span>뷰가 잘 보이는 중앙석 혹은 테이블석.</button></div></div>
+        <div class="quiz-slide" data-q="2"><div class="q-num">Q3 / 12</div><div class="q-text">경기 중 내 시선은 주로 어디에?</div><div class="choice-list"><button class="choice-item" onclick="qAnswer(2,'A')"><span class="choice-label">A</span>투수의 구종과 타자의 타격 폼.</button><button class="choice-item" onclick="qAnswer(2,'B')"><span class="choice-label">B</span>전광판에 잡히는 이벤트와 응원단.</button></div></div>
+        <div class="quiz-slide" data-q="3"><div class="q-num">Q4 / 12</div><div class="q-text">야구장의 꽃, 먹거리는?</div><div class="choice-list"><button class="choice-item" onclick="qAnswer(3,'A')"><span class="choice-label">A</span>경기에 집중해야 하니 간단한 간식 위주.</button><button class="choice-item" onclick="qAnswer(3,'B')"><span class="choice-label">B</span>이미 맛집 리스트 다 뽑아옴. 먹으러 옴.</button></div></div>
+        <div class="quiz-slide" data-q="4"><div class="q-num">Q5 / 12</div><div class="q-text">우리 팀이 역전패를 당했다면?</div><div class="choice-list"><button class="choice-item" onclick="qAnswer(4,'A')"><span class="choice-label">A</span>집 가는 내내 하이라이트 복기하며 분석. 분노.</button><button class="choice-item" onclick="qAnswer(4,'B')"><span class="choice-label">B</span>"내일은 이기겠지~" 맛있는 거 먹으러 감.</button></div></div>
+        <div class="quiz-slide" data-q="5"><div class="q-num">Q6 / 12</div><div class="q-text">직관 인증샷은 어떻게 찍나?</div><div class="choice-list"><button class="choice-item" onclick="qAnswer(5,'A')"><span class="choice-label">A</span>점수판이나 경기 장면 위주로 한두 장.</button><button class="choice-item" onclick="qAnswer(5,'B')"><span class="choice-label">B</span>유니폼 입은 내 모습과 예쁜 음식 사진 필수.</button></div></div>
+        <div class="quiz-slide" data-q="6"><div class="q-num">Q7 / 12</div><div class="q-text">모르는 사람과 응원가 떼창하기</div><div class="choice-list"><button class="choice-item" onclick="qAnswer(6,'A')"><span class="choice-label">A</span>처음 봐도 하이파이브 가능! 이미 축제 분위기.</button><button class="choice-item" onclick="qAnswer(6,'B')"><span class="choice-label">B</span>조금 부끄럽지만 박수는 열심히 침.</button></div></div>
+        <div class="quiz-slide" data-q="7"><div class="q-num">Q8 / 12</div><div class="q-text">유니폼 마킹은 누구로?</div><div class="choice-list"><button class="choice-item" onclick="qAnswer(7,'A')"><span class="choice-label">A</span>실력 좋은 에이스나 베테랑 선수.</button><button class="choice-item" onclick="qAnswer(7,'B')"><span class="choice-label">B</span>외모가 훈훈하거나 요즘 뜨는 라이징 스타.</button></div></div>
+        <div class="quiz-slide" data-q="8"><div class="q-num">Q9 / 12</div><div class="q-text">경기 중 비가 오기 시작한다면?</div><div class="choice-list"><button class="choice-item" onclick="qAnswer(8,'A')"><span class="choice-label">A</span>우천 취소 안 돼! 우비 입고 끝까지 자리를 지킴.</button><button class="choice-item" onclick="qAnswer(8,'B')"><span class="choice-label">B</span>"오히려 좋아." 바로 근처 술집으로 대피.</button></div></div>
+        <div class="quiz-slide" data-q="9"><div class="q-num">Q10 / 12</div><div class="q-text">심판의 애매한 판정이 나왔을 때</div><div class="choice-list"><button class="choice-item" onclick="qAnswer(9,'A')"><span class="choice-label">A</span>(벌떡) "그게 왜 스트라이크야!" 소리 지름.</button><button class="choice-item" onclick="qAnswer(9,'B')"><span class="choice-label">B</span>"음... 그런가?" 옆 사람한테 물어봄.</button></div></div>
+        <div class="quiz-slide" data-q="10"><div class="q-num">Q11 / 12</div><div class="q-text">야구장에 들고 가는 짐의 양은?</div><div class="choice-list"><button class="choice-item" onclick="qAnswer(10,'A')"><span class="choice-label">A</span>글러브, 기록지 등 장비가 가득한 가방.</button><button class="choice-item" onclick="qAnswer(10,'B')"><span class="choice-label">B</span>가벼운 몸과 티켓, 그리고 지갑.</button></div></div>
+        <div class="quiz-slide" data-q="11"><div class="q-num">Q12 / 12</div><div class="q-text">경기 종료 후 나의 상태는?</div><div class="choice-list"><button class="choice-item" onclick="qAnswer(11,'A')"><span class="choice-label">A</span>목이 쉬어서 말이 안 나옴.</button><button class="choice-item" onclick="qAnswer(11,'B')"><span class="choice-label">B</span>배가 너무 불러서 움직이기 힘듦.</button></div></div>
+      </div>
+
+      <!-- 결과 화면 -->
+      <div class="quiz-result" id="quizResult">
+        <div class="r-emoji" id="rEmoji"></div>
+        <div class="r-name"  id="rName"></div>
+        <div class="r-desc"  id="rDesc"></div>
+        <div class="r-quote" id="rQuote"></div>
+        <div class="r-title-card" id="rTitleCard">
+          <span class="rtc-label">✨ 부여될 칭호</span>
+          <span class="rtc-title" id="rTitleText"></span>
+        </div>
+        <button class="btn-apply" id="applyBtn">이 칭호 적용하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/login.js"></script>
+</body>
+</html>

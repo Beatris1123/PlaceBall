@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>나의 야구장 부캐 찾기</title>
+  <style>
+    body { font-family: 'Noto Sans KR', sans-serif; background: transparent; color: #fff; text-align: center; padding: 2rem; margin: 0; }
+    .question-box { background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 16px; margin-bottom: 2rem; }
+    h2 { margin-bottom: 1.5rem; font-size: 1.2rem; line-height: 1.4; }
+    .btn-answer { display: block; width: 100%; padding: 1rem; margin-bottom: 1rem; background: rgba(59,130,246,0.2); border: 1px solid rgba(59,130,246,0.5); color: #fff; border-radius: 12px; cursor: pointer; transition: 0.2s; font-size: 1rem; word-break: keep-all; }
+    .btn-answer:hover { background: rgba(59,130,246,0.5); transform: translateY(-2px); }
+    #result-box { display: none; }
+    .progress-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 2rem; overflow: hidden; }
+    .progress-fill { height: 100%; background: #3B82F6; width: 0%; transition: width 0.3s; }
+    .q-number { font-size: 0.9rem; color: #94A3B8; margin-bottom: 0.5rem; display: block; }
+  </style>
+</head>
+<body>
+
+<div id="quiz-box">
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <div class="question-box">
+    <span class="q-number" id="q-num"></span>
+    <h2 id="q-text">질문 로딩중...</h2>
+    <button class="btn-answer" onclick="selectAnswer('A')"></button>
+    <button class="btn-answer" onclick="selectAnswer('B')"></button>
+  </div>
+</div>
+
+<div id="result-box" class="question-box">
+  <h2>🎉 당신의 야구장 부캐는?</h2>
+  <div style="font-size: 4rem; margin-bottom: 1rem;" id="res-emoji">⚾</div>
+  <h1 id="res-title" style="color: #FDE68A; margin-bottom: 0.5rem;"></h1>
+  <p id="res-desc" style="color: #94A3B8; line-height: 1.6; word-break: keep-all;"></p>
+  <button class="btn-answer" style="margin-top: 2rem; background: #DC2626; border:none; font-weight: bold;" onclick="finishQuiz()">결과 저장하고 닫기</button>
+</div>
+
+<script>
+  /**
+   * personality.js의 PERSONALITY_MAP과 동일한 이름/이모지/키를 사용합니다.
+   * 'zen' 타입을 'relaxed'로 통일합니다.
+   */
+
+  // 12개 질문 데이터 — 'zen' 타입을 'relaxed'로 변경
+  const questions = [
+    { q: "야구장 도착 시간은?",
+      a: { text: "경기 시작 1~2시간 전! 연습도 봐야지.", type: "cheer" },
+      b: { text: "경기 직전 혹은 조금 늦게. 먹거리 사느라 바쁨.", type: "food" } },
+    { q: "좌석을 예매할 때 기준은?",
+      a: { text: "응원단상 앞! 무조건 일어나서 응원해야 함.", type: "cheer" },
+      b: { text: "뷰가 잘 보이는 중앙석 혹은 테이블석.", type: "analyst" } },
+    { q: "경기 중 내 시선은 주로 어디에?",
+      a: { text: "투수의 구종과 타자의 타격 폼.", type: "analyst" },
+      b: { text: "전광판에 잡히는 이벤트와 응원단.", type: "photo" } },
+    { q: "야구장의 꽃, 먹거리는?",
+      a: { text: "경기에 집중해야 하니 간단한 간식 위주.", type: "relaxed" },   // zen → relaxed
+      b: { text: "이미 맛집 리스트 다 뽑아옴. 먹으러 옴.", type: "food" } },
+    { q: "우리 팀이 역전패를 당했다면?",
+      a: { text: "(분노) 집 가는 내내 하이라이트 복기하며 분석.", type: "analyst" },
+      b: { text: "\"내일은 이기겠지~\" 맛있는 거 먹으러 감.", type: "food" } },
+    { q: "직관 인증샷은 어떻게 찍나?",
+      a: { text: "점수판이나 경기 장면 위주로 한두 장.", type: "analyst" },
+      b: { text: "유니폼 입은 내 모습과 예쁜 음식 사진 필수.", type: "photo" } },
+    { q: "모르는 사람과 응원가 떼창하기",
+      a: { text: "처음 봐도 하이파이브 가능! 이미 축제 분위기.", type: "cheer" },
+      b: { text: "조금 부끄럽지만 박수는 열심히 침.", type: "relaxed" } },    // zen → relaxed
+    { q: "유니폼 마킹은 누구로?",
+      a: { text: "실력 좋은 에이스나 베테랑 선수.", type: "analyst" },
+      b: { text: "외모가 훈훈하거나 요즘 뜨는 라이징 스타.", type: "photo" } },
+    { q: "경기 중 비가 오기 시작한다면?",
+      a: { text: "우천 취소 안 돼! 우비 입고 끝까지 자리를 지킴.", type: "cheer" },
+      b: { text: "\"오히려 좋아.\" 바로 근처 술집으로 대피.", type: "food" } },
+    { q: "심판의 애매한 판정이 나왔을 때",
+      a: { text: "(벌떡) \"그게 왜 스트라이크야!\" 소리 지름.", type: "cheer" },
+      b: { text: "\"음... 그런가?\" 옆 사람한테 물어봄.", type: "relaxed" } },  // zen → relaxed
+    { q: "야구장에 들고 가는 짐의 양은?",
+      a: { text: "글러브, 기록지 등 장비가 가득한 가방.", type: "analyst" },
+      b: { text: "가벼운 몸과 티켓, 그리고 지갑.", type: "photo" } },
+    { q: "경기 종료 후 나의 상태는?",
+      a: { text: "목이 쉬어서 말이 안 나옴.", type: "cheer" },
+      b: { text: "배가 너무 불러서 움직이기 힘듦.", type: "food" } }
+  ];
+
+  let currentQ = 0;
+  // 점수판 — 'relaxed'로 통일
+  const scores = { cheer: 0, food: 0, analyst: 0, photo: 0, relaxed: 0 };
+
+  function renderQ() {
+    if (currentQ >= questions.length) { showResult(); return; }
+    document.getElementById('progressFill').style.width = `${((currentQ) / questions.length) * 100}%`;
+    document.getElementById('q-num').innerText = `Q ${currentQ + 1} / ${questions.length}`;
+    document.getElementById('q-text').innerText = questions[currentQ].q;
+
+    const btns = document.querySelectorAll('.btn-answer');
+    btns[0].innerText = questions[currentQ].a.text;
+    btns[1].innerText = questions[currentQ].b.text;
+  }
+
+  function selectAnswer(choice) {
+    const selectedType = choice === 'A' ? questions[currentQ].a.type : questions[currentQ].b.type;
+    if (scores[selectedType] !== undefined) scores[selectedType]++;
+    currentQ++;
+    renderQ();
+  }
+
+  // personality.js의 PERSONALITY_MAP과 동일한 이름/이모지 사용
+  const RESULT_MAP = {
+    cheer   : { name: '불타는 응원단장',  emoji: '🔥', color: '#EF4444', desc: '"이겨라! 이겨라! 목이 터질 때까지!"\n목소리가 가장 큼. 공격 때는 무조건 기립.' },
+    food    : { name: '먹거리 탐험가',    emoji: '🌭', color: '#F59E0B', desc: '"경기는 배불러야 제대로 즐길 수 있지."\n야구장 근처 맛집 지도를 꿰고 있음.' },
+    analyst : { name: '데이터 분석가',    emoji: '📊', color: '#3B82F6', desc: '"저 투수 오늘 구속이 평균보다 3km 느리네."\n스탯티즈를 켜놓고 시청. 작전 미스에 민감함.' },
+    photo   : { name: '직관 포토그래퍼', emoji: '📸', color: '#8B5CF6', desc: '"이 앵글이면 완벽한 인증샷이야!"\n구장 배경의 맥주 사진, 셀카가 가장 중요함.' },
+    relaxed : { name: '여유로운 관람객',  emoji: '☀️', color: '#06B6D4', desc: '"이기면 좋고 지면 어쩔 수 없지. 맥주나 한 잔."\n해탈의 경지. 잔디 냄새와 여유를 즐김.' },
+  };
+
+  let finalType = '';
+  function showResult() {
+    document.getElementById('quiz-box').style.display = 'none';
+    document.getElementById('result-box').style.display = 'block';
+
+    finalType = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+    const result = RESULT_MAP[finalType];
+
+    document.getElementById('res-emoji').innerText = result.emoji;
+    document.getElementById('res-title').innerText = result.name;
+    document.getElementById('res-desc').innerText = result.desc;
+  }
+
+  function finishQuiz() {
+    const result = RESULT_MAP[finalType];
+    // localStorage에 직접 저장 (personality.js와 동일한 키 형식)
+    const payload = {
+      type  : finalType,
+      name  : result.name,
+      emoji : result.emoji,
+      color : result.color,
+      desc  : result.desc,
+    };
+    localStorage.setItem('placeball_personality', JSON.stringify(payload));
+    // 부모 창으로 postMessage 전달
+    window.parent.postMessage({ type_key: finalType, quizComplete: true }, '*');
+  }
+
+  renderQ();
+</script>
+</body>
+</html>

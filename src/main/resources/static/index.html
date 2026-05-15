@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLACEBALL — 직관의 모든 것</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --kia: #EF4444;
+      --kia-dark: #B91C1C;
+      --lg: #3B82F6;
+      --lg-dark: #1D4ED8;
+      --surface: rgba(10,18,30,0.72);
+      --surface-2: rgba(8,14,24,0.60);
+      --surface-3: rgba(6,12,22,0.55);
+      --border: rgba(255,255,255,0.08);
+      --border-md: rgba(255,255,255,0.14);
+      --text-1: #F1F5F9;
+      --text-2: #CBD5E1;
+      --text-3: #64748B;
+      --green: #22C55E;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.25);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.3);
+      --radius: 1rem;
+      --radius-lg: 1.5rem;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #060D1A;
+      color: var(--text-1);
+      min-height: 100vh;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,");
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #bg-illustration {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    #bg-illustration svg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center bottom;
+    }
+
+    #bg-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg,
+          rgba(6,13,26,0.55) 0%,
+          rgba(6,13,26,0.30) 35%,
+          rgba(6,13,26,0.20) 65%,
+          rgba(6,13,26,0.50) 100%
+        ),
+        radial-gradient(ellipse 60% 30% at 28% 80%, rgba(220,38,38,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 30% at 72% 80%, rgba(29,78,216,0.12) 0%, transparent 70%);
+    }
+
+    header, main, footer { position: relative; z-index: 2; }
+
+    header {
+      background: rgba(6,13,26,0.82);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    .header-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      height: 72px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .logo-area { display: flex; align-items: center; gap: 0.75rem; }
+    .logo-mark {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: #FFFFFF;
+      border: 1.5px solid rgba(220,38,38,0.2);
+      box-shadow: 0 2px 8px rgba(220,38,38,0.12);
+      position: relative; flex-shrink: 0; overflow: hidden;
+    }
+    .logo-mark::before {
+      content: '';
+      position: absolute;
+      width: 24px; height: 48px;
+      left: 3px; top: -4px;
+      border: 2.5px solid transparent;
+      border-right-color: var(--kia);
+      border-radius: 50%;
+      transform: rotate(14deg);
+    }
+    .logo-mark::after {
+      content: '';
+      position: absolute;
+      width: 24px; height: 48px;
+      right: 3px; top: -4px;
+      border: 2.5px solid transparent;
+      border-left-color: var(--kia);
+      border-radius: 50%;
+      transform: rotate(-14deg);
+    }
+    .logo-text { display: flex; flex-direction: column; line-height: 1; }
+    .logo-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.06em;
+      color: var(--text-1);
+    }
+    .logo-sub {
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      font-weight: 700;
+    }
+
+    .scoreboard {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 2rem;
+      padding: 0.5rem 1.25rem;
+    }
+    .score-team {
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .team-badge {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 900; color: #fff;
+    }
+    .team-name { font-size: 12px; font-weight: 800; color: var(--text-2); letter-spacing: -0.02em; }
+    .score-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .score-divider {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .live-badge {
+      font-size: 9px; font-weight: 900;
+      background: var(--green);
+      color: #fff;
+      padding: 2px 7px; border-radius: 99px;
+      letter-spacing: 0.1em;
+      animation: pulse-live 2s ease-in-out infinite;
+    }
+    .inning-info { font-size: 9px; color: var(--text-3); font-weight: 700; letter-spacing: 0.05em; }
+    @keyframes pulse-live { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+    .nav-right { display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; }
+    .btn-diary {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px;
+      background: rgba(29,78,216,0.15); color: var(--lg);
+      border: 1.5px solid #BFDBFE;
+      border-radius: 10px;
+      font-weight: 700; font-size: 13px;
+      cursor: pointer; text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn-diary:hover { background: #DBEAFE; transform: translateY(-1px); }
+    .btn-login {
+      padding: 8px 20px;
+      background: var(--kia); color: #fff;
+      border: none; border-radius: 10px;
+      font-weight: 700; font-size: 13px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-login:hover { background: var(--kia-dark); transform: translateY(-1px); }
+
+    main {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 4rem;
+      display: grid;
+      grid-template-columns: 300px 1fr 300px;
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .card-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    .card-title-group { display: flex; align-items: center; gap: 0.5rem; }
+    .card-icon { font-size: 1.1rem; }
+    .card-title { font-size: 15px; font-weight: 800; color: var(--text-1); }
+    .card-subtitle { font-size: 11px; color: var(--text-3); font-weight: 600; margin-top: 2px; }
+    .badge-live {
+      font-size: 9px; font-weight: 900;
+      background: #DCFCE7; color: #15803D;
+      padding: 3px 8px; border-radius: 99px;
+    }
+    .badge-blue {
+      font-size: 9px; font-weight: 900;
+      background: #DBEAFE; color: var(--lg);
+      padding: 3px 8px; border-radius: 99px;
+    }
+
+    .left-col { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .stat-big { font-size: 2.4rem; font-weight: 900; color: var(--text-1); line-height: 1; }
+    .stat-unit { font-size: 13px; color: var(--text-3); font-weight: 600; margin-left: 4px; }
+
+    .chart-bars {
+      display: flex; align-items: flex-end; gap: 3px; height: 52px; margin: 1rem 0;
+    }
+    .bar {
+      flex: 1; background: var(--lg); border-radius: 3px 3px 0 0; opacity: 0.3;
+      transition: opacity 0.2s;
+    }
+    .bar:last-child { opacity: 0.9; }
+    .bar:nth-last-child(2) { opacity: 0.7; }
+    .bar:nth-last-child(3) { opacity: 0.55; }
+
+    .reaction-row { margin-bottom: 0.75rem; }
+    .reaction-label {
+      display: flex; justify-content: space-between;
+      font-size: 11px; font-weight: 700; margin-bottom: 4px;
+    }
+    .progress-track { height: 6px; background: var(--surface-3); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 99px; }
+
+    .card-link {
+      font-size: 11px; font-weight: 700; color: var(--lg);
+      background: none; border: none; cursor: pointer;
+      padding: 0; text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .card-link:hover { opacity: 0.7; }
+
+    /* ─── community-link-btn ─── */
+    .community-link-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700; color: var(--lg);
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .community-link-btn:hover { opacity: 0.7; }
+
+    .chat-window {
+      background: rgba(4,10,20,0.55);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .chat-scroll { height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; }
+    .chat-msg-row { display: flex; align-items: flex-start; gap: 6px; }
+    .chat-msg-row.user-row { flex-direction: row-reverse; }
+    .bubble { max-width: 85%; }
+    .bubble {
+      padding: 10px 12px; border-radius: 12px;
+      font-size: 12px; line-height: 1.5; max-width: 90%;
+    }
+    .bubble-bot { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.10); color: var(--text-2); align-self: flex-start; }
+    .bubble-user { background: var(--lg); color: #fff; align-self: flex-end; }
+    .chat-input-row { display: flex; gap: 6px; margin-top: 8px; }
+    .chat-input {
+      flex: 1; padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px; font-size: 12px;
+      font-family: inherit; outline: none;
+      background: rgba(255,255,255,0.07);
+      color: var(--text-1);
+      transition: border-color 0.15s;
+    }
+    .chat-input:focus { border-color: var(--lg); }
+    .chat-send {
+      padding: 8px 14px;
+      background: var(--text-1); color: #fff;
+      border: none; border-radius: 8px;
+      font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: background 0.15s;
+      font-family: inherit;
+    }
+    .chat-send:hover { background: #1e293b; }
+
+    .typing-indicator { display: none; align-items: center; gap: 4px; padding: 8px 12px; }
+    .typing-indicator.visible { display: flex; }
+    .typing-dot { width: 6px; height: 6px; background: var(--text-3); border-radius: 50%; animation: bounce 1.2s ease-in-out infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+    .center-col { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .stadium-shell {
+      background: linear-gradient(170deg, #0F172A 0%, #1E293B 100%);
+      border-radius: 1.25rem;
+      padding: 1.25rem;
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .zone-buttons {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+      margin-bottom: 1.25rem;
+    }
+    .zone-btn {
+      padding: 10px 6px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.06);
+      border-radius: 10px;
+      font-size: 11px; font-weight: 800;
+      color: var(--text-2); cursor: pointer;
+      transition: all 0.2s; text-align: center;
+      font-family: inherit;
+    }
+    .zone-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.18); transform: translateY(-1px); }
+    .zone-btn.active {
+      background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3);
+      color: #fff;
+      box-shadow: var(--shadow-md);
+    }
+
+    .zone-panel {
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      background: rgba(6,12,24,0.55);
+    }
+    .zone-panel-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 1rem; gap: 1rem;
+    }
+    .zone-name { font-size: 17px; font-weight: 900; color: var(--text-1); }
+    .zone-desc { font-size: 11px; color: var(--text-3); margin-top: 3px; line-height: 1.4; }
+    .zone-ratio-label { font-size: 9px; font-weight: 900; color: var(--text-3); letter-spacing: 0.1em; text-align: right; }
+    .zone-ratio-val { font-size: 1.3rem; font-weight: 900; white-space: nowrap; margin-top: 2px; }
+
+    .score-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+    .score-box { border-radius: 10px; padding: 14px 16px; }
+    .score-box-kia { background: #FFF1F2; }
+    .score-box-lg { background: #EFF6FF; }
+    .score-box-label { font-size: 10px; font-weight: 900; margin-bottom: 4px; letter-spacing: 0.05em; }
+    .score-box-val { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; line-height: 1; }
+
+    .gauge-row { margin-bottom: 10px; }
+    .gauge-label { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+    .gauge-track { height: 8px; background: var(--surface-3); border-radius: 99px; overflow: hidden; }
+    .gauge-fill { height: 100%; border-radius: 99px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+
+    .right-col { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .photo-item {
+      position: relative; border-radius: 8px; overflow: hidden;
+      aspect-ratio: 4/3; cursor: pointer;
+    }
+    .photo-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+    .photo-item:hover img { transform: scale(1.05); }
+    .photo-item::after {
+      content: attr(data-caption);
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.6));
+      color: #fff; font-size: 10px; font-weight: 700;
+      padding: 14px 8px 6px;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .photo-item:hover::after { opacity: 1; }
+
+    .schedule-card {
+      display: block; text-decoration: none;
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.06);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .schedule-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+
+    .featured-match {
+      background: linear-gradient(135deg, rgba(29,78,216,0.2) 0%, rgba(59,130,246,0.15) 100%);
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem; margin-bottom: 1rem;
+    }
+    .match-time-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .match-time-label { font-size: 10px; font-weight: 900; color: var(--lg); letter-spacing: 0.08em; }
+    .match-time { font-size: 11px; font-weight: 700; color: var(--text-2); }
+    .match-name { font-size: 1.1rem; font-weight: 900; color: var(--text-1); margin-bottom: 4px; }
+    .match-meta { font-size: 11px; color: var(--text-3); }
+
+    .schedule-row {
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(255,255,255,0.06); border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 10px 14px; margin-bottom: 6px;
+      font-size: 12px; font-weight: 700; color: var(--text-2);
+    }
+
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(12px);
+      align-items: center; justify-content: center;
+      z-index: 200; padding: 1.5rem;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-box {
+      width: min(720px, 100%);
+      max-height: 85vh; overflow-y: auto;
+      background: rgba(8,16,30,0.95);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.05);
+      padding: 2rem;
+      scrollbar-width: thin;
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+    .modal-title { font-size: 1.2rem; font-weight: 900; color: var(--text-1); }
+    .modal-close {
+      background: none; border: none; font-size: 1.8rem;
+      color: var(--text-3); cursor: pointer; line-height: 1;
+      transition: color 0.15s;
+    }
+    .modal-close:hover { color: var(--text-1); }
+
+    .post-item {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      transition: background 0.15s;
+    }
+    .post-item:hover { background: rgba(255,255,255,0.05); }
+    .post-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .post-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--lg), #1E3A8A);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 800; font-size: 14px; flex-shrink: 0;
+    }
+    .post-name { font-weight: 700; font-size: 14px; color: var(--text-1); }
+    .post-time { font-size: 11px; color: var(--text-3); }
+    .post-body { font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 8px; }
+    .post-stats { display: flex; gap: 12px; font-size: 11px; color: var(--text-3); }
+
+    .gallery-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px; margin-bottom: 1.5rem;
+    }
+    .gallery-item {
+      position: relative; border-radius: 10px; overflow: hidden;
+      aspect-ratio: 1; cursor: pointer;
+    }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+    .gallery-item:hover img { transform: scale(1.05); }
+    .gallery-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(transparent 50%, rgba(0,0,0,0.55));
+      display: flex; align-items: flex-end; padding: 8px;
+      color: #fff; font-size: 11px; font-weight: 600; opacity: 0; transition: opacity 0.2s;
+    }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+
+    .upload-zone {
+      border: 2px dashed rgba(255,255,255,0.12); border-radius: var(--radius);
+      padding: 2rem; text-align: center; margin-bottom: 1.5rem;
+      background: rgba(255,255,255,0.04); cursor: pointer;
+      transition: all 0.2s;
+    }
+    .upload-zone:hover { border-color: var(--lg); background: rgba(59,130,246,0.10); }
+    .upload-icon { font-size: 2rem; margin-bottom: 8px; }
+    .upload-text { font-size: 13px; color: var(--text-2); margin-bottom: 12px; line-height: 1.5; }
+    .upload-btn {
+      padding: 8px 24px; background: var(--lg); color: #fff;
+      border: none; border-radius: 8px; font-weight: 700;
+      font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+
+    .divider { height: 1px; background: rgba(255,255,255,0.07); margin: 1rem 0; }
+
+    .fade-in { animation: fadeIn 0.4s ease forwards; }
+    @keyframes fadeIn { from{opacity:0; transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+    .pulse-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot { 0%,100%{transform:scale(1)} 50%{transform:scale(1.4)} }
+
+    .personality-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 5px 12px 5px 8px;
+      border-radius: 99px;
+      border: 1.5px solid;
+      font-size: 12px; font-weight: 800;
+      cursor: pointer; transition: all 0.2s;
+      white-space: nowrap; user-select: none;
+      backdrop-filter: blur(10px);
+      position: relative;
+    }
+    .personality-badge:hover { transform: translateY(-1px); filter: brightness(1.15); }
+    .personality-badge .badge-emoji { font-size: 14px; line-height: 1; }
+    .personality-badge .badge-label { letter-spacing: -0.02em; }
+
+    .badge-tooltip {
+      position: absolute;
+      bottom: calc(100% + 10px);
+      left: 50%; transform: translateX(-50%);
+      background: rgba(6,13,26,0.97);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 12px;
+      padding: 10px 14px;
+      min-width: 200px; max-width: 260px;
+      pointer-events: none;
+      opacity: 0; transition: opacity 0.18s;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      z-index: 200;
+    }
+    .personality-badge:hover .badge-tooltip { opacity: 1; }
+    .badge-tooltip::after {
+      content: '';
+      position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: rgba(255,255,255,0.14);
+    }
+    .tooltip-emoji { font-size: 1.6rem; margin-bottom: 4px; }
+    .tooltip-name { font-size: 13px; font-weight: 900; color: #F1F5F9; margin-bottom: 3px; }
+    .tooltip-desc { font-size: 11px; color: #94A3B8; line-height: 1.4; }
+    .tooltip-retake {
+      margin-top: 8px; font-size: 10px; font-weight: 700;
+      color: #F5C842; display: inline-block; pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .inline-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 2px 7px 2px 4px;
+      border-radius: 99px; border: 1px solid;
+      font-size: 10px; font-weight: 800;
+      white-space: nowrap; flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .inline-badge .b-emoji { font-size: 11px; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 99px; }
+
+    .widget-popup-anchor { position: relative; }
+
+    .hover-popup {
+      position: absolute;
+      left: calc(100% + 14px);
+      top: 0;
+      width: 340px;
+      background: rgba(8,16,30,0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 6px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+      z-index: 50;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateX(-8px) scale(0.97);
+      transform-origin: left top;
+      transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+      overflow: hidden;
+    }
+
+    .left-col { position: relative; z-index: 10; }
+
+    .right-col .hover-popup {
+      left: auto;
+      right: calc(100% + 14px);
+      transform-origin: right top;
+      transform: translateX(8px) scale(0.97);
+    }
+
+    .widget-popup-anchor:hover .hover-popup {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .hover-popup::before {
+      content: '';
+      position: absolute;
+      left: -7px;
+      top: 22px;
+      width: 13px; height: 13px;
+      background: var(--surface);
+      border-left: 1px solid var(--border-md);
+      border-bottom: 1px solid var(--border-md);
+      transform: rotate(45deg);
+    }
+
+    .right-col .hover-popup::before {
+      left: auto;
+      right: -7px;
+      border-left: none;
+      border-bottom: none;
+      border-right: 1px solid var(--border-md);
+      border-top: 1px solid var(--border-md);
+    }
+
+    .popup-header {
+      padding: 1rem 1.25rem 0.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .popup-header-title {
+      font-size: 13px; font-weight: 800; color: var(--text-1);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .popup-header-meta { font-size: 10px; color: var(--text-3); font-weight: 600; }
+
+    .popup-post-item {
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+    .popup-post-item:last-child { border-bottom: none; }
+    .popup-post-item:hover { background: rgba(255,255,255,0.06); }
+    .popup-post-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .popup-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .popup-author { font-size: 12px; font-weight: 700; color: var(--text-1); }
+    .popup-time { font-size: 10px; color: var(--text-3); }
+    .popup-body {
+      font-size: 11.5px; color: var(--text-2); line-height: 1.55;
+      margin-bottom: 6px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .popup-stats { display: flex; gap: 10px; font-size: 10px; color: var(--text-3); }
+    .popup-footer {
+      padding: 0.75rem 1.25rem;
+      background: rgba(255,255,255,0.04);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      text-align: center;
+    }
+    .popup-footer-btn {
+      font-size: 11px; font-weight: 800; color: var(--lg);
+      background: none; border: none; cursor: pointer;
+      font-family: inherit; transition: opacity 0.15s;
+    }
+    .popup-footer-btn:hover { opacity: 0.7; }
+
+    .popup-photo-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+      padding: 0.9rem 1.25rem;
+    }
+    .popup-photo-item {
+      position: relative; border-radius: 8px; overflow: hidden;
+      aspect-ratio: 1; cursor: pointer;
+    }
+    .popup-photo-item img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.25s;
+    }
+    .popup-photo-item:hover img { transform: scale(1.07); }
+    .popup-photo-item::after {
+      content: attr(data-nick);
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.65));
+      color: #fff; font-size: 9px; font-weight: 700;
+      padding: 12px 5px 4px; opacity: 0; transition: opacity 0.2s;
+    }
+    .popup-photo-item:hover::after { opacity: 1; }
+
+    .popup-upload-banner {
+      margin: 0 1.25rem 1rem;
+      background: linear-gradient(135deg, rgba(29,78,216,0.2), rgba(59,130,246,0.15));
+      border: 1px dashed rgba(147,197,253,0.4);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .popup-upload-banner:hover { background: linear-gradient(135deg, rgba(29,78,216,0.3), rgba(59,130,246,0.22)); }
+    .popup-upload-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .popup-upload-text { font-size: 11px; color: var(--lg); font-weight: 700; line-height: 1.4; }
+
+    .card:hover { box-shadow: var(--shadow-md); transition: box-shadow 0.2s; }
+
+    @media (max-width: 1200px) {
+      main { grid-template-columns: 260px 1fr 260px; gap: 1rem; }
+    }
+    @media (max-width: 960px) {
+      main { grid-template-columns: 1fr; padding: 1rem; }
+      .header-inner { grid-template-columns: 1fr auto; }
+      .scoreboard { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="bg-illustration" aria-hidden="true">
+<svg viewBox="0 0 1400 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bsky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#03070F"/>
+      <stop offset="40%" stop-color="#060D1F"/>
+      <stop offset="100%" stop-color="#0A1628"/>
+    </linearGradient>
+    <linearGradient id="bgrass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1A5C2A"/>
+      <stop offset="100%" stop-color="#0D3A18"/>
+    </linearGradient>
+    <radialGradient id="bflareR" cx="30%" cy="80%" r="55%">
+      <stop offset="0%" stop-color="#DC2626" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#DC2626" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bflareB" cx="70%" cy="80%" r="55%">
+      <stop offset="0%" stop-color="#1D4ED8" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#1D4ED8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bcenterGlow" cx="50%" cy="60%" r="40%">
+      <stop offset="0%" stop-color="#F5C842" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#F5C842" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bspot1" cx="20%" cy="0%" r="50%">
+      <stop offset="0%" stop-color="#FFFBEA" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#FFFBEA" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bspot2" cx="80%" cy="0%" r="50%">
+      <stop offset="0%" stop-color="#FFFBEA" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#FFFBEA" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1400" height="700" fill="url(#bsky)"/>
+  <g opacity="0.65">
+    <circle cx="80" cy="40" r="1" fill="#fff"/><circle cx="180" cy="22" r="1.2" fill="#fff" opacity="0.8"/>
+    <circle cx="320" cy="55" r="0.8" fill="#fff"/><circle cx="450" cy="18" r="1.4" fill="#fff" opacity="0.6"/>
+    <circle cx="550" cy="38" r="0.9" fill="#fff"/><circle cx="650" cy="12" r="1.1" fill="#fff" opacity="0.9"/>
+    <circle cx="700" cy="44" r="0.7" fill="#fff"/><circle cx="800" cy="25" r="1.3" fill="#fff" opacity="0.7"/>
+    <circle cx="920" cy="48" r="0.9" fill="#fff"/><circle cx="1040" cy="16" r="1.2" fill="#fff" opacity="0.8"/>
+    <circle cx="1150" cy="36" r="1" fill="#fff"/><circle cx="1260" cy="20" r="0.8" fill="#fff" opacity="0.9"/>
+    <circle cx="1350" cy="50" r="1.1" fill="#fff" opacity="0.6"/>
+  </g>
+  <rect width="1400" height="700" fill="url(#bflareR)"/>
+  <rect width="1400" height="700" fill="url(#bflareB)"/>
+  <rect width="1400" height="700" fill="url(#bcenterGlow)"/>
+  <rect width="1400" height="700" fill="url(#bspot1)"/>
+  <rect width="1400" height="700" fill="url(#bspot2)"/>
+  <path d="M0 420 Q350 200 700 180 Q1050 200 1400 420 L1400 700 L0 700 Z" fill="#0C1C10" opacity="0.88"/>
+  <path d="M60 400 Q700 195 1340 400 L1340 430 Q700 225 60 430 Z" fill="#0F2418"/>
+  <path d="M100 430 Q700 240 1300 430 L1300 465 Q700 270 100 465 Z" fill="#122A1C"/>
+  <path d="M140 465 Q700 280 1260 465 L1260 505 Q700 310 140 505 Z" fill="#163222"/>
+  <rect x="120" y="120" width="8" height="280" fill="#1E3A2A"/>
+  <rect x="115" y="116" width="18" height="12" rx="2" fill="#2A5040"/>
+  <path d="M124 128 L300 420 L200 420 Z" fill="#FFFBEA" opacity="0.035"/>
+  <rect x="1272" y="120" width="8" height="280" fill="#1E3A2A"/>
+  <rect x="1267" y="116" width="18" height="12" rx="2" fill="#2A5040"/>
+  <path d="M1276 128 L1100 420 L1200 420 Z" fill="#FFFBEA" opacity="0.035"/>
+  <path d="M180 505 Q700 340 1220 505 L1220 560 Q700 380 180 560 Z" fill="url(#bgrass)"/>
+  <path d="M700 390 L760 440 L700 490 L640 440 Z" fill="#8B5A2B" opacity="0.75"/>
+  <path d="M700 405 L748 445 L700 475 L652 445 Z" fill="#1A6628" opacity="0.65"/>
+  <ellipse cx="700" cy="442" rx="16" ry="10" fill="#9B6535" opacity="0.85"/>
+  <g fill="#DC2626" opacity="0.8">
+    <ellipse cx="190" cy="497" rx="10" ry="8"/><ellipse cx="215" cy="492" rx="10" ry="8"/>
+    <ellipse cx="240" cy="497" rx="11" ry="8"/><ellipse cx="266" cy="492" rx="10" ry="8"/>
+    <ellipse cx="292" cy="497" rx="11" ry="9"/><ellipse cx="318" cy="491" rx="10" ry="8"/>
+  </g>
+  <g fill="#1D4ED8" opacity="0.8">
+    <ellipse cx="896" cy="487" rx="10" ry="8"/><ellipse cx="920" cy="492" rx="10" ry="8"/>
+    <ellipse cx="944" cy="487" rx="11" ry="8"/><ellipse cx="968" cy="492" rx="10" ry="8"/>
+    <ellipse cx="992" cy="487" rx="11" ry="9"/><ellipse cx="1016" cy="491" rx="10" ry="8"/>
+  </g>
+  <rect x="400" y="340" width="600" height="26" rx="13" fill="#111827" opacity="0.88"/>
+  <rect x="400" y="340" width="358" height="26" rx="13" fill="#DC2626" opacity="0.85"/>
+  <rect x="758" y="340" width="242" height="26" rx="13" fill="#1D4ED8" opacity="0.80"/>
+  <line x1="700" y1="334" x2="700" y2="372" stroke="#F5C842" stroke-width="3"/>
+  <circle cx="700" cy="353" r="12" fill="#F5C842"/>
+  <circle cx="700" cy="353" r="8" fill="#0A1628" stroke="#F5C842" stroke-width="1.5"/>
+  <text x="575" y="359" text-anchor="middle" font-family="'Arial Black',sans-serif" font-size="13" fill="white" font-weight="900">홈팀 60%</text>
+  <text x="835" y="359" text-anchor="middle" font-family="'Arial Black',sans-serif" font-size="13" fill="white" font-weight="900">원정 40%</text>
+  <rect x="580" y="200" width="240" height="118" rx="10" fill="#040C14" opacity="0.90"/>
+  <rect x="584" y="204" width="232" height="110" rx="8" fill="#060F1A" opacity="0.93"/>
+  <rect x="580" y="200" width="240" height="118" rx="10" fill="none" stroke="#F5C842" stroke-width="1.5" opacity="0.65"/>
+  <text x="700" y="230" text-anchor="middle" font-family="'Arial Black',sans-serif" font-size="20" fill="#F5C842" letter-spacing="3" font-weight="900">PLACEBALL</text>
+  <text x="700" y="252" text-anchor="middle" font-family="'Arial',sans-serif" font-size="11" fill="#94A3B8" letter-spacing="2">BATTLE ZONE</text>
+  <text id="svg-home-score" x="645" y="288" text-anchor="middle" font-family="'Arial Black',sans-serif" font-size="30" fill="#DC2626" font-weight="900">-</text>
+  <text x="700" y="287" text-anchor="middle" font-family="'Arial',sans-serif" font-size="11" fill="#64748B">VS</text>
+  <text id="svg-away-score" x="755" y="288" text-anchor="middle" font-family="'Arial Black',sans-serif" font-size="30" fill="#3B82F6" font-weight="900">-</text>
+  <text id="svg-home-team" x="645" y="304" text-anchor="middle" font-family="'Arial',sans-serif" font-size="8" fill="#94A3B8" letter-spacing="1">HOME</text>
+  <text id="svg-away-team" x="755" y="304" text-anchor="middle" font-family="'Arial',sans-serif" font-size="8" fill="#94A3B8" letter-spacing="1">AWAY</text>
+  <path d="M0 600 Q350 565 700 570 Q1050 565 1400 600 L1400 700 L0 700 Z" fill="#040C0A" opacity="0.65"/>
+  <path d="M0 650 Q350 625 700 630 Q1050 625 1400 650 L1400 700 L0 700 Z" fill="#020806" opacity="0.80"/>
+</svg>
+</div>
+<div id="bg-overlay" aria-hidden="true"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-area">
+      <div class="logo-mark"></div>
+      <div class="logo-text">
+        <span class="logo-name">PLACEBALL</span>
+        <span class="logo-sub">Ballpark Community</span>
+      </div>
+    </div>
+
+    <!-- Live Score -->
+    <div class="scoreboard">
+      <div class="score-team">
+        <div class="team-badge" id="awayBadge" style="background:#333;">A</div>
+        <div>
+          <div class="team-name" id="awayTeamName">AWAY</div>
+        </div>
+        <span class="score-num" id="awayScore" style="color:#fff;">-</span>
+      </div>
+      <div class="score-divider">
+        <span class="live-badge" id="matchStatusBadge" style="display:none; animation:none;">예정</span>
+        <span class="inning-info" id="mainMatchInfo"></span>
+      </div>
+      <div class="score-team">
+        <span class="score-num" id="homeScore" style="color:#fff;">-</span>
+        <div>
+          <div class="team-name" id="homeTeamName">HOME</div>
+        </div>
+        <div class="team-badge" id="homeBadge" style="background:#333;">H</div>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <a href="diary.html" class="btn-diary">📘 직관 다이어리</a>
+      <button id="login-btn" class="btn-login" onclick="location.href='login.html'">로그인</button>
+      <div id="user-info" style="display:none; align-items:center; gap:10px;">
+        <div id="header-personality-badge" style="display:none;">
+          <div class="personality-badge" id="header-badge-el" onclick="window.location.href='login.html'">
+            <span class="badge-emoji" id="hb-emoji">⚾</span>
+            <span class="badge-label" id="hb-label">성향 미설정</span>
+            <div class="badge-tooltip">
+              <div class="tooltip-emoji" id="hb-tooltip-emoji">⚾</div>
+              <div class="tooltip-name" id="hb-tooltip-name">성향 미설정</div>
+              <div class="tooltip-desc" id="hb-tooltip-desc">로그인 후 성향 테스트를 완료하면 뱃지가 표시됩니다.</div>
+              <span class="tooltip-retake" onclick="window.location.href='login.html'">⟳ 테스트 다시하기</span>
+            </div>
+          </div>
+        </div>
+        <span style="font-size:13px; font-weight:600; color:var(--text-2)"><span id="user-nick" style="color:var(--lg); font-weight:800;"></span>님</span>
+        <button id="logout-btn" style="padding:6px 14px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.14); border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; color:var(--text-2);">로그아웃</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── LEFT ── -->
+  <div class="left-col">
+
+    <!-- Posts card -->
+    <div class="card fade-in widget-popup-anchor">
+      <div class="hover-popup">
+        <div class="popup-header">
+          <div class="popup-header-title">
+            📰 실시간 인기 게시글
+            <span class="badge-live" style="font-size:8px;">LIVE</span>
+          </div>
+          <div class="popup-header-meta">방금 업데이트</div>
+        </div>
+        <div class="popup-post-item">
+          <div class="popup-post-head">
+            <div class="popup-avatar" style="background:linear-gradient(135deg,#1D4ED8,#1E3A8A)">K</div>
+            <div><div class="popup-author">KIA_Fan92</div><div class="popup-time">2분 전</div></div>
+          </div>
+          <div class="popup-body">오늘 잠실 분위기 완전 우리 쪽이다! 응원석에서 떼창 시작되자마자 흐름이 넘어왔어요.</div>
+          <div class="popup-stats"><span>👍 124</span><span>💬 18</span><span>🔗 5</span></div>
+        </div>
+        <div class="popup-post-item">
+          <div class="popup-post-head">
+            <div class="popup-avatar" style="background:linear-gradient(135deg,#16A34A,#15803D)">B</div>
+            <div><div class="popup-author">BaseballLover</div><div class="popup-time">8분 전</div></div>
+          </div>
+          <div class="popup-body">인증샷 올리고 응원 포인트도 챙김! 외야보다 중앙 응원석 열기가 훨씬 강하네요.</div>
+          <div class="popup-stats"><span>👍 89</span><span>💬 12</span><span>🔗 3</span></div>
+        </div>
+        <div class="popup-post-item">
+          <div class="popup-post-head">
+            <div class="popup-avatar" style="background:linear-gradient(135deg,#DC2626,#991B1B)">T</div>
+            <div><div class="popup-author">TigerSupporter</div><div class="popup-time">21분 전</div></div>
+          </div>
+          <div class="popup-body">LG 역응원도 생각보다 세다. 1루 쪽은 원정 응원 밀도가 높게 느껴졌어요. 하지만 우리가 더 강했습니다!</div>
+          <div class="popup-stats"><span>👍 156</span><span>💬 28</span><span>🔗 8</span></div>
+        </div>
+        <div class="popup-footer">
+          <a href="community.html" class="popup-footer-btn" style="text-decoration:none;">전체 게시글 보기 →</a>
+        </div>
+      </div>
+
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-icon">📰</span>
+          <div>
+            <div class="card-title">게시물</div>
+            <div class="card-subtitle">커뮤니티 실시간</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="pulse-dot"></div>
+          <span class="badge-live">LIVE</span>
+        </div>
+      </div>
+
+      <div>
+        <span class="stat-big">12,548</span><span class="stat-unit">건</span>
+      </div>
+      <div style="font-size:11px; color:var(--text-3); margin-top:4px;">오늘 올라온 응원 게시글</div>
+
+      <div class="chart-bars" style="margin-top:1rem;">
+        <div class="bar" style="height:40%"></div>
+        <div class="bar" style="height:30%"></div>
+        <div class="bar" style="height:55%"></div>
+        <div class="bar" style="height:68%"></div>
+        <div class="bar" style="height:60%"></div>
+        <div class="bar" style="height:80%"></div>
+        <div class="bar" style="height:92%"></div>
+        <div class="bar" style="height:75%"></div>
+        <div class="bar" style="height:88%"></div>
+      </div>
+
+      <div style="font-size:11px; font-weight:800; color:var(--text-1); margin-bottom:10px;">반응 온도</div>
+
+      <div class="reaction-row">
+        <div class="reaction-label">
+          <span style="color:var(--text-2)">공감 폭발</span>
+          <span style="color:#16A34A; font-weight:900;">68%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:68%; background:#16A34A;"></div>
+        </div>
+      </div>
+      <div class="reaction-row">
+        <div class="reaction-label">
+          <span style="color:var(--text-2)">정보 공유</span>
+          <span style="color:var(--text-3);">22%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:22%; background:#94A3B8;"></div>
+        </div>
+      </div>
+      <div class="reaction-row">
+        <div class="reaction-label">
+          <span style="color:var(--text-2)">논쟁 중</span>
+          <span style="color:var(--kia); font-weight:900;">10%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:10%; background:var(--kia);"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <a href="community.html" class="community-link-btn"><span>📋</span> 게시글 보기</a>
+    </div>
+
+    <!-- AI Chatbot card -->
+    <div class="card fade-in" style="animation-delay:0.1s">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-icon">🤖</span>
+          <div>
+            <div class="card-title">AI 챗봇</div>
+            <div class="card-subtitle">응원 도우미</div>
+          </div>
+        </div>
+        <span style="font-size:10px; color:var(--text-3); font-weight:600;">Claude 연동</span>
+      </div>
+      <div class="chat-window">
+        <div class="chat-scroll" id="chat-messages">
+          <div class="bubble bubble-bot">
+            무엇이든 물어보세요. 응원 문구, 게시글, 댓글, 경기 분위기 등 도움이 필요하신 모든 것을 도와드립니다. ⚾
+          </div>
+        </div>
+        <div class="typing-indicator" id="typing">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="chat-input" type="text" placeholder="무엇이든 물어보세요">
+          <button class="chat-send" id="chat-send">전송</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CENTER ── -->
+  <div class="center-col">
+    <div class="card fade-in" style="animation-delay:0.05s">
+      <div class="card-header">
+        <div>
+          <div class="card-title" style="font-size:1.1rem;">구역별 응원 게이지</div>
+          <div class="card-subtitle">구역별 응원 분포를 한눈에 확인하세요</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button id="btn-join-battle"
+            style="display:flex;align-items:center;gap:5px;padding:7px 13px;
+              background:linear-gradient(135deg,#DC2626,#1D4ED8);
+              color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:800;
+              cursor:pointer;font-family:inherit;transition:all .2s;
+              box-shadow:0 3px 12px rgba(220,38,38,0.35);white-space:nowrap;"
+            onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 18px rgba(220,38,38,0.5)'"
+            onmouseout="this.style.transform='';this.style.boxShadow='0 3px 12px rgba(220,38,38,0.35)'">
+            ⚔️ 점령전 참여하기
+          </button>
+          <div class="pulse-dot"></div>
+          <span class="badge-live">실시간</span>
+        </div>
+      </div>
+
+      <div class="stadium-shell" style="margin-bottom:1.25rem;">
+        <svg viewBox="0 0 640 400" width="100%" aria-label="잠실야구장 좌석 응원 현황">
+          <defs>
+            <linearGradient id="fieldG2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#4ADE80"/>
+              <stop offset="100%" stop-color="#15803D"/>
+            </linearGradient>
+            <linearGradient id="dirtG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#C2894A"/>
+              <stop offset="100%" stop-color="#A0692A"/>
+            </linearGradient>
+            <radialGradient id="moundG" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#C2894A"/>
+              <stop offset="100%" stop-color="#A0692A"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="320" cy="210" rx="308" ry="188" fill="#1a2535"/>
+          <ellipse cx="320" cy="210" rx="296" ry="176" fill="#0f1923"/>
+          <path id="zone-outfield-left" class="seat-zone" d="M90 142 Q130 88 200 68 L205 90 Q148 110 115 156 Z" fill="#16A34A"/>
+          <path id="zone-outfield-center" class="seat-zone" d="M200 68 Q260 50 320 46 Q380 50 420 68 L415 90 Q360 74 320 70 Q280 74 225 90 Z" fill="#16A34A"/>
+          <path id="zone-outfield-right" class="seat-zone" d="M420 68 Q490 88 530 142 L505 156 Q472 110 415 90 Z" fill="#16A34A"/>
+          <path id="zone-navy-3b" class="seat-zone" d="M90 142 L115 156 Q118 230 110 285 L84 272 Q76 218 78 168 Z" fill="#1E3A8A"/>
+          <path id="zone-navy-1b" class="seat-zone" d="M530 142 L505 156 Q502 230 510 285 L536 272 Q544 218 542 168 Z" fill="#DC2626"/>
+          <path id="zone-navy-lc" class="seat-zone" d="M200 68 L205 90 Q170 108 148 136 L115 156 L90 142 Q120 100 165 75 Z" fill="#1E3A8A"/>
+          <path id="zone-navy-rc" class="seat-zone" d="M420 68 L415 90 Q450 108 472 136 L505 156 L530 142 Q500 100 475 75 Z" fill="#DC2626"/>
+          <path id="zone-red-3b" class="seat-zone" d="M115 156 Q118 230 110 285 L124 291 Q118 235 122 168 Z" fill="#1E40AF"/>
+          <path id="zone-red-1b" class="seat-zone" d="M505 156 Q502 230 510 285 L496 291 Q502 235 498 168 Z" fill="#B91C1C"/>
+          <path id="zone-red-3b-side" class="seat-zone" d="M148 136 Q172 112 205 90 L215 108 Q184 128 160 152 Z" fill="#1E40AF"/>
+          <path id="zone-red-1b-side" class="seat-zone" d="M472 136 Q448 112 415 90 L405 108 Q436 128 460 152 Z" fill="#B91C1C"/>
+          <path id="zone-orange-3b" class="seat-zone active-zone" d="M122 168 Q118 235 124 291 L155 300 Q148 240 152 178 Z" fill="#1D4ED8"/>
+          <path id="zone-orange-1b" class="seat-zone" d="M498 168 Q502 235 496 291 L465 300 Q472 240 468 178 Z" fill="#DC2626"/>
+          <path id="zone-orange-3b-top" class="seat-zone active-zone" d="M160 152 Q184 128 215 108 L228 124 Q200 146 176 168 Z" fill="#1D4ED8"/>
+          <path id="zone-orange-1b-top" class="seat-zone" d="M460 152 Q436 128 405 108 L392 124 Q420 146 444 168 Z" fill="#DC2626"/>
+          <path id="zone-table-top" class="seat-zone" d="M215 108 Q265 88 320 84 Q375 88 405 108 L392 124 Q362 106 320 102 Q278 106 228 124 Z" fill="#7C3AED"/>
+          <path id="zone-blue-bottom" class="seat-zone" d="M152 178 Q148 240 155 300 L200 314 Q194 248 198 184 Z" fill="#2563EB"/>
+          <path id="zone-blue-bottom-r" class="seat-zone" d="M468 178 Q472 240 465 300 L420 314 Q426 248 422 184 Z" fill="#DC2626"/>
+          <path id="zone-exciting-l" class="seat-zone" d="M176 168 Q200 146 228 124 L242 138 Q218 158 196 180 Z" fill="#7C3AED"/>
+          <path id="zone-exciting-r" class="seat-zone" d="M444 168 Q420 146 392 124 L378 138 Q402 158 424 180 Z" fill="#DC2626"/>
+          <path id="zone-premium" class="seat-zone" d="M228 124 Q270 104 320 100 Q370 104 412 124 L398 138 Q362 120 320 116 Q278 120 242 138 Z" fill="#7C3AED"/>
+          <path d="M155 300 L200 314 Q260 328 320 330 Q380 328 440 314 L465 300 L496 291 Q506 318 498 342 Q420 364 320 366 Q220 364 142 342 Q134 318 124 291 Z" fill="#15293D" opacity="0.6"/>
+          <path id="zone-foul" class="seat-zone" d="M155 300 L200 314 Q260 328 320 330 Q380 328 440 314 L465 300 L496 291 Q506 318 498 342 Q420 364 320 366 Q220 364 142 342 Q134 318 124 291 Z" fill="#0EA5E9"/>
+          <path d="M242 138 Q280 118 320 114 Q360 118 398 138 L424 180 Q422 230 420 314 Q380 328 320 330 Q260 328 220 314 Q218 230 196 180 Z" fill="url(#fieldG2)"/>
+          <path d="M242 138 Q260 128 320 124 Q380 128 398 138 L390 180 Q370 168 320 166 Q270 168 250 180 Z" fill="url(#dirtG)" opacity="0.7"/>
+          <ellipse cx="320" cy="228" rx="14" ry="9" fill="url(#moundG)"/>
+          <rect x="315" y="296" width="10" height="8" rx="1" fill="white" opacity="0.95"/>
+          <rect x="365" y="206" width="9" height="9" rx="1" fill="white" opacity="0.9" transform="rotate(45 369 210)"/>
+          <rect x="315" y="160" width="9" height="9" rx="1" fill="white" opacity="0.9" transform="rotate(45 319 164)"/>
+          <rect x="265" y="206" width="9" height="9" rx="1" fill="white" opacity="0.9" transform="rotate(45 269 210)"/>
+          <line x1="320" y1="300" x2="196" y2="180" stroke="white" stroke-width="1.2" opacity="0.7"/>
+          <line x1="320" y1="300" x2="444" y2="180" stroke="white" stroke-width="1.2" opacity="0.7"/>
+          <text x="320" y="62" text-anchor="middle" fill="#DCFCE7" font-size="10" font-weight="900" font-family="'Noto Sans KR',sans-serif" paint-order="stroke" stroke="rgba(0,0,0,0.6)" stroke-width="3">외야 그린석</text>
+          <text x="140" y="108" text-anchor="middle" fill="#BFDBFE" font-size="9" font-weight="900" font-family="'Noto Sans KR',sans-serif" paint-order="stroke" stroke="rgba(0,0,0,0.6)" stroke-width="3">3루 응원석</text>
+          <text x="500" y="108" text-anchor="middle" fill="#FEE2E2" font-size="9" font-weight="900" font-family="'Noto Sans KR',sans-serif" paint-order="stroke" stroke="rgba(0,0,0,0.6)" stroke-width="3">1루 응원석</text>
+          <text x="108" y="220" text-anchor="middle" fill="#BFDBFE" font-size="9" font-weight="900" font-family="'Noto Sans KR',sans-serif" paint-order="stroke" stroke="rgba(0,0,0,0.6)" stroke-width="3" transform="rotate(-90 108 220)">3루 네이비</text>
+          <text x="532" y="220" text-anchor="middle" fill="#FEE2E2" font-size="9" font-weight="900" font-family="'Noto Sans KR',sans-serif" paint-order="stroke" stroke="rgba(0,0,0,0.6)" stroke-width="3" transform="rotate(90 532 220)">1루 네이비</text>
+          <text x="320" y="116" text-anchor="middle" fill="#EDE9FE" font-size="9" font-weight="900" font-family="'Noto Sans KR',sans-serif" paint-order="stroke" stroke="rgba(0,0,0,0.6)" stroke-width="3">테이블·프리미엄</text>
+          <text x="320" y="350" text-anchor="middle" fill="#BAE6FD" font-size="9" font-weight="900" font-family="'Noto Sans KR',sans-serif" paint-order="stroke" stroke="rgba(0,0,0,0.5)" stroke-width="2">외야 블루·파울존</text>
+        </svg>
+      </div>
+
+      <div class="zone-buttons" style="grid-template-columns:repeat(5,1fr);">
+        <button class="zone-btn active" data-zone="orange-3b">3루 오렌지</button>
+        <button class="zone-btn" data-zone="orange-1b">1루 오렌지</button>
+        <button class="zone-btn" data-zone="outfield-center">중앙 외야</button>
+        <button class="zone-btn" data-zone="premium">테이블·프리미엄</button>
+        <button class="zone-btn" data-zone="foul">외야 파울존</button>
+      </div>
+
+      <div class="zone-panel">
+        <div class="zone-panel-top">
+          <div>
+            <div class="zone-name" id="zone-name">KIA 중앙 응원석</div>
+            <div class="zone-desc" id="zone-desc">홈팀 중심 응원이 가장 크게 모이는 메인 응원 구역입니다.</div>
+          </div>
+          <div style="text-align:right; flex-shrink:0;">
+            <div class="zone-ratio-label">현재 응원 비율</div>
+            <div class="zone-ratio-val" id="zone-ratio">
+              <span style="color:var(--kia)">KIA 88%</span>
+              <span style="color:var(--text-3); font-size:1rem; margin:0 4px;">:</span>
+              <span style="color:var(--lg)">LG 12%</span>
+            </div>
+          </div>
+        </div>
+        <div class="score-boxes">
+          <div class="score-box score-box-kia">
+            <div class="score-box-label" style="color:var(--kia)">홈팀 응원 지수</div>
+            <div class="score-box-val" style="color:var(--kia)" id="kia-score">88</div>
+          </div>
+          <div class="score-box score-box-lg">
+            <div class="score-box-label" style="color:var(--lg)">원정 응원 지수</div>
+            <div class="score-box-val" style="color:var(--lg)" id="lg-score">12</div>
+          </div>
+        </div>
+        <div class="gauge-row">
+          <div class="gauge-label">
+            <span style="color:var(--kia)">홈팀 응원 비중</span>
+            <span style="color:var(--kia); font-weight:900;" id="kia-pct">88%</span>
+          </div>
+          <div class="gauge-track">
+            <div class="gauge-fill" id="kia-bar" style="width:88%; background:var(--kia);"></div>
+          </div>
+        </div>
+        <div class="gauge-row">
+          <div class="gauge-label">
+            <span style="color:var(--lg)">원정 응원 비중</span>
+            <span style="color:var(--lg); font-weight:900;" id="lg-pct">12%</span>
+          </div>
+          <div class="gauge-track">
+            <div class="gauge-fill" id="lg-bar" style="width:12%; background:var(--lg);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT ── -->
+  <div class="right-col">
+
+    <!-- Photos card -->
+    <div class="card fade-in widget-popup-anchor" style="animation-delay:0.1s">
+      <div class="hover-popup">
+        <div class="popup-header">
+          <div class="popup-header-title">📸 최신 인증샷</div>
+          <div class="popup-header-meta">실시간 업데이트</div>
+        </div>
+        <div class="popup-photo-grid">
+          <div class="popup-photo-item" data-nick="@kia_fan92">
+            <img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=300&auto=format&fit=crop" alt="">
+          </div>
+          <div class="popup-photo-item" data-nick="@lg_supporter">
+            <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=300&auto=format&fit=crop" alt="">
+          </div>
+          <div class="popup-photo-item" data-nick="@park_hopper">
+            <img src="https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=300&auto=format&fit=crop" alt="">
+          </div>
+          <div class="popup-photo-item" data-nick="@stadium_view">
+            <img src="https://images.unsplash.com/photo-1471295253337-3ceaaedca402?q=80&w=300&auto=format&fit=crop" alt="">
+          </div>
+          <div class="popup-photo-item" data-nick="@cheering_fan">
+            <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=300&auto=format&fit=crop" alt="">
+          </div>
+          <div class="popup-photo-item" data-nick="@night_game">
+            <img src="https://images.unsplash.com/photo-1521417531039-273c86dd4cae?q=80&w=300&auto=format&fit=crop" alt="">
+          </div>
+        </div>
+        <div class="popup-upload-banner" id="popup-upload-banner">
+          <div class="popup-upload-icon">📤</div>
+          <div class="popup-upload-text">내 직관 인증샷 올리기<br><span style="font-weight:600;opacity:0.7;">업로드하면 응원 포인트 +10점!</span></div>
+        </div>
+        <div class="popup-footer">
+          <button class="popup-footer-btn" id="popup-open-photos">전체 갤러리 보기 →</button>
+        </div>
+      </div>
+
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-icon">📸</span>
+          <div>
+            <div class="card-title">인증샷</div>
+            <div class="card-subtitle">Photo Verification</div>
+          </div>
+        </div>
+        <span style="font-size:9px; color:var(--text-3); font-weight:600;">실시간 업데이트</span>
+      </div>
+
+      <div class="photo-grid">
+        <div class="photo-item" data-caption="@kia_fan92">
+          <img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=600&auto=format&fit=crop" alt="Fan photo 1">
+        </div>
+        <div class="photo-item" data-caption="@lg_supporter">
+          <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop" alt="Fan photo 2">
+        </div>
+        <div class="photo-item" data-caption="@park_hopper">
+          <img src="https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=600&auto=format&fit=crop" alt="Fan photo 3">
+        </div>
+        <div class="photo-item" data-caption="@stadium_view">
+          <img src="https://images.unsplash.com/photo-1471295253337-3ceaaedca402?q=80&w=600&auto=format&fit=crop" alt="Fan photo 4">
+        </div>
+        <div class="photo-item" data-caption="@cheering_fan">
+          <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=600&auto=format&fit=crop" alt="Fan photo 5">
+        </div>
+        <div class="photo-item" data-caption="@night_game">
+          <img src="https://images.unsplash.com/photo-1521417531039-273c86dd4cae?q=80&w=600&auto=format&fit=crop" alt="Fan photo 6">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <button class="card-link" id="open-photos">인증샷 전체 보기 →</button>
+    </div>
+
+    <!-- Schedule card -->
+    <a href="schedule.html" class="schedule-card fade-in" style="animation-delay:0.15s">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-icon">📅</span>
+          <div>
+            <div class="card-title">경기 일정</div>
+            <div class="card-subtitle">Today Schedule</div>
+          </div>
+        </div>
+        <span class="badge-blue">전체 보기</span>
+      </div>
+      <div class="featured-match">
+        <div class="match-time-row">
+          <span class="match-time-label">오늘의 핵심 매치</span>
+          <span class="match-time">18:30</span>
+        </div>
+        <div class="match-name">KIA vs LG</div>
+        <div class="match-meta">잠실 · 응원 지수 경쟁이 가장 치열한 경기</div>
+      </div>
+      <div class="schedule-row"><span>한화 vs 삼성</span><span style="color:var(--text-3)">18:30</span></div>
+      <div class="schedule-row"><span>롯데 vs SSG</span><span style="color:var(--text-3)">18:30</span></div>
+      <div class="schedule-row"><span>두산 vs 키움</span><span style="color:var(--text-3)">18:30</span></div>
+      <div class="divider"></div>
+      <span class="card-link">전체 경기 일정 보기 →</span>
+    </a>
+  </div>
+
+</main>
+
+<!-- ═══ 점령전 티켓 인증 모달 ═══ -->
+<div id="battle-modal" class="modal-backdrop">
+  <div class="modal-box" style="max-width:560px;">
+    <div class="modal-header">
+      <span class="modal-title">⚔️ 점령전 참여하기</span>
+      <button class="modal-close" data-target="battle-modal">×</button>
+    </div>
+
+    <div id="battle-step-upload">
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:1.25rem;line-height:1.6;">
+        야구 티켓 사진을 업로드하면 AI가 경기 정보를 자동으로 읽어와요.<br>
+        <span style="color:var(--green);font-weight:700;">인증된 직관은 응원 포인트 +50점!</span>
+      </p>
+      <div id="battle-upload-zone" style="border:2px dashed rgba(255,255,255,0.15);border-radius:14px;padding:2.5rem;text-align:center;cursor:pointer;transition:all .2s;background:rgba(255,255,255,0.03);">
+        <div style="font-size:3rem;margin-bottom:0.75rem;">🎫</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text-2);margin-bottom:6px;">티켓 사진을 드래그하거나 클릭하여 업로드</div>
+        <div style="font-size:11px;color:var(--text-3);">JPG, PNG, HEIC 지원 · 최대 10MB</div>
+        <input type="file" id="battle-file-input" accept="image/*" style="display:none;">
+      </div>
+      <div id="battle-preview-wrap" style="display:none;margin-top:1rem;">
+        <img id="battle-preview-img" style="width:100%;max-height:260px;object-fit:contain;border-radius:10px;border:1px solid rgba(255,255,255,0.1);" alt="">
+        <button id="battle-reset-btn" style="margin-top:8px;background:none;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:inherit;">✕ 다시 선택</button>
+      </div>
+      <button id="battle-ocr-btn" style="width:100%;margin-top:1.25rem;padding:14px;background:linear-gradient(135deg,#DC2626,#1D4ED8);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;transition:all .2s;box-shadow:0 4px 16px rgba(220,38,38,0.3);opacity:0.4;pointer-events:none;" disabled>
+        🔍 티켓 정보 읽기
+      </button>
+    </div>
+
+    <div id="battle-step-loading" style="display:none;text-align:center;padding:3rem 0;">
+      <div style="font-size:3rem;margin-bottom:1rem;animation:spin 1.5s linear infinite;display:inline-block;">⚙️</div>
+      <div style="font-size:15px;font-weight:800;color:var(--text-1);margin-bottom:8px;">티켓 분석 중...</div>
+      <div style="font-size:12px;color:var(--text-3);">Cloud Vision AI가 티켓 정보를 읽고 있어요</div>
+      <div style="margin-top:1.25rem;height:4px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;">
+        <div id="ocr-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#DC2626,#1D4ED8);border-radius:99px;transition:width .4s;"></div>
+      </div>
+    </div>
+
+    <div id="battle-step-result" style="display:none;">
+      <div id="battle-result-card" style="background:linear-gradient(135deg,rgba(220,38,38,0.12),rgba(29,78,216,0.12));border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+          <span style="font-size:1.2rem;">🎫</span>
+          <span style="font-size:14px;font-weight:900;color:var(--text-1);">티켓 인식 결과</span>
+          <span id="ocr-confidence-badge" style="margin-left:auto;font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.3);">AI 분석 완료</span>
+        </div>
+        <div style="display:grid;gap:10px;">
+          <div class="ocr-field-row"><span class="ocr-field-label">📅 경기 날짜</span><span class="ocr-field-val" id="ocr-date">-</span></div>
+          <div class="ocr-field-row"><span class="ocr-field-label">⚾ 경기</span><span class="ocr-field-val" id="ocr-match">-</span></div>
+          <div class="ocr-field-row"><span class="ocr-field-label">🏟 구장</span><span class="ocr-field-val" id="ocr-stadium">-</span></div>
+          <div class="ocr-field-row"><span class="ocr-field-label">💺 좌석</span><span class="ocr-field-val" id="ocr-seat">-</span></div>
+        </div>
+      </div>
+      <details style="margin-bottom:1.25rem;">
+        <summary style="font-size:11px;color:var(--text-3);cursor:pointer;font-weight:700;">📄 OCR 원문 보기</summary>
+        <pre id="ocr-raw-text" style="margin-top:8px;padding:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:10px;color:var(--text-3);white-space:pre-wrap;word-break:break-all;max-height:120px;overflow-y:auto;"></pre>
+      </details>
+      <div style="display:flex;gap:8px;">
+        <button id="battle-retry-btn" style="flex:1;padding:11px;border-radius:10px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:var(--text-2);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;">↩ 다시 업로드</button>
+        <button id="battle-confirm-btn" style="flex:2;padding:11px;border-radius:10px;background:linear-gradient(135deg,#DC2626,#1D4ED8);color:#fff;border:none;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;transition:all .2s;box-shadow:0 4px 14px rgba(220,38,38,0.3);">⚔️ 점령전 참여 확정!</button>
+      </div>
+    </div>
+
+    <div id="battle-step-done" style="display:none;text-align:center;padding:2.5rem 0;">
+      <div style="font-size:4rem;margin-bottom:1rem;">🎉</div>
+      <div style="font-size:1.2rem;font-weight:900;color:var(--text-1);margin-bottom:8px;">점령전 참여 완료!</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:1.5rem;">
+        티켓이 인증되었어요.<br>
+        <span style="color:#F5C842;font-weight:800;">+50 응원 포인트</span>가 적립되었습니다! ⚾
+      </div>
+      <div id="battle-done-info" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:1rem;font-size:13px;color:var(--text-2);text-align:left;margin-bottom:1.25rem;"></div>
+      <button id="battle-done-close" style="width:100%;padding:12px;border-radius:10px;background:linear-gradient(135deg,#DC2626,#1D4ED8);color:#fff;border:none;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;">확인</button>
+    </div>
+
+    <!-- STEP 5: 오류 -->
+    <div id="battle-step-error" style="display:none;text-align:center;padding:2.5rem 1rem;">
+      <div style="font-size:3.5rem;margin-bottom:1rem;">🚫</div>
+      <div style="font-size:1.1rem;font-weight:900;color:#f87171;margin-bottom:10px;">참여 불가</div>
+      <div id="battle-error-msg" style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:1.5rem;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:1rem;"></div>
+      <button id="battle-error-close" style="width:100%;padding:12px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:var(--text-2);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">닫기</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .ocr-field-row { display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06); }
+  .ocr-field-row:last-child { border-bottom:none; }
+  .ocr-field-label { font-size:12px;font-weight:700;color:var(--text-3); }
+  .ocr-field-val   { font-size:13px;font-weight:800;color:var(--text-1);text-align:right;max-width:60%; }
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+</style>
+
+<!-- ═══ PHOTOS MODAL ═══ -->
+<div id="photos-modal" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">인증샷 갤러리</span>
+      <button class="modal-close" data-target="photos-modal">×</button>
+    </div>
+    <div class="upload-zone">
+      <div class="upload-icon">📸</div>
+      <div class="upload-text">구장에서 찍은 사진을 올려 응원 포인트를 획득하세요!<br>사진 1장당 포인트 +10점</div>
+      <button class="upload-btn">내 사진 업로드</button>
+    </div>
+    <div style="font-size:14px; font-weight:800; color:var(--text-1); margin-bottom:1rem;">팬 갤러리</div>
+    <div class="gallery-grid">
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@baseball_lover</div></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@homerun_shot</div></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@park_hopper</div></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1471295253337-3ceaaedca402?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@stadium_view</div></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@cheering_fan</div></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1521417531039-273c86dd4cae?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@night_game</div></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@crowd_energy</div></div>
+      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1624526267942-ab67cb38121d?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@stadium_moment</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/index.js"></script>
+</body>
+</html>
