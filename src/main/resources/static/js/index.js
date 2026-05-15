@@ -594,3 +594,183 @@ renderZone('orange-3b'); // 초기 구역
     });
   }
 })();
+
+// ─── 경기 일정 카드 동적 로딩 ───
+(function() {
+  const TEAM_COL = {
+    'KIA':'#EF4444','기아':'#EF4444','LG':'#3B82F6','두산':'#1E3A8A',
+    '삼성':'#1D4ED8','롯데':'#EF4444','SSG':'#CE0E2D','NC':'#0EA5E9',
+    'KT':'#DC2626','한화':'#F97316','키움':'#820024'
+  };
+  function tc(name) { return TEAM_COL[name] || '#94A3B8'; }
+
+  async function loadScheduleCard() {
+    try {
+      const res = await fetch('/api/games/today');
+      if (!res.ok) return;
+      const games = await res.json();
+      if (!games.length) {
+        const mn = document.getElementById('schedule-main-match');
+        const mt = document.getElementById('schedule-main-time');
+        const mm = document.getElementById('schedule-main-meta');
+        if (mn) mn.textContent = '오늘 예정된 경기가 없습니다';
+        if (mt) mt.textContent = '';
+        if (mm) mm.textContent = '내일 경기 일정을 확인해보세요';
+        return;
+      }
+
+      const myTeam = localStorage.getItem('favoriteTeam') || '';
+      let featured = games[0];
+      if (myTeam) {
+        const found = games.find(g => g.homeTeam === myTeam || g.awayTeam === myTeam);
+        if (found) featured = found;
+      }
+
+      const mn  = document.getElementById('schedule-main-match');
+      const mt  = document.getElementById('schedule-main-time');
+      const mm  = document.getElementById('schedule-main-meta');
+      const tl  = document.querySelector('#schedule-card-body .match-time-label');
+      const ext = document.getElementById('schedule-extra-rows');
+
+      if (mn) {
+        const hc = tc(featured.homeTeam); const ac = tc(featured.awayTeam);
+        mn.innerHTML = `<span style="color:${ac};font-weight:900;">${featured.awayTeam}</span>`
+          + ` <span style="color:var(--text-3);font-size:0.85em;margin:0 4px">vs</span>`
+          + `<span style="color:${hc};font-weight:900;">${featured.homeTeam}</span>`;
+      }
+      if (mt) {
+        const s = (featured.status||'').toLowerCase();
+        if (s.includes('live') || s.includes('진행')) {
+          mt.innerHTML = `<span style="background:#22C55E;color:#fff;padding:2px 7px;border-radius:99px;font-size:11px;font-weight:800;">LIVE</span>`;
+        } else if (s.includes('종료') || s.includes('final')) {
+          mt.textContent = `${featured.homeScore ?? '-'} : ${featured.awayScore ?? '-'}`;
+        } else {
+          mt.textContent = featured.gameTime ? featured.gameTime.slice(0,5) : '18:30';
+        }
+      }
+      if (mm) mm.textContent = (featured.venue || '') + (myTeam && (featured.homeTeam===myTeam||featured.awayTeam===myTeam) ? ' · 내 팀 경기!' : ' · 오늘의 핵심 매치');
+      if (tl) tl.textContent = '오늘의 핵심 매치';
+
+      // 나머지 경기들
+      if (ext) {
+        const rest = games.filter(g => g.id !== featured.id).slice(0, 3);
+        ext.innerHTML = rest.map(g => {
+          const s = (g.status||'').toLowerCase();
+          const scoreOrTime = (s.includes('live')||s.includes('진행'))
+            ? `<span style="background:#22C55E;color:#fff;padding:1px 6px;border-radius:99px;font-size:10px;">LIVE</span>`
+            : (s.includes('종료') ? `${g.homeScore??'-'}:${g.awayScore??'-'}` : (g.gameTime||'').slice(0,5)||'18:30');
+          return `<div class="schedule-row">
+            <span><span style="color:${tc(g.awayTeam)};font-weight:700;">${g.awayTeam}</span> vs <span style="color:${tc(g.homeTeam)};font-weight:700;">${g.homeTeam}</span></span>
+            <span style="color:var(--text-3)">${scoreOrTime}</span>
+          </div>`;
+        }).join('');
+      }
+    } catch(e) { /* 조용히 무시 */ }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadScheduleCard);
+})();
+
+// ─── 응원 지수 실시간 반영 (서버 API 기반) ───
+(function() {
+  function updateCheerUI(homeScore, awayScore, homePct, awayPct) {
+    const els = {
+      kiaScore:  document.getElementById('kia-score'),
+      lgScore:   document.getElementById('lg-score'),
+      kiaPct:    document.getElementById('kia-pct'),
+      lgPct:     document.getElementById('lg-pct'),
+      kiaBar:    document.getElementById('kia-bar'),
+      lgBar:     document.getElementById('lg-bar'),
+      zoneRatio: document.getElementById('zone-ratio'),
+    };
+    if (els.kiaScore)  els.kiaScore.textContent  = homeScore;
+    if (els.lgScore)   els.lgScore.textContent   = awayScore;
+    if (els.kiaPct)    els.kiaPct.textContent    = homePct + '%';
+    if (els.lgPct)     els.lgPct.textContent     = awayPct + '%';
+    if (els.kiaBar)    els.kiaBar.style.width    = homePct + '%';
+    if (els.lgBar)     els.lgBar.style.width     = awayPct + '%';
+    if (els.zoneRatio) els.zoneRatio.innerHTML   =
+      `<span style="color:var(--kia)">홈 ${homePct}%</span>`
+      + `<span style="color:var(--text-3);font-size:1rem;margin:0 4px">:</span>`
+      + `<span style="color:var(--lg)">원정 ${awayPct}%</span>`;
+  }
+
+  async function refreshCheerPoints() {
+    try {
+      const res  = await fetch('/api/posts/cheer-ratio');
+      if (!res.ok) return;
+      const data = await res.json();
+      updateCheerUI(data.homeScore, data.awayScore, data.homePct, data.awayPct);
+    } catch(e) { /* 조용히 무시 */ }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    refreshCheerPoints();
+    document.querySelectorAll('.zone-btn').forEach(btn => {
+      btn.addEventListener('click', () => setTimeout(refreshCheerPoints, 50));
+    });
+  });
+})();
+
+// ─── 커뮤니티 인증샷 → index.html 인증샷 카드 표시 (서버 API 기반) ───
+(function() {
+  const PLACEHOLDER = [
+    'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1471295253337-3ceaaedca402?q=80&w=600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1521417531039-273c86dd4cae?q=80&w=600&auto=format&fit=crop',
+  ];
+
+  async function renderPhotoCards() {
+    let communityPhotos = [];
+    try {
+      const res  = await fetch('/api/posts/photos?limit=12');
+      if (res.ok) communityPhotos = await res.json();
+    } catch(e) {}
+
+    // 메인 인증샷 카드 (6칸)
+    document.querySelectorAll('.photo-item').forEach((item, i) => {
+      const img = item.querySelector('img');
+      if (!img) return;
+      if (communityPhotos[i]) {
+        img.src = communityPhotos[i].imageData;
+        item.setAttribute('data-caption', '@' + communityPhotos[i].author);
+        item.style.cursor = 'pointer';
+        item.onclick = e => { e.stopPropagation(); window.location.href = 'community.html?tab=photo'; };
+      } else {
+        img.src = PLACEHOLDER[i] || PLACEHOLDER[0];
+        item.onclick = null;
+      }
+    });
+
+    // popup 인증샷
+    document.querySelectorAll('.popup-photo-item').forEach((item, i) => {
+      const img = item.querySelector('img');
+      if (!img) return;
+      if (communityPhotos[i]) {
+        img.src = communityPhotos[i].imageData;
+        item.setAttribute('data-nick', '@' + communityPhotos[i].author);
+      } else {
+        img.src = PLACEHOLDER[i] || PLACEHOLDER[0];
+      }
+    });
+
+    // 갤러리 모달
+    const galleryItems = document.querySelectorAll('#photos-modal .gallery-item');
+    galleryItems.forEach((item, i) => {
+      const img     = item.querySelector('img');
+      const overlay = item.querySelector('.gallery-overlay');
+      if (!img) return;
+      if (communityPhotos[i]) {
+        img.src = communityPhotos[i].imageData;
+        if (overlay) overlay.textContent = '@' + communityPhotos[i].author;
+      } else {
+        img.src = PLACEHOLDER[i % PLACEHOLDER.length];
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', renderPhotoCards);
+})();
