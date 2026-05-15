@@ -29,7 +29,7 @@ DB_CONFIG = {
     "port":     int(os.getenv("DB_PORT", "3306")),
     "db":       os.getenv("DB_NAME",     "placeball"),
     "user":     os.getenv("DB_USER",     "root"),
-    "password": os.getenv("DB_PASSWORD", "1234"),
+    "password": os.getenv("DB_PASSWORD", "placeball"),
     "charset":  "utf8mb4",
 }
 

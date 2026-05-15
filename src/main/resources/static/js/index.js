@@ -67,6 +67,18 @@ function renderHeaderBadge() {
   }
 })();
 
+// LocalDate/LocalTime 배열([18,30,0]) 또는 문자열("18:30:00") 양쪽 처리
+function parseGameTime(v) {
+  if (!v) return '';
+  if (Array.isArray(v)) return String(v[0]).padStart(2,'0') + ':' + String(v[1]).padStart(2,'0');
+  return String(v).slice(0, 5);
+}
+function parseGameDate(v) {
+  if (!v) return '';
+  if (Array.isArray(v)) return v[0] + '-' + String(v[1]).padStart(2,'0') + '-' + String(v[2]).padStart(2,'0');
+  return String(v).slice(0, 10);
+}
+
 // ─── 팀 색상 맵 ───
 const TEAM_COLORS = {
   'KIA':  '#EF4444', '기아': '#EF4444',
@@ -152,7 +164,7 @@ function teamColor(name) { return TEAM_COLORS[name] || '#94A3B8'; }
         statusBadge.textContent    = '종료';
         statusBadge.style.background = '#64748B';
       } else {
-        statusBadge.textContent    = game.time ? game.time.slice(0,5) : '예정';
+        statusBadge.textContent    = parseGameTime(game.gameTime) || '예정';
         statusBadge.style.background = '#3B82F6';
       }
     }
@@ -645,7 +657,7 @@ renderZone('orange-3b'); // 초기 구역
         } else if (s.includes('종료') || s.includes('final')) {
           mt.textContent = `${featured.homeScore ?? '-'} : ${featured.awayScore ?? '-'}`;
         } else {
-          mt.textContent = featured.gameTime ? featured.gameTime.slice(0,5) : '18:30';
+          mt.textContent = parseGameTime(featured.gameTime) || '18:30';
         }
       }
       if (mm) mm.textContent = (featured.venue || '') + (myTeam && (featured.homeTeam===myTeam||featured.awayTeam===myTeam) ? ' · 내 팀 경기!' : ' · 오늘의 핵심 매치');
@@ -658,14 +670,14 @@ renderZone('orange-3b'); // 초기 구역
           const s = (g.status||'').toLowerCase();
           const scoreOrTime = (s.includes('live')||s.includes('진행'))
             ? `<span style="background:#22C55E;color:#fff;padding:1px 6px;border-radius:99px;font-size:10px;">LIVE</span>`
-            : (s.includes('종료') ? `${g.homeScore??'-'}:${g.awayScore??'-'}` : (g.gameTime||'').slice(0,5)||'18:30');
+            : (s.includes('종료') ? `${g.homeScore??'-'}:${g.awayScore??'-'}` : parseGameTime(g.gameTime)||'18:30');
           return `<div class="schedule-row">
             <span><span style="color:${tc(g.awayTeam)};font-weight:700;">${g.awayTeam}</span> vs <span style="color:${tc(g.homeTeam)};font-weight:700;">${g.homeTeam}</span></span>
             <span style="color:var(--text-3)">${scoreOrTime}</span>
           </div>`;
         }).join('');
       }
-    } catch(e) { /* 조용히 무시 */ }
+    } catch(e) { console.error('[경기카드 로딩 실패]', e); }
   }
 
   document.addEventListener('DOMContentLoaded', loadScheduleCard);

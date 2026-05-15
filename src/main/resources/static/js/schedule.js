@@ -52,11 +52,23 @@ function getTeamColor(name) {
 }
 
 // API 응답(Game 엔티티) → 프론트 통일 포맷 변환
+// LocalDate/LocalTime이 배열([2026,5,16]) 또는 문자열("18:30:00") 모두 처리
+function parseDate(v) {
+  if (!v) return '';
+  if (Array.isArray(v)) return `${v[0]}-${String(v[1]).padStart(2,'0')}-${String(v[2]).padStart(2,'0')}`;
+  return String(v).slice(0, 10);
+}
+function parseTime(v) {
+  if (!v) return '';
+  if (Array.isArray(v)) return `${String(v[0]).padStart(2,'0')}:${String(v[1]).padStart(2,'0')}`;
+  return String(v).slice(0, 5);
+}
+
 function normalizeGame(g) {
   return {
     id:         g.id,
-    date:       g.gameDate,                          // "2025-05-02"
-    time:       g.gameTime ? g.gameTime.slice(0,5) : '',  // "18:30:00" → "18:30"
+    date:       parseDate(g.gameDate),
+    time:       parseTime(g.gameTime),
     home:       g.homeTeam,
     away:       g.awayTeam,
     homeScore:  g.homeScore,
@@ -418,7 +430,7 @@ async function loadHeaderScoreboard() {
       statusBadge.textContent        = '종료';
       statusBadge.style.background   = '#64748B';
     } else {
-      statusBadge.textContent        = game.gameTime ? game.gameTime.slice(0, 5) : '예정';
+      statusBadge.textContent        = parseTime(game.gameTime) || '예정';
       statusBadge.style.background   = '#3B82F6';
     }
     board.style.visibility = 'visible';
