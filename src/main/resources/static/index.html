@@ -1251,8 +1251,7 @@
       <button class="card-link" id="open-photos">인증샷 전체 보기 →</button>
     </div>
 
-    <!-- Schedule card -->
-    <a href="schedule.html" class="schedule-card fade-in" style="animation-delay:0.15s">
+    <a href="schedule.html" class="schedule-card fade-in" style="animation-delay:0.15s" id="schedule-card-body">
       <div class="card-header">
         <div class="card-title-group">
           <span class="card-icon">📅</span>
@@ -1263,16 +1262,16 @@
         </div>
         <span class="badge-blue">전체 보기</span>
       </div>
-      <div id="schedule-card-body">
-        <div class="featured-match">
-          <div class="match-time-row">
-            <span class="match-time-label" id="schedule-main-label">오늘의 핵심 매치</span>
-            <span class="match-time" id="schedule-main-time">-</span>
-          </div>
-          <div class="match-name" id="schedule-main-match">⚾ 불러오는 중...</div>
-          <div class="match-meta" id="schedule-main-meta"></div>
+
+      <div class="featured-match">
+        <div class="match-time-row">
+          <span class="match-time-label">오늘의 핵심 매치</span>
+          <span class="match-time" id="schedule-main-time">18:30</span>
         </div>
-        <div id="schedule-extra-rows"></div>
+        <div class="match-name" id="schedule-main-match">데이터를 불러오는 중...</div>
+        <div class="match-meta" id="schedule-main-meta">경기 정보를 확인하세요</div>
+      </div>
+      <div id="schedule-extra-rows">
       </div>
       <div class="divider"></div>
       <span class="card-link">전체 경기 일정 보기 →</span>
