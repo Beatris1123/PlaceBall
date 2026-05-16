@@ -143,6 +143,38 @@
         .detail-images{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.5rem;}
         .detail-images img{max-width:200px;border-radius:10px;cursor:pointer;border:1px solid var(--border);}
         .detail-footer-action{display:flex;align-items:center;justify-content:center;gap:12px;padding-top:1rem;border-top:1px solid var(--border);}
+
+        /* ── 댓글 영역 ── */
+        .comment-section{margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border);}
+        .comment-section-title{font-size:12px;font-weight:800;color:var(--text-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem;}
+        .comment-list{display:flex;flex-direction:column;gap:10px;margin-bottom:1rem;min-height:0;}
+        .comment-item{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:10px 14px;position:relative;}
+        .comment-header{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+        .comment-author{font-size:12px;font-weight:800;color:var(--text-1);}
+        .comment-date{font-size:11px;color:var(--text-3);}
+        .comment-edited{font-size:10px;color:var(--text-3);font-style:italic;}
+        .comment-content{font-size:13px;color:var(--text-2);line-height:1.7;white-space:pre-wrap;word-break:break-all;}
+        .comment-actions{display:flex;gap:6px;margin-top:6px;}
+        .comment-btn{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;border:1px solid var(--border-md);background:transparent;color:var(--text-3);cursor:pointer;font-family:inherit;transition:all 0.15s;}
+        .comment-btn:hover{color:var(--text-1);background:rgba(255,255,255,0.07);}
+        .comment-btn.del{border-color:rgba(220,38,38,0.25);color:#F87171;}
+        .comment-btn.del:hover{background:rgba(220,38,38,0.08);}
+        .comment-empty{text-align:center;padding:1.5rem;color:var(--text-3);font-size:13px;}
+        .comment-write{display:flex;gap:8px;align-items:flex-end;}
+        .comment-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border-md);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--text-1);font-family:inherit;resize:none;min-height:44px;max-height:120px;outline:none;transition:border 0.15s;}
+        .comment-input:focus{border-color:rgba(59,130,246,0.5);}
+        .comment-submit{padding:10px 16px;border-radius:12px;background:var(--blue);border:none;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.15s;}
+        .comment-submit:hover{background:#2563EB;}
+        .comment-submit:disabled{opacity:0.5;cursor:not-allowed;}
+
+        /* ── 출석체크 ── */
+        .attendance-card{background:rgba(10,22,44,0.85);border:1px solid var(--border-md);border-radius:16px;padding:1.25rem;margin-bottom:1rem;}
+        .attendance-title{font-size:10px;font-weight:800;color:var(--text-3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.75rem;}
+        .attendance-btn{width:100%;padding:12px;border-radius:12px;background:linear-gradient(135deg,#1D4ED8,#3B82F6);border:none;color:#fff;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;letter-spacing:0.02em;}
+        .attendance-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(59,130,246,0.3);}
+        .attendance-btn:disabled{background:rgba(255,255,255,0.07);color:var(--text-3);cursor:not-allowed;transform:none;box-shadow:none;}
+        .attendance-status{margin-top:0.6rem;font-size:12px;text-align:center;color:var(--text-3);}
+        .attendance-status.done{color:var(--green);}
         .btn-like{display:flex;align-items:center;gap:7px;padding:9px 24px;border-radius:99px;background:rgba(220,38,38,0.10);border:1.5px solid rgba(220,38,38,0.25);color:var(--red);font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;transition:all 0.2s;}
         .btn-like:hover{background:rgba(220,38,38,0.18);}
         .btn-like.liked{background:var(--red);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(220,38,38,0.4);}
@@ -187,6 +219,16 @@
 <div class="main-wrap">
     <aside class="sidebar">
         <button class="btn-write" id="openWriteBtn">✏️ 글쓰기</button>
+
+        <!-- 출석체크 -->
+        <div class="attendance-card">
+            <div class="attendance-title">📅 오늘의 출석</div>
+            <button class="attendance-btn" id="attendanceBtn">
+                <span>⚾</span><span id="attendanceBtnText">출석체크</span>
+            </button>
+            <div class="attendance-status" id="attendanceStatus"></div>
+        </div>
+
         <div class="sidebar-title">카테고리</div>
         <div class="tab-list" id="tabList">
             <button class="tab-item active" data-tab="all"><span class="tab-icon">📋</span> 전체<span class="tab-count" id="cnt-all">0</span></button>
@@ -270,6 +312,22 @@
                 </button>
                 <button class="btn-edit" id="detailEditBtn" style="display:none;padding:9px 18px;border-radius:99px;background:rgba(59,130,246,0.12);border:1.5px solid rgba(59,130,246,0.3);color:#60A5FA;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;">✏️ 수정</button>
                 <button class="btn-delete" id="detailDeleteBtn" style="display:none;padding:9px 18px;border-radius:99px;background:rgba(220,38,38,0.10);border:1.5px solid rgba(220,38,38,0.25);color:#F87171;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;">🗑️ 삭제</button>
+            </div>
+
+            <!-- 댓글 영역 -->
+            <div class="comment-section">
+                <div class="comment-section-title">💬 댓글 <span id="commentCount">0</span></div>
+                <div class="comment-list" id="commentList">
+                    <div class="comment-empty">첫 댓글을 남겨보세요!</div>
+                </div>
+                <div class="comment-write" id="commentWrite" style="display:none;">
+                    <textarea class="comment-input" id="commentInput" placeholder="댓글을 입력하세요..." rows="1"
+                              oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+                    <button class="comment-submit" id="commentSubmitBtn">등록</button>
+                </div>
+                <div id="commentLoginPrompt" style="text-align:center;padding:0.75rem;font-size:12px;color:var(--text-3);">
+                    <a href="login.html" style="color:var(--blue);font-weight:700;">로그인</a>하면 댓글을 달 수 있어요
+                </div>
             </div>
         </div>
     </div>

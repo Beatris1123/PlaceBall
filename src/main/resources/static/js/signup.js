@@ -1,165 +1,126 @@
-const userIdInput = document.getElementById('signupId');
-const userNicknameInput = document.getElementById('signupNickname'); // 닉네임 입력창
-const userPwInput = document.getElementById('signupPw');
-const pwConfirmInput = document.getElementById('signupPwConfirm');
+/* ============================================================
+   signup.js — HTML ID 기준으로 완전 재작성
+   HTML id 목록: regId, regNick, regPw, regPw2, selectedTeam,
+                 signupSubmitBtn, signupMsg
+   ============================================================ */
 
-const idMessage = document.getElementById('idMessage');
-const nicknameMessage = document.getElementById('nicknameMessage'); // 닉네임 메시지
-const pwMessage = document.getElementById('pwMessage');
+// ── 요소 참조 ──
+const regIdEl   = document.getElementById('regId');
+const regNickEl = document.getElementById('regNick');
+const regPwEl   = document.getElementById('regPw');
+const regPw2El  = document.getElementById('regPw2');
+const msgEl     = document.getElementById('signupMsg');
+const submitBtn = document.getElementById('signupSubmitBtn');
 
-// 상태 저장 변수
-let isIdChecked = false;       // 아이디 중복확인 통과 여부
-let isNicknameChecked = false; // 닉네임 중복확인 통과 여부
+// ── 상태 ──
+let idChecked   = false;
+let nickChecked = false;
 
-// ==========================================
-// 1. 입력값이 변경되면 중복확인 상태 초기화
-// ==========================================
-userIdInput.addEventListener('input', function() {
-    isIdChecked = false;
-    idMessage.className = 'status-text';
-});
-
-userNicknameInput.addEventListener('input', function() {
-    isNicknameChecked = false;
-    nicknameMessage.className = 'status-text';
-});
-
-// ==========================================
-// 2. 아이디 중복확인 버튼
-// ==========================================
-document.getElementById('checkIdBtn').addEventListener('click', function() {
-    const userId = userIdInput.value.trim();
-
-    if (!userId) {
-        alert("아이디를 입력해주세요.");
-        return;
-    }
-
-    fetch(`/api/check-id?id=${userId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.available) {
-                idMessage.textContent = "사용 가능한 아이디입니다.";
-                idMessage.className = 'status-text text-success';
-                isIdChecked = true;
-            } else {
-                idMessage.textContent = "이미 사용 중인 아이디입니다.";
-                idMessage.className = 'status-text text-error';
-                isIdChecked = false;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert("백엔드 연결 전이므로 임시로 '사용 가능' 처리합니다.");
-            idMessage.textContent = "사용 가능한 아이디입니다. (임시)";
-            idMessage.className = 'status-text text-success';
-            isIdChecked = true;
-        });
-});
-
-// ==========================================
-// 3. 닉네임 중복확인 버튼 (새로 추가됨)
-// ==========================================
-document.getElementById('checkNicknameBtn').addEventListener('click', function() {
-    const nickname = userNicknameInput.value.trim();
-
-    if (!nickname) {
-        alert("닉네임을 입력해주세요.");
-        return;
-    }
-
-    fetch(`/api/check-nickname?nickname=${nickname}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.available) {
-                nicknameMessage.textContent = "사용 가능한 닉네임입니다.";
-                nicknameMessage.className = 'status-text text-success';
-                isNicknameChecked = true;
-            } else {
-                nicknameMessage.textContent = "이미 사용 중인 닉네임입니다.";
-                nicknameMessage.className = 'status-text text-error';
-                isNicknameChecked = false;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert("백엔드 연결 전이므로 임시로 '사용 가능' 처리합니다.");
-            nicknameMessage.textContent = "사용 가능한 닉네임입니다. (임시)";
-            nicknameMessage.className = 'status-text text-success';
-            isNicknameChecked = true;
-        });
-});
-
-// ==========================================
-// 4. 비밀번호 일치 확인 (실시간 체크)
-// ==========================================
-function checkPasswordMatch() {
-    const pw = userPwInput.value;
-    const pwConfirm = pwConfirmInput.value;
-
-    if (!pw || !pwConfirm) {
-        pwMessage.className = 'status-text';
-        return;
-    }
-
-    if (pw === pwConfirm) {
-        pwMessage.textContent = "비밀번호가 일치합니다.";
-        pwMessage.className = 'status-text text-success';
-    } else {
-        pwMessage.textContent = "비밀번호가 일치하지 않습니다.";
-        pwMessage.className = 'status-text text-error';
-    }
+// ── 메시지 표시 헬퍼 ──
+function showMsg(text, type) {   // type: 'error' | 'success' | ''
+  if (!msgEl) return;
+  msgEl.textContent  = text;
+  msgEl.style.color  = type === 'error' ? '#F87171' : type === 'success' ? '#4ADE80' : '#94A3B8';
 }
 
-userPwInput.addEventListener('input', checkPasswordMatch);
-pwConfirmInput.addEventListener('input', checkPasswordMatch);
+// ── 팀 선택 (onclick="pickTeam(this)" 에서 호출) ──
+window.pickTeam = function(btn) {
+  document.querySelectorAll('.team-pick-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const hidden = document.getElementById('selectedTeam');
+  if (hidden) hidden.value = btn.dataset.team;
+};
 
-// ==========================================
-// 5. 최종 가입하기 버튼 클릭 시 검증
-// ==========================================
-document.getElementById('submitSignupBtn').addEventListener('click', function() {
-    const userId = userIdInput.value.trim();
-    const nickname = userNicknameInput.value.trim();
-    const userPw = userPwInput.value;
-    const pwConfirm = pwConfirmInput.value;
-
-    if (!isIdChecked) {
-        alert("아이디 중복확인을 진행해주세요.");
-        return;
+// ── 아이디 중복 확인 ──
+// signup.html에 checkIdBtn이 없으므로 regId에서 포커스 아웃 시 자동 체크
+regIdEl?.addEventListener('blur', async function () {
+  const val = this.value.trim();
+  idChecked = false;
+  if (!val) return;
+  if (!/^[a-zA-Z0-9]{4,20}$/.test(val)) {
+    showMsg('아이디는 영문·숫자 4~20자로 입력해주세요.', 'error');
+    return;
+  }
+  try {
+    const res  = await fetch(`/api/check-id?id=${encodeURIComponent(val)}`);
+    const data = await res.json();
+    if (data.available) {
+      showMsg('사용 가능한 아이디입니다.', 'success');
+      idChecked = true;
+    } else {
+      showMsg('이미 사용 중인 아이디입니다.', 'error');
     }
-    if (!isNicknameChecked) {
-        alert("닉네임 중복확인을 진행해주세요.");
-        return;
-    }
-    if (!userPw) {
-        alert("비밀번호를 입력해주세요.");
-        return;
-    }
-    if (userPw !== pwConfirm) {
-        alert("비밀번호가 일치하지 않습니다. 다시 확인해주세요.");
-        return;
-    }
-
-    // body 부분에 nickname 데이터 추가하여 백엔드 전송
-    fetch('/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            id: userId,
-            nickname: nickname,
-            password: userPw
-        })
-    })
-    .then(response => {
-        alert('회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.');
-        window.location.href = 'login.html';
-    })
-    .catch(error => console.error('Error:', error));
+  } catch(e) { /* 서버 미연결 시 가입 단계에서 확인 */ idChecked = true; }
 });
 
-// ==========================================
-// 6. 돌아가기 버튼
-// ==========================================
-document.getElementById('cancelBtn').addEventListener('click', function() {
-    window.location.href = 'login.html';
+regIdEl?.addEventListener('input', () => { idChecked = false; showMsg('', ''); });
+
+// ── 닉네임 중복 확인 ──
+regNickEl?.addEventListener('blur', async function () {
+  const val = this.value.trim();
+  nickChecked = false;
+  if (!val) return;
+  try {
+    const res  = await fetch(`/api/check-nickname?nickname=${encodeURIComponent(val)}`);
+    const data = await res.json();
+    if (data.available) {
+      showMsg('사용 가능한 닉네임입니다.', 'success');
+      nickChecked = true;
+    } else {
+      showMsg('이미 사용 중인 닉네임입니다.', 'error');
+    }
+  } catch(e) { nickChecked = true; }
+});
+
+regNickEl?.addEventListener('input', () => { nickChecked = false; showMsg('', ''); });
+
+// ── 비밀번호 확인 (실시간) ──
+regPw2El?.addEventListener('input', function () {
+  if (!regPwEl.value || !this.value) { showMsg('', ''); return; }
+  if (regPwEl.value === this.value) showMsg('비밀번호가 일치합니다.', 'success');
+  else                              showMsg('비밀번호가 일치하지 않습니다.', 'error');
+});
+
+// ── 가입하기 버튼 ──
+submitBtn?.addEventListener('click', async () => {
+  const loginId      = regIdEl?.value.trim()   || '';
+  const nickname     = regNickEl?.value.trim()  || '';
+  const password     = regPwEl?.value           || '';
+  const passwordConf = regPw2El?.value          || '';
+  const favoriteTeam = document.getElementById('selectedTeam')?.value || '';
+
+  // ── 유효성 검사 ──
+  if (!loginId) { showMsg('아이디를 입력해주세요.', 'error'); regIdEl?.focus(); return; }
+  if (!/^[a-zA-Z0-9]{4,20}$/.test(loginId)) {
+    showMsg('아이디는 영문·숫자 4~20자로 입력해주세요.', 'error'); regIdEl?.focus(); return;
+  }
+  if (!nickname) { showMsg('닉네임을 입력해주세요.', 'error'); regNickEl?.focus(); return; }
+  if (password.length < 8) { showMsg('비밀번호는 8자 이상이어야 합니다.', 'error'); regPwEl?.focus(); return; }
+  if (password !== passwordConf) { showMsg('비밀번호가 일치하지 않습니다.', 'error'); regPw2El?.focus(); return; }
+  if (!favoriteTeam) { showMsg('응원 팀을 선택해주세요.', 'error'); return; }
+
+  submitBtn.disabled    = true;
+  submitBtn.textContent = '처리 중...';
+
+  try {
+    const res  = await fetch('/api/signup', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ id: loginId, nickname, password, favoriteTeam })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showMsg('회원가입 완료! 로그인 페이지로 이동합니다.', 'success');
+      setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+    } else {
+      showMsg(data.message || '회원가입에 실패했습니다. 다시 시도해주세요.', 'error');
+      submitBtn.disabled    = false;
+      submitBtn.textContent = '가입하기';
+    }
+  } catch(e) {
+    showMsg('서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.', 'error');
+    submitBtn.disabled    = false;
+    submitBtn.textContent = '가입하기';
+  }
 });

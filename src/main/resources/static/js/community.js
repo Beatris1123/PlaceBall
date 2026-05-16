@@ -437,3 +437,233 @@ document.addEventListener('DOMContentLoaded', () => {
   handleURLParams();
   renderBoard();
 });
+// ══════════════════════════════════════════════════════════════
+// 댓글 기능
+// ══════════════════════════════════════════════════════════════
+
+let editingCommentId = null;   // 수정 중인 댓글 ID
+
+function formatCommentDate(isoStr) {
+  const d    = new Date(isoStr);
+  const diff = Date.now() - d.getTime();
+  if (diff < 60000)    return '방금 전';
+  if (diff < 3600000)  return `${Math.floor(diff / 60000)}분 전`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}시간 전`;
+  return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+// 댓글 목록 로드
+async function loadComments(postId) {
+  const nick   = getNick();
+  const params = new URLSearchParams({ postId });
+  if (nick) params.append('viewer', nick);
+
+  const list = await apiFetch(`/api/comments?${params}`);
+  if (!list) return;
+
+  const listEl      = document.getElementById('commentList');
+  const countEl     = document.getElementById('commentCount');
+  const writeEl     = document.getElementById('commentWrite');
+  const loginPrompt = document.getElementById('commentLoginPrompt');
+
+  if (countEl) countEl.textContent = list.length;
+
+  // 로그인 여부에 따라 입력창 표시
+  if (writeEl)     writeEl.style.display     = nick ? 'flex' : 'none';
+  if (loginPrompt) loginPrompt.style.display = nick ? 'none' : 'block';
+
+  if (!listEl) return;
+
+  if (!list.length) {
+    listEl.innerHTML = '<div class="comment-empty">첫 댓글을 남겨보세요!</div>';
+    return;
+  }
+
+  listEl.innerHTML = list.map(c => `
+    <div class="comment-item" id="comment-${c.id}">
+      <div class="comment-header">
+        <span class="comment-author">${escHtml(c.author)}</span>
+        <span class="comment-date">${formatCommentDate(c.date)}</span>
+        ${c.edited ? '<span class="comment-edited">(수정됨)</span>' : ''}
+      </div>
+      <div class="comment-content" id="comment-content-${c.id}">${escHtml(c.content)}</div>
+      ${c.isOwner ? `
+        <div class="comment-actions">
+          <button class="comment-btn" onclick="startEditComment(${c.id}, ${JSON.stringify(c.content)})">수정</button>
+          <button class="comment-btn del" onclick="deleteComment(${c.id})">삭제</button>
+        </div>` : ''}
+    </div>`
+  ).join('');
+}
+
+// 댓글 작성 / 수정 제출
+document.addEventListener('DOMContentLoaded', () => {
+  const submitBtn = document.getElementById('commentSubmitBtn');
+  const input     = document.getElementById('commentInput');
+  if (!submitBtn || !input) return;
+
+  submitBtn.addEventListener('click', async () => {
+    const content = input.value.trim();
+    if (!content) return;
+
+    const nick = getNick();
+    if (!nick) { alert('로그인이 필요합니다.'); return; }
+
+    submitBtn.disabled = true;
+
+    if (editingCommentId !== null) {
+      // ── 수정 모드 ──
+      const data = await apiFetch(`/api/comments/${editingCommentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ author: nick, content })
+      });
+      if (data?.success) {
+        cancelEditComment();
+        await loadComments(currentPostId);
+      } else {
+        alert(data?.message || '수정 중 오류가 발생했습니다.');
+      }
+    } else {
+      // ── 신규 작성 ──
+      const data = await apiFetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId: currentPostId, author: nick, content })
+      });
+      if (data?.success) {
+        input.value = '';
+        input.style.height = 'auto';
+        await loadComments(currentPostId);
+        // 맨 아래 스크롤
+        const listEl = document.getElementById('commentList');
+        if (listEl) listEl.scrollTop = listEl.scrollHeight;
+      } else {
+        alert(data?.message || '댓글 작성 중 오류가 발생했습니다.');
+      }
+    }
+
+    submitBtn.disabled = false;
+  });
+
+  // Enter(shift 없이) 제출
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submitBtn.click();
+    }
+  });
+});
+
+// 댓글 수정 시작
+function startEditComment(commentId, originalContent) {
+  editingCommentId = commentId;
+  const input     = document.getElementById('commentInput');
+  const submitBtn = document.getElementById('commentSubmitBtn');
+  if (input)     { input.value = originalContent; input.focus(); input.style.height = 'auto'; input.style.height = input.scrollHeight + 'px'; }
+  if (submitBtn) submitBtn.textContent = '수정 완료';
+  // 수정 취소 버튼 표시
+  let cancelBtn = document.getElementById('commentCancelBtn');
+  if (!cancelBtn) {
+    cancelBtn = document.createElement('button');
+    cancelBtn.id = 'commentCancelBtn';
+    cancelBtn.className = 'comment-btn';
+    cancelBtn.textContent = '취소';
+    cancelBtn.style.cssText = 'margin-left:6px;';
+    cancelBtn.onclick = cancelEditComment;
+    submitBtn.insertAdjacentElement('afterend', cancelBtn);
+  }
+}
+
+function cancelEditComment() {
+  editingCommentId = null;
+  const input     = document.getElementById('commentInput');
+  const submitBtn = document.getElementById('commentSubmitBtn');
+  const cancelBtn = document.getElementById('commentCancelBtn');
+  if (input)     { input.value = ''; input.style.height = 'auto'; }
+  if (submitBtn) submitBtn.textContent = '등록';
+  if (cancelBtn) cancelBtn.remove();
+}
+
+// 댓글 삭제
+async function deleteComment(commentId) {
+  if (!confirm('댓글을 삭제하시겠습니까?')) return;
+  const nick = getNick();
+  const data = await apiFetch(`/api/comments/${commentId}?author=${encodeURIComponent(nick)}`, {
+    method: 'DELETE'
+  });
+  if (data?.success) {
+    await loadComments(currentPostId);
+  } else {
+    alert(data?.message || '삭제 중 오류가 발생했습니다.');
+  }
+}
+
+// openDetail에 댓글 로드 연동 — 기존 openDetail 마지막에 loadComments 호출
+const _origOpenDetail = openDetail;
+window.openDetail = async function(id) {
+  await _origOpenDetail(id);
+  editingCommentId = null;
+  const input = document.getElementById('commentInput');
+  if (input) { input.value = ''; input.style.height = 'auto'; }
+  const submitBtn = document.getElementById('commentSubmitBtn');
+  if (submitBtn) submitBtn.textContent = '등록';
+  const cancelBtn = document.getElementById('commentCancelBtn');
+  if (cancelBtn) cancelBtn.remove();
+  await loadComments(id);
+};
+
+// ══════════════════════════════════════════════════════════════
+// 출석체크 기능
+// ══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  const btn       = document.getElementById('attendanceBtn');
+  const btnText   = document.getElementById('attendanceBtnText');
+  const statusEl  = document.getElementById('attendanceStatus');
+  if (!btn) return;
+
+  const nick = getNick();
+  if (!nick) {
+    btn.disabled    = true;
+    btnText.textContent = '로그인 필요';
+    return;
+  }
+
+  // 오늘 출석 여부 조회
+  try {
+    const res  = await fetch(`/api/attendance?nickname=${encodeURIComponent(nick)}`);
+    const data = await res.json();
+    if (data.doneToday) {
+      btn.disabled = true;
+      btnText.textContent = '✅ 출석 완료';
+      if (statusEl) { statusEl.textContent = '오늘 출석체크 완료!'; statusEl.className = 'attendance-status done'; }
+    }
+  } catch(e) {}
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    btnText.textContent = '처리 중...';
+    try {
+      const res  = await fetch('/api/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname: nick })
+      });
+      const data = await res.json();
+      if (data.success) {
+        btnText.textContent = '✅ 출석 완료';
+        if (statusEl) { statusEl.textContent = data.message; statusEl.className = 'attendance-status done'; }
+      } else if (data.alreadyDone) {
+        btnText.textContent = '✅ 출석 완료';
+        if (statusEl) { statusEl.textContent = data.message; statusEl.className = 'attendance-status done'; }
+      } else {
+        btn.disabled = false;
+        btnText.textContent = '출석체크';
+        if (statusEl) { statusEl.textContent = data.message || '오류가 발생했습니다.'; statusEl.className = 'attendance-status'; }
+      }
+    } catch(e) {
+      btn.disabled = false;
+      btnText.textContent = '출석체크';
+    }
+  });
+});
