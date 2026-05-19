@@ -142,6 +142,7 @@ public class DiaryApiController {
 
     // ── 공통: Diary 필드 채우기 ──
     private void fillDiary(Diary diary, DiaryRequest req) {
+        diary.setGameId(req.getGameId());
         diary.setGameDate(LocalDate.parse(req.getDate()));
         diary.setHomeTeam(req.getHome());
         diary.setAwayTeam(req.getAway());
@@ -165,6 +166,7 @@ public class DiaryApiController {
     private Map<String, Object> toMap(Diary d) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id",        d.getId());
+        m.put("gameId",    d.getGameId());          // ★ 경기 ID (수정 시 목록 선택 복원용)
         m.put("date",      d.getGameDate().toString());
         m.put("home",      d.getHomeTeam()   != null ? d.getHomeTeam()   : "");
         m.put("away",      d.getAwayTeam()   != null ? d.getAwayTeam()   : "");
@@ -193,6 +195,7 @@ public class DiaryApiController {
 @Data
 class DiaryRequest {
     private String  nickname;      // 로그인 닉네임 (본인 확인용)
+    private Long    gameId;        // 연결된 Game ID
     private String  date;          // "2026-05-11"
     private String  home;
     private String  away;

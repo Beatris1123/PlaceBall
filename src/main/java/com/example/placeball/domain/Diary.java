@@ -22,6 +22,9 @@ public class Diary {
     private Member member;
 
     // 경기 정보
+    @Column(name = "game_id")
+    private Long gameId;                   // 연결된 Game ID (수정 시 복원용)
+
     @Column(name = "game_date", nullable = false)
     private LocalDate gameDate;             // 직관 날짜
 
