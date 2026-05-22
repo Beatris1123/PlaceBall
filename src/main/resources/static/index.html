@@ -1146,30 +1146,30 @@
         </div>
         <div class="score-boxes">
           <div class="score-box score-box-kia">
-            <div class="score-box-label" style="color:var(--kia)">홈팀 응원 지수</div>
-            <div class="score-box-val" style="color:var(--kia)" id="kia-score">88</div>
+            <div class="score-box-label" style="color:var(--kia)" id="home-team-label">홈팀 응원</div>
+            <div class="score-box-val" style="color:var(--kia)" id="kia-score">-</div>
           </div>
           <div class="score-box score-box-lg">
-            <div class="score-box-label" style="color:var(--lg)">원정 응원 지수</div>
-            <div class="score-box-val" style="color:var(--lg)" id="lg-score">12</div>
+            <div class="score-box-label" style="color:var(--lg)" id="away-team-label">원정팀 응원</div>
+            <div class="score-box-val" style="color:var(--lg)" id="lg-score">-</div>
           </div>
         </div>
         <div class="gauge-row">
           <div class="gauge-label">
-            <span style="color:var(--kia)">홈팀 응원 비중</span>
-            <span style="color:var(--kia); font-weight:900;" id="kia-pct">88%</span>
+            <span id="home-gauge-label" style="color:var(--kia)">홈팀 응원 비중</span>
+            <span style="color:var(--kia); font-weight:900;" id="kia-pct">50%</span>
           </div>
           <div class="gauge-track">
-            <div class="gauge-fill" id="kia-bar" style="width:88%; background:var(--kia);"></div>
+            <div class="gauge-fill" id="kia-bar" style="width:50%; background:var(--kia);"></div>
           </div>
         </div>
         <div class="gauge-row">
           <div class="gauge-label">
-            <span style="color:var(--lg)">원정 응원 비중</span>
-            <span style="color:var(--lg); font-weight:900;" id="lg-pct">12%</span>
+            <span id="away-gauge-label" style="color:var(--lg)">원정팀 응원 비중</span>
+            <span style="color:var(--lg); font-weight:900;" id="lg-pct">50%</span>
           </div>
           <div class="gauge-track">
-            <div class="gauge-fill" id="lg-bar" style="width:12%; background:var(--lg);"></div>
+            <div class="gauge-fill" id="lg-bar" style="width:50%; background:var(--lg);"></div>
           </div>
         </div>
       </div>
@@ -1396,6 +1396,30 @@
   </div>
 </div>
 
-<script src="js/index.js"></script>
+<script>
+// ── 전역 점령전 점수 갱신 함수 (index.js IIFE 스코프 문제 우회) ──
+function updateHeaderBattleScore(home, away) {
+  var h = document.getElementById('homeScore');
+  var a = document.getElementById('awayScore');
+  if (h) h.textContent = home != null ? String(home) : '-';
+  if (a) a.textContent = away != null ? String(away) : '-';
+}
+
+async function refreshBattleScoreboard() {
+  try {
+    var myTeam = localStorage.getItem('myTeam') || localStorage.getItem('favoriteTeam') || '';
+    var url = myTeam ? '/api/battle/today?team=' + encodeURIComponent(myTeam) : '/api/battle/today';
+    var res = await fetch(url);
+    if (!res.ok) return;
+    var battles = await res.json();
+    if (!battles || battles.length === 0) return;
+    var b = battles[0];
+    updateHeaderBattleScore(b.homeCheerScore, b.awayCheerScore);
+  } catch(e) {}
+}
+
+document.addEventListener('DOMContentLoaded', refreshBattleScoreboard);
+</script>
+<script src="js/index.js?v=20260521"></script>
 </body>
 </html>

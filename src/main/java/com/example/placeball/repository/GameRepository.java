@@ -7,27 +7,70 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface GameRepository extends JpaRepository<Game, Long> {
 
-    // 특정 년월의 경기 전체 조회 (캘린더용)
-    @Query("SELECT g FROM Game g WHERE YEAR(g.gameDate) = :year AND MONTH(g.gameDate) = :month ORDER BY g.gameDate, g.gameTime")
-    List<Game> findByYearAndMonth(@Param("year") int year, @Param("month") int month);
+    // ── 기존 (GameApiController 에서 사용 중) ──────────────────
 
-    // 특정 날짜 경기 조회
-    List<Game> findByGameDateOrderByGameTime(LocalDate date);
+    // 연도+월+팀 필터
+    @Query("""
+        SELECT g FROM Game g
+        WHERE YEAR(g.gameDate) = :year
+          AND MONTH(g.gameDate) = :month
+          AND (:team IS NULL OR g.homeTeam = :team OR g.awayTeam = :team)
+        ORDER BY g.gameDate ASC, g.gameTime ASC
+        """)
+    List<Game> findByYearAndMonthAndTeam(
+            @Param("year") int year,
+            @Param("month") int month,
+            @Param("team") String team);
 
-    // 특정 팀 경기 조회 (년월)
-    @Query("SELECT g FROM Game g WHERE YEAR(g.gameDate) = :year AND MONTH(g.gameDate) = :month AND (g.homeTeam = :team OR g.awayTeam = :team) ORDER BY g.gameDate, g.gameTime")
-    List<Game> findByYearAndMonthAndTeam(@Param("year") int year, @Param("month") int month, @Param("team") String team);
+    // 연도+월+상태 필터
+    @Query("""
+        SELECT g FROM Game g
+        WHERE YEAR(g.gameDate) = :year
+          AND MONTH(g.gameDate) = :month
+          AND g.status = :status
+        ORDER BY g.gameDate ASC, g.gameTime ASC
+        """)
+    List<Game> findByYearAndMonthAndStatus(
+            @Param("year") int year,
+            @Param("month") int month,
+            @Param("status") String status);
 
-    // 상태별 조회 (upcoming / finished / live)
-    @Query("SELECT g FROM Game g WHERE YEAR(g.gameDate) = :year AND MONTH(g.gameDate) = :month AND g.status = :status ORDER BY g.gameDate, g.gameTime")
-    List<Game> findByYearAndMonthAndStatus(@Param("year") int year, @Param("month") int month, @Param("status") String status);
+    // 연도+월 전체
+    @Query("""
+        SELECT g FROM Game g
+        WHERE YEAR(g.gameDate) = :year
+          AND MONTH(g.gameDate) = :month
+        ORDER BY g.gameDate ASC, g.gameTime ASC
+        """)
+    List<Game> findByYearAndMonth(
+            @Param("year") int year,
+            @Param("month") int month);
 
-    // 오늘 경기
-    List<Game> findByGameDateOrderByGameTimeAsc(LocalDate date);
+    // 날짜 + 시간 오름차순
+    List<Game> findByGameDateOrderByGameTimeAsc(LocalDate gameDate);
 
-    // 특정 기간 경기
+    // 날짜 + 시간 (오름차순, alias)
+    List<Game> findByGameDateOrderByGameTime(LocalDate gameDate);
+
+    // ── 신규 (BattleApiController 에서 사용) ───────────────────
+
+    // 날짜로 경기 목록 조회
+    List<Game> findByGameDate(LocalDate gameDate);
+
+    // 날짜 범위 조회
     List<Game> findByGameDateBetweenOrderByGameDateAscGameTimeAsc(LocalDate from, LocalDate to);
+
+    // 날짜 + 홈팀 + 원정팀으로 단일 경기 조회
+    Optional<Game> findByGameDateAndHomeTeamAndAwayTeam(
+            LocalDate gameDate, String homeTeam, String awayTeam);
+
+    // 상태별 조회
+    List<Game> findByStatus(String status);
+
+    // 날짜 + 상태 조회
+    List<Game> findByGameDateAndStatus(LocalDate gameDate, String status);
 }

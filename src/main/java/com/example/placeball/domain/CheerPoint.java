@@ -35,6 +35,11 @@ public class CheerPoint {
     @Column(name = "description", length = 200)
     private String description;            // 상세 설명 (예: "KIA vs LG 직관 티켓 인증")
 
+    // 좌석 구역 — 티켓 인증 시 OCR 좌석 정보에서 추출 (온라인 활동은 null)
+    // 예: "1루", "3루", "외야", "중앙", "내야"
+    @Column(name = "seat_zone", length = 20)
+    private String seatZone;
+
     @Column(name = "earned_at")
     private LocalDateTime earnedAt;        // 획득 일시
 

@@ -1,8 +1,10 @@
 package com.example.placeball.controller;
 
+import com.example.placeball.domain.CheerPoint;
 import com.example.placeball.domain.Comment;
 import com.example.placeball.domain.CommunityPost;
 import com.example.placeball.domain.Member;
+import com.example.placeball.repository.CheerPointRepository;
 import com.example.placeball.repository.CommentRepository;
 import com.example.placeball.repository.CommunityPostRepository;
 import com.example.placeball.repository.MemberRepository;
@@ -13,23 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * 댓글 CRUD + 출석체크
- *
- * [댓글]
- *   GET    /api/comments?postId=1           댓글 목록
- *   POST   /api/comments                    댓글 작성
- *   PUT    /api/comments/{id}               댓글 수정 (본인만)
- *   DELETE /api/comments/{id}?author=닉네임  댓글 삭제 (본인만)
- *
- * [출석체크]
- *   POST   /api/attendance          오늘 출석 체크
- *   GET    /api/attendance?nickname=닉네임   출석 현황 조회
- */
 @RestController
 @RequiredArgsConstructor
 public class CommentApiController {
@@ -37,11 +25,9 @@ public class CommentApiController {
     private final CommentRepository       commentRepository;
     private final CommunityPostRepository postRepository;
     private final MemberRepository        memberRepository;
+    private final CheerPointRepository    cheerPointRepository;
 
-    // ══════════════════════════════════════════════════════════
-    // 댓글 목록
-    // GET /api/comments?postId=1&viewer=닉네임
-    // ══════════════════════════════════════════════════════════
+    // ── 댓글 목록 ──
     @GetMapping("/api/comments")
     @Transactional(readOnly = true)
     public ResponseEntity<List<Map<String, Object>>> getComments(
@@ -54,22 +40,19 @@ public class CommentApiController {
         List<Comment> comments = commentRepository.findByPostOrderByCreatedAtAsc(post);
         List<Map<String, Object>> result = comments.stream().map(c -> {
             Map<String, Object> m = new LinkedHashMap<>();
-            m.put("id",        c.getId());
-            m.put("author",    c.getMember().getNickname());
-            m.put("content",   c.getContent());
-            m.put("date",      c.getCreatedAt().toString());
-            m.put("edited",    Boolean.TRUE.equals(c.getEdited()));
-            m.put("isOwner",   viewer != null && viewer.equals(c.getMember().getNickname()));
+            m.put("id",      c.getId());
+            m.put("author",  c.getMember().getNickname());
+            m.put("content", c.getContent());
+            m.put("date",    c.getCreatedAt().toString());
+            m.put("edited",  Boolean.TRUE.equals(c.getEdited()));
+            m.put("isOwner", viewer != null && viewer.equals(c.getMember().getNickname()));
             return m;
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(result);
     }
 
-    // ══════════════════════════════════════════════════════════
-    // 댓글 작성
-    // POST /api/comments
-    // ══════════════════════════════════════════════════════════
+    // ── 댓글 작성 (+포인트 적립) ──
     @PostMapping("/api/comments")
     @Transactional
     public ResponseEntity<Map<String, Object>> createComment(
@@ -91,6 +74,15 @@ public class CommentApiController {
         comment.setContent(req.getContent().substring(0, Math.min(req.getContent().length(), 500)));
         commentRepository.save(comment);
 
+        // 댓글 포인트는 오늘 1회만 적립
+        int earnedPoints = 0;
+        boolean alreadyEarned = cheerPointRepository.existsTodayByMemberAndType(
+                member, "COMMENT_WRITE", LocalDate.now());
+        if (!alreadyEarned) {
+            awardPoints(member, "COMMENT_WRITE", 3, "댓글 작성");
+            earnedPoints = 3;
+        }
+
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("success", true);
         res.put("id",      comment.getId());
@@ -98,13 +90,11 @@ public class CommentApiController {
         res.put("content", comment.getContent());
         res.put("date",    comment.getCreatedAt().toString());
         res.put("isOwner", true);
+        res.put("points",  earnedPoints);
         return ResponseEntity.ok(res);
     }
 
-    // ══════════════════════════════════════════════════════════
-    // 댓글 수정
-    // PUT /api/comments/{id}
-    // ══════════════════════════════════════════════════════════
+    // ── 댓글 수정 ──
     @PutMapping("/api/comments/{id}")
     @Transactional
     public ResponseEntity<Map<String, Object>> updateComment(
@@ -123,10 +113,7 @@ public class CommentApiController {
         return ResponseEntity.ok(Map.of("success", true));
     }
 
-    // ══════════════════════════════════════════════════════════
-    // 댓글 삭제
-    // DELETE /api/comments/{id}?author=닉네임
-    // ══════════════════════════════════════════════════════════
+    // ── 댓글 삭제 ──
     @DeleteMapping("/api/comments/{id}")
     @Transactional
     public ResponseEntity<Map<String, Object>> deleteComment(
@@ -142,17 +129,11 @@ public class CommentApiController {
         return ResponseEntity.ok(Map.of("success", true));
     }
 
-    // ══════════════════════════════════════════════════════════
-    // 출석체크
-    // POST /api/attendance   body: { "nickname": "..." }
-    // GET  /api/attendance?nickname=...
-    // ══════════════════════════════════════════════════════════
-
-    /** 오늘 출석체크 여부를 member의 nickname+날짜를 키로 간단 저장 (in-memory 캐시 역할) */
+    // ── 출석체크 (+포인트 적립) ──
     private final Map<String, LocalDate> attendanceCache = new HashMap<>();
 
     @PostMapping("/api/attendance")
-    @Transactional(readOnly = true)
+    @Transactional
     public ResponseEntity<Map<String, Object>> checkAttendance(
             @RequestBody Map<String, String> body) {
 
@@ -165,7 +146,11 @@ public class CommentApiController {
         LocalDate today = LocalDate.now();
         String cacheKey = nick + "_" + today;
 
-        if (attendanceCache.containsKey(cacheKey)) {
+        // 캐시 또는 DB 둘 다 체크
+        boolean alreadyDone = attendanceCache.containsKey(cacheKey)
+                || cheerPointRepository.existsTodayByMemberAndType(member, "ATTENDANCE", today);
+
+        if (alreadyDone) {
             return ResponseEntity.ok(Map.of(
                     "success", false,
                     "message", "오늘은 이미 출석체크를 했어요! 내일 또 만나요 ⚾",
@@ -174,11 +159,13 @@ public class CommentApiController {
         }
 
         attendanceCache.put(cacheKey, today);
+        awardPoints(member, "ATTENDANCE", 5, "출석체크 " + today);
 
         return ResponseEntity.ok(Map.of(
                 "success",     true,
-                "message",     "출석체크 완료! 오늘도 직관 가자! ⚾",
+                "message",     "출석체크 완료! +5점 적립! ⚾",
                 "alreadyDone", false,
+                "points",      5,
                 "date",        today.toString(),
                 "nickname",    nick
         ));
@@ -190,17 +177,20 @@ public class CommentApiController {
             @RequestParam String nickname) {
 
         LocalDate today = LocalDate.now();
-        String cacheKey = nickname + "_" + today;
-        boolean doneToday = attendanceCache.containsKey(cacheKey);
-
-        return ResponseEntity.ok(Map.of(
-                "doneToday", doneToday,
-                "nickname",  nickname,
-                "date",      today.toString()
-        ));
+        boolean doneToday = attendanceCache.containsKey(nickname + "_" + today);
+        return ResponseEntity.ok(Map.of("doneToday", doneToday, "nickname", nickname, "date", today.toString()));
     }
 
-    // helpers
+    // ── 헬퍼 ──
+    private void awardPoints(Member m, String type, int amount, String desc) {
+        CheerPoint cp = new CheerPoint();
+        cp.setMember(m);
+        cp.setPointType(type);
+        cp.setAmount(amount);
+        cp.setDescription(desc);
+        cheerPointRepository.save(cp);
+    }
+
     private boolean blank(String s) { return s == null || s.isBlank(); }
     private ResponseEntity<Map<String, Object>> badReq(String msg) {
         return ResponseEntity.badRequest().body(Map.of("success", false, "message", msg));
@@ -213,7 +203,6 @@ public class CommentApiController {
     }
 }
 
-// ── 댓글 요청 DTO ──
 @Data
 class CommentRequest {
     private Long   postId;

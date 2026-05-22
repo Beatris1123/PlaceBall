@@ -15,58 +15,29 @@ public class BattleRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 참여한 회원
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
-
-    // 대상 경기
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "game_id")
+    // 연결된 경기
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "game_id", nullable = false, unique = true)
     private Game game;
 
-    // 점령전 정보
-    @Column(name = "zone", length = 50)
-    private String zone;                    // 참여 구역 (중앙 응원석, 1루 오렌지 등)
+    // 홈팀 응원 포인트 합산
+    @Column(name = "home_cheer_score", nullable = false)
+    private Integer homeCheerScore = 0;
 
-    @Column(name = "my_team", length = 20)
-    private String myTeam;                  // 응원 팀
+    // 원정팀 응원 포인트 합산
+    @Column(name = "away_cheer_score", nullable = false)
+    private Integer awayCheerScore = 0;
 
-    // 티켓 OCR 결과
-    @Column(name = "ticket_image_url", length = 500)
-    private String ticketImageUrl;          // 업로드된 티켓 이미지 URL
+    // 점령전 승자 팀명 (무승부면 "draw")
+    @Column(name = "cheer_winner", length = 20)
+    private String cheerWinner;
 
-    @Column(name = "ocr_date", length = 50)
-    private String ocrDate;                 // OCR로 추출한 날짜
-
-    @Column(name = "ocr_match", length = 100)
-    private String ocrMatch;                // OCR로 추출한 경기 (KIA vs LG)
-
-    @Column(name = "ocr_stadium", length = 100)
-    private String ocrStadium;              // OCR로 추출한 구장
-
-    @Column(name = "ocr_seat", length = 100)
-    private String ocrSeat;                 // OCR로 추출한 좌석
-
-    @Column(name = "ocr_raw_text", columnDefinition = "TEXT")
-    private String ocrRawText;              // OCR 원문 전체
-
-    @Column(name = "ocr_confidence")
-    private Integer ocrConfidence = 0;      // OCR 신뢰도 (0~100)
-
-    // 처리 상태
-    @Column(name = "status", length = 20)
-    private String status = "pending";      // pending / approved / rejected
-
-    // 포인트
-    @Column(name = "point_earned")
-    private Integer pointEarned = 0;        // 획득한 포인트
-
-    @Column(name = "participated_at")
-    private LocalDateTime participatedAt;   // 참여 일시
+    // 저장 일시
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     @PrePersist
     public void prePersist() {
-        this.participatedAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 }

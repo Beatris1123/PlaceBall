@@ -48,12 +48,26 @@ public class PostApiController {
         post.setPersona(req.getPersona());
         postRepository.save(post);
         saveImages(post, req.getImages());
-        awardPoints(member, "POST_WRITE",
-                TAB_POINTS.getOrDefault(req.getTab(), 3),
-                tabLabel(req.getTab()) + " 작성: " + trunc(req.getTitle(), 30));
 
-        return ok(Map.of("success", true, "id", post.getId(),
-                "points", TAB_POINTS.getOrDefault(req.getTab(), 3)));
+        // 응원 탭 게시글은 오늘 1회만 점수 적립
+        int earnedPoints = 0;
+        if ("cheer".equals(req.getTab())) {
+            boolean alreadyEarned = cheerPointRepository.existsTodayByMemberAndType(
+                    member, "POST_WRITE", java.time.LocalDate.now());
+            if (!alreadyEarned) {
+                awardPoints(member, "POST_WRITE",
+                        TAB_POINTS.getOrDefault(req.getTab(), 3),
+                        tabLabel(req.getTab()) + " 작성: " + trunc(req.getTitle(), 30));
+                earnedPoints = TAB_POINTS.getOrDefault(req.getTab(), 3);
+            }
+        } else {
+            awardPoints(member, "POST_WRITE",
+                    TAB_POINTS.getOrDefault(req.getTab(), 3),
+                    tabLabel(req.getTab()) + " 작성: " + trunc(req.getTitle(), 30));
+            earnedPoints = TAB_POINTS.getOrDefault(req.getTab(), 3);
+        }
+
+        return ok(Map.of("success", true, "id", post.getId(), "points", earnedPoints));
     }
 
     // ── 2. 목록 조회 ──

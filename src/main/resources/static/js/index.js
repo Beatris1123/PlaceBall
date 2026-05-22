@@ -1,4 +1,4 @@
-// ─── 1. 공통 유틸 및 성향 뱃지 로직 ───
+﻿// ─── 1. 공통 유틸 및 성향 뱃지 로직 ───
 const PERSONALITY_MAP = {
   'cheer'    : { name: '불타는 응원단장',  emoji: '🔥', color: '#EF4444', desc: '응원가를 외우고 떼창을 이끄는 열정 팬' },
   'food'     : { name: '먹거리 탐험가',    emoji: '🌭', color: '#F59E0B', desc: '직관의 목적은 치킨과 맥주! 맛집 지도 완성' },
@@ -109,14 +109,12 @@ function tc(name) { return TEAM_COLORS[name] || '#94A3B8'; }
     if (svgAwayTeam) svgAwayTeam.textContent = away || 'AWAY';
   }
 
-  // 상단 스코어보드 업데이트
+  // 상단 스코어보드 — 팀명/뱃지/구장/시간만 세팅 (점수는 점령전 점수로 별도 갱신)
   function updateHeaderScoreboard(game) {
     const awayBadge     = document.getElementById('awayBadge');
     const awayTeamName  = document.getElementById('awayTeamName');
-    const awayScoreEl   = document.getElementById('awayScore');
     const statusBadge   = document.getElementById('matchStatusBadge');
     const mainMatchInfo = document.getElementById('mainMatchInfo');
-    const homeScoreEl   = document.getElementById('homeScore');
     const homeTeamName  = document.getElementById('homeTeamName');
     const homeBadge     = document.getElementById('homeBadge');
 
@@ -128,35 +126,32 @@ function tc(name) { return TEAM_COLORS[name] || '#94A3B8'; }
     if (awayBadge) { awayBadge.textContent = at.slice(0,1); awayBadge.style.background = tc(at); }
     if (homeBadge) { homeBadge.textContent = ht.slice(0,1); homeBadge.style.background = tc(ht); }
 
+    // 가운데 배지: 경기 시간 표시
     const s = (game.status || '').toLowerCase();
-    const isPlayingOrDone = s.includes('live') || s.includes('진행') || s.includes('종료') || s.includes('final');
-
-    if (awayScoreEl) {
-      awayScoreEl.textContent = isPlayingOrDone && game.awayScore != null ? String(game.awayScore) : '-';
-      awayScoreEl.style.color = isPlayingOrDone ? tc(at) : '#fff';
-    }
-    if (homeScoreEl) {
-      homeScoreEl.textContent = isPlayingOrDone && game.homeScore != null ? String(game.homeScore) : '-';
-      homeScoreEl.style.color = isPlayingOrDone ? tc(ht) : '#fff';
-    }
-
     if (statusBadge) {
       statusBadge.style.display   = 'inline-block';
       statusBadge.style.animation = '';
       if (s.includes('live') || s.includes('진행')) {
-        statusBadge.textContent    = 'LIVE';
+        statusBadge.textContent      = 'LIVE';
         statusBadge.style.background = '#22C55E';
         statusBadge.style.animation  = 'pulse-live 2s ease-in-out infinite';
       } else if (s.includes('종료') || s.includes('final')) {
-        statusBadge.textContent    = '종료';
+        statusBadge.textContent      = '종료';
         statusBadge.style.background = '#64748B';
       } else {
-        statusBadge.textContent    = getTimeStr(game.gameTime || game.time);
+        statusBadge.textContent      = getTimeStr(game.gameTime || game.time);
         statusBadge.style.background = '#3B82F6';
       }
     }
     if (mainMatchInfo) mainMatchInfo.textContent = game.venue || '';
+
+    // 점수 자리 초기값 — 점령전 점수로 교체 예약
+    const homeScoreEl = document.getElementById('homeScore');
+    const awayScoreEl = document.getElementById('awayScore');
+    if (homeScoreEl) { homeScoreEl.textContent = '-'; homeScoreEl.style.color = tc(ht); }
+    if (awayScoreEl) { awayScoreEl.textContent = '-'; awayScoreEl.style.color = tc(at); }
   }
+
 
   // 통합 데이터 가져오기 및 렌더링
   async function loadAllGameData() {
@@ -285,72 +280,186 @@ document.querySelectorAll('.modal-backdrop').forEach(modal => {
 
 // ─── 5. 구역 선택 (ZONE SELECTOR) ───
 const zoneData = {
-  'orange-3b': { name: '3루 오렌지석 (원정 응원석)', desc: '잠실의 원정팀 핵심 응원 구역. 상대팀 팬이 집결해 역응원 열기가 가장 강한 곳입니다.', zones: ['zone-orange-3b','zone-orange-3b-top','zone-red-3b','zone-red-3b-side'] },
-  'orange-1b': { name: '1루 오렌지석 (홈팀 응원석)', desc: '홈팀 팬의 핵심 응원 구역. 떼창과 단체 응원가가 가장 강렬하게 터지는 곳입니다.', zones: ['zone-orange-1b','zone-orange-1b-top','zone-red-1b','zone-red-1b-side'] },
-  'outfield-center': { name: '중앙 외야 그린석', desc: '홈런볼이 떨어지는 중립 외야 구역. 양 팀 응원이 교차하며 분위기가 가장 다채로운 곳입니다.', zones: ['zone-outfield-center','zone-outfield-left','zone-outfield-right'] },
-  'premium': { name: '테이블석 / 프리미엄석', desc: '포수 바로 뒤 중앙 최고급 좌석. 경기장 전체를 한눈에 볼 수 있는 명당으로 응원보다 관람 중심입니다.', zones: ['zone-premium','zone-table-top','zone-exciting-l','zone-exciting-r'] },
-  'foul': { name: '외야 파울존 / 블루석', desc: '1·3루 파울라인 바깥 구역. 접근성이 좋고 가성비 높아 응원보다 여유로운 관람을 즐기는 팬이 많습니다.', zones: ['zone-foul','zone-blue-bottom','zone-blue-bottom-r','zone-navy-3b','zone-navy-1b'] }
+  'orange-3b':       { name: '3루 오렌지석 (원정 응원석)', desc: '잠실의 원정팀 핵심 응원 구역. 상대팀 팬이 집결해 역응원 열기가 가장 강한 곳입니다.', zones: ['zone-orange-3b','zone-orange-3b-top','zone-red-3b','zone-red-3b-side'],  seatZone: '3루' },
+  'orange-1b':       { name: '1루 오렌지석 (홈팀 응원석)', desc: '홈팀 팬의 핵심 응원 구역. 떼창과 단체 응원가가 가장 강렬하게 터지는 곳입니다.',        zones: ['zone-orange-1b','zone-orange-1b-top','zone-red-1b','zone-red-1b-side'],  seatZone: '1루' },
+  'outfield-center': { name: '중앙 외야 그린석',            desc: '홈런볼이 떨어지는 중립 외야 구역. 양 팀 응원이 교차하며 분위기가 가장 다채로운 곳입니다.', zones: ['zone-outfield-center','zone-outfield-left','zone-outfield-right'],       seatZone: '외야' },
+  'premium':         { name: '테이블석 / 프리미엄석',        desc: '포수 바로 뒤 중앙 최고급 좌석. 경기장 전체를 한눈에 볼 수 있는 명당으로 응원보다 관람 중심입니다.', zones: ['zone-premium','zone-table-top','zone-exciting-l','zone-exciting-r'], seatZone: '중앙' },
+  'foul':            { name: '외야 파울존 / 블루석',         desc: '1·3루 파울라인 바깥 구역. 접근성이 좋고 가성비 높아 응원보다 여유로운 관람을 즐기는 팬이 많습니다.', zones: ['zone-foul','zone-blue-bottom','zone-blue-bottom-r','zone-navy-3b','zone-navy-1b'], seatZone: '내야' },
+  'online':          { name: '온라인 응원',                  desc: '게시글, 댓글, 출석 등 플랫폼 활동으로 쌓인 응원 점수입니다.',                           zones: [],                                                                       seatZone: null }
 };
+
+// 구역별 점수 캐시
+let _zoneScoreCache = null;
+
+async function loadZoneScores() {
+  try {
+    const myTeam = localStorage.getItem('myTeam') || localStorage.getItem('favoriteTeam') || '';
+    const url = myTeam ? `/api/battle/zones?team=${encodeURIComponent(myTeam)}` : '/api/battle/zones';
+    const res = await fetch(url);
+    if (!res.ok) return;
+    _zoneScoreCache = await res.json();
+  } catch(e) { _zoneScoreCache = null; }
+}
+
+function getZoneScore(seatZone) {
+  if (!_zoneScoreCache) return null;
+  if (seatZone === null) return _zoneScoreCache.online || null;
+  return (_zoneScoreCache.zones || {})[seatZone] || null;
+}
 
 function renderZone(key) {
   const d = zoneData[key];
   if (!d) return;
-  const zoneName  = document.getElementById('zone-name');
-  const zoneDesc  = document.getElementById('zone-desc');
-  if (zoneName)  zoneName.textContent  = d.name;
-  if (zoneDesc)  zoneDesc.textContent  = d.desc;
+  const zoneName = document.getElementById('zone-name');
+  const zoneDesc = document.getElementById('zone-desc');
+  if (zoneName) zoneName.textContent = d.name;
+  if (zoneDesc) zoneDesc.textContent = d.desc;
 
   document.querySelectorAll('.zone-btn').forEach(b => b.classList.toggle('active', b.dataset.zone === key));
 
-  document.querySelectorAll('.seat-zone').forEach(z => {
-    z.style.opacity = '0.10';
-    z.style.filter  = 'brightness(0.7)';
-  });
-  if (d.zones) {
+  // SVG 구역 하이라이트
+  document.querySelectorAll('.seat-zone').forEach(z => { z.style.opacity = '0.10'; z.style.filter = 'brightness(0.7)'; });
+  if (d.zones && d.zones.length > 0) {
     d.zones.forEach(zid => {
       const el = document.getElementById(zid);
       if (el) { el.style.opacity = '0.72'; el.style.filter = 'brightness(1.3)'; }
     });
   }
+
+  // 점수 패널 갱신
+  const score = getZoneScore(d.seatZone);
+  updateZonePanel(score, key === 'online');
 }
+
+function updateZonePanel(score, isOnline) {
+  const kiaScoreEl  = document.getElementById('kia-score');
+  const lgScoreEl   = document.getElementById('lg-score');
+  const kiaPctEl    = document.getElementById('kia-pct');
+  const lgPctEl     = document.getElementById('lg-pct');
+  const kiaBarEl    = document.getElementById('kia-bar');
+  const lgBarEl     = document.getElementById('lg-bar');
+  const zoneRatioEl = document.getElementById('zone-ratio');
+  const homeLabel   = document.querySelector('.score-box-kia .score-box-label');
+  const awayLabel   = document.querySelector('.score-box-lg .score-box-label');
+  const homeValEl   = document.querySelector('.score-box-kia .score-box-val');
+  const awayValEl   = document.querySelector('.score-box-lg .score-box-val');
+
+  const homeTeam = _zoneScoreCache ? (_zoneScoreCache.homeTeam || '홈팀') : '홈팀';
+  const awayTeam = _zoneScoreCache ? (_zoneScoreCache.awayTeam || '원정팀') : '원정팀';
+  const homeColor = tc(homeTeam);
+  const awayColor = tc(awayTeam);
+
+  // 라벨에 팀명 반영
+  if (homeLabel) homeLabel.textContent = isOnline ? `${homeTeam} 온라인` : `${homeTeam} 응원`;
+  if (awayLabel) awayLabel.textContent = isOnline ? `${awayTeam} 온라인` : `${awayTeam} 응원`;
+
+  // 점수 색상 팀컬러로
+  if (homeValEl) homeValEl.style.color = homeColor;
+  if (awayValEl) awayValEl.style.color = awayColor;
+  if (kiaBarEl)  kiaBarEl.style.background = homeColor;
+  if (lgBarEl)   lgBarEl.style.background  = awayColor;
+
+  if (!score) {
+    if (kiaScoreEl) kiaScoreEl.textContent = '-';
+    if (lgScoreEl)  lgScoreEl.textContent  = '-';
+    if (kiaPctEl)   kiaPctEl.textContent   = '50%';
+    if (lgPctEl)    lgPctEl.textContent    = '50%';
+    if (kiaBarEl)   kiaBarEl.style.width   = '50%';
+    if (lgBarEl)    lgBarEl.style.width    = '50%';
+    if (kiaPctEl)   kiaPctEl.style.color   = homeColor;
+    if (lgPctEl)    lgPctEl.style.color    = awayColor;
+    if (zoneRatioEl) zoneRatioEl.innerHTML =
+      `<span style="color:${homeColor}">${homeTeam} 50%</span>`
+      + `<span style="color:var(--text-3);margin:0 4px">:</span>`
+      + `<span style="color:${awayColor}">${awayTeam} 50%</span>`;
+    return;
+  }
+
+  if (kiaScoreEl) kiaScoreEl.textContent = score.homeScore;
+  if (lgScoreEl)  lgScoreEl.textContent  = score.awayScore;
+  if (kiaPctEl)   { kiaPctEl.textContent = score.homePct + '%'; kiaPctEl.style.color = homeColor; }
+  if (lgPctEl)    { lgPctEl.textContent  = score.awayPct + '%'; lgPctEl.style.color  = awayColor; }
+  if (kiaBarEl)   kiaBarEl.style.width   = score.homePct + '%';
+  if (lgBarEl)    lgBarEl.style.width    = score.awayPct + '%';
+  if (zoneRatioEl) zoneRatioEl.innerHTML =
+    `<span style="color:${homeColor}">${homeTeam} ${score.homePct}%</span>`
+    + `<span style="color:var(--text-3);font-size:1rem;margin:0 4px">:</span>`
+    + `<span style="color:${awayColor}">${awayTeam} ${score.awayPct}%</span>`;
+
+  // gauge 라벨 팀명 반영
+  const homeGaugeLabel = document.getElementById('home-gauge-label');
+  const awayGaugeLabel = document.getElementById('away-gauge-label');
+  const homeTeamLabel  = document.getElementById('home-team-label');
+  const awayTeamLabel  = document.getElementById('away-team-label');
+  if (homeGaugeLabel) { homeGaugeLabel.textContent = `${homeTeam} 응원 비중`; homeGaugeLabel.style.color = homeColor; }
+  if (awayGaugeLabel) { awayGaugeLabel.textContent = `${awayTeam} 응원 비중`; awayGaugeLabel.style.color = awayColor; }
+  if (homeTeamLabel)  { homeTeamLabel.textContent  = isOnline ? `${homeTeam} 온라인` : `${homeTeam} 응원`; homeTeamLabel.style.color = homeColor; }
+  if (awayTeamLabel)  { awayTeamLabel.textContent  = isOnline ? `${awayTeam} 온라인` : `${awayTeam} 응원`; awayTeamLabel.style.color = awayColor; }
+}
+
 document.querySelectorAll('.zone-btn').forEach(btn => {
   btn.addEventListener('click', () => renderZone(btn.dataset.zone));
 });
-renderZone('orange-3b'); // 초기 구역 세팅
+
+// 온라인 응원 버튼 추가 (zone-buttons 뒤에 삽입)
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadZoneScores();
+  renderZone('orange-3b');
+
+  const zoneBtnsEl = document.querySelector('.zone-buttons');
+  if (zoneBtnsEl) {
+    const onlineBtn = document.createElement('button');
+    onlineBtn.className = 'zone-btn';
+    onlineBtn.dataset.zone = 'online';
+    onlineBtn.innerHTML = '🌐 온라인 응원';
+    onlineBtn.style.cssText = 'grid-column: 1 / -1; margin-top: 6px; background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.3); color: #93C5FD;';
+    onlineBtn.addEventListener('click', () => renderZone('online'));
+    zoneBtnsEl.after(onlineBtn);
+  }
+});
 
 // ─── 6. 응원 지수 실시간 반영 (서버 API 기반) ───
+function updateCheerUI(homeScore, awayScore, homePct, awayPct) {
+  const els = {
+    kiaScore:  document.getElementById('kia-score'),
+    lgScore:   document.getElementById('lg-score'),
+    kiaPct:    document.getElementById('kia-pct'),
+    lgPct:     document.getElementById('lg-pct'),
+    kiaBar:    document.getElementById('kia-bar'),
+    lgBar:     document.getElementById('lg-bar'),
+    zoneRatio: document.getElementById('zone-ratio'),
+  };
+  if (els.kiaScore)  els.kiaScore.textContent  = homeScore;
+  if (els.lgScore)   els.lgScore.textContent   = awayScore;
+  if (els.kiaPct)    els.kiaPct.textContent    = homePct + '%';
+  if (els.lgPct)     els.lgPct.textContent     = awayPct + '%';
+  if (els.kiaBar)    els.kiaBar.style.width    = homePct + '%';
+  if (els.lgBar)     els.lgBar.style.width     = awayPct + '%';
+  if (els.zoneRatio) els.zoneRatio.innerHTML   =
+    `<span style="color:var(--kia)">홈 ${homePct}%</span>`
+    + `<span style="color:var(--text-3);font-size:1rem;margin:0 4px">:</span>`
+    + `<span style="color:var(--lg)">원정 ${awayPct}%</span>`;
+}
+
+async function refreshCheerPoints() {
+  try {
+    const myTeam = localStorage.getItem('myTeam') || localStorage.getItem('favoriteTeam') || '';
+    const url = myTeam
+      ? `/api/battle/today?team=${encodeURIComponent(myTeam)}`
+      : '/api/battle/today';
+    const res = await fetch(url);
+    if (!res.ok) return;
+    const battles = await res.json();
+    if (!battles || battles.length === 0) return;
+    const battle = battles[0];
+    // 가운데 게이지 카드 갱신
+    updateCheerUI(battle.homeCheerScore, battle.awayCheerScore, battle.homePct, battle.awayPct);
+    // 상단 스코어보드 점령전 점수 갱신
+    updateHeaderBattleScore(battle.homeCheerScore, battle.awayCheerScore);
+  } catch(e) { }
+}
+
 (function() {
-  function updateCheerUI(homeScore, awayScore, homePct, awayPct) {
-    const els = {
-      kiaScore:  document.getElementById('kia-score'),
-      lgScore:   document.getElementById('lg-score'),
-      kiaPct:    document.getElementById('kia-pct'),
-      lgPct:     document.getElementById('lg-pct'),
-      kiaBar:    document.getElementById('kia-bar'),
-      lgBar:     document.getElementById('lg-bar'),
-      zoneRatio: document.getElementById('zone-ratio'),
-    };
-    if (els.kiaScore)  els.kiaScore.textContent  = homeScore;
-    if (els.lgScore)   els.lgScore.textContent   = awayScore;
-    if (els.kiaPct)    els.kiaPct.textContent    = homePct + '%';
-    if (els.lgPct)     els.lgPct.textContent     = awayPct + '%';
-    if (els.kiaBar)    els.kiaBar.style.width    = homePct + '%';
-    if (els.lgBar)     els.lgBar.style.width     = awayPct + '%';
-    if (els.zoneRatio) els.zoneRatio.innerHTML   =
-      `<span style="color:var(--kia)">홈 ${homePct}%</span>`
-      + `<span style="color:var(--text-3);font-size:1rem;margin:0 4px">:</span>`
-      + `<span style="color:var(--lg)">원정 ${awayPct}%</span>`;
-  }
-
-  async function refreshCheerPoints() {
-    try {
-      const res  = await fetch('/api/posts/cheer-ratio');
-      if (!res.ok) return;
-      const data = await res.json();
-      updateCheerUI(data.homeScore, data.awayScore, data.homePct, data.awayPct);
-    } catch(e) { }
-  }
-
   document.addEventListener('DOMContentLoaded', refreshCheerPoints);
 })();
 
@@ -568,17 +677,104 @@ renderZone('orange-3b'); // 초기 구역 세팅
   const confirmBtn = document.getElementById('battle-confirm-btn');
   if (confirmBtn) confirmBtn.addEventListener('click', async () => {
     const d = window._ocrResult || {};
-    confirmBtn.disabled = true;
-    confirmBtn.textContent = '저장 중...';
-    const result = await saveToDiary(d);
-    if (result && result.error) {
-      confirmBtn.disabled = false;
-      confirmBtn.textContent = '⚔️ 점령전 참여 확정!';
+
+    // ── 오늘 날짜 검증: 티켓 날짜가 오늘이 아니면 차단 ──
+    const todayStr = new Date().toISOString().slice(0, 10);
+    let ticketDateStr = '';
+    if (d.date) {
+      const m = d.date.match(/(\d{4})[년\s\-\/\.]+(\d{1,2})[월\s\-\/\.]+(\d{1,2})/);
+      if (m) ticketDateStr = `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
+    }
+    if (ticketDateStr && ticketDateStr !== todayStr) {
       const errMsg = document.getElementById('battle-error-msg');
-      if (errMsg) errMsg.textContent = result.error;
+      if (errMsg) errMsg.innerHTML =
+        `오늘(${todayStr}) 경기 티켓만 점령전에 참여할 수 있어요.<br>` +
+        `인식된 티켓 날짜: <b>${d.date}</b>`;
       showStep('error');
       return;
     }
+
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = '저장 중...';
+    console.log('[점령전] 확정 시작. OCR결과:', d, '오늘:', todayStr, '티켓날짜:', ticketDateStr);
+
+    // ── 1. 다이어리 저장 (실패해도 certify는 시도) ──
+    const result = await saveToDiary(d);
+    console.log('[점령전] saveToDiary 결과:', result);
+    if (result && result.error) {
+      // 이미 저장된 다이어리는 무시하고 certify 계속 진행
+      if (result.error.includes('응원팀') || result.error.includes('포함')) {
+        // 응원팀 불일치 에러는 차단
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = '⚔️ 점령전 참여 확정!';
+        const errMsg = document.getElementById('battle-error-msg');
+        if (errMsg) errMsg.textContent = result.error;
+        showStep('error');
+        return;
+      }
+      // 그 외 에러(중복 저장 등)는 경고만 하고 certify 계속 진행
+      console.warn('[점령전] 다이어리 저장 실패 (certify 계속):', result.error);
+    }
+
+    // ── 2. 점령전 포인트 적립 (certify API) ──
+    const user = localStorage.getItem('loggedInUser');
+    let earnedPoints = 0;
+
+    // gameId: saveToDiary 결과 또는 오늘 경기 직접 조회
+    let gameId = result && result.id ? result.id : null;
+    console.log('[certify] result:', result, 'gameId:', gameId);
+
+    // gameId 없으면 오늘 경기에서 직접 찾기
+    if (!gameId && user) {
+      try {
+        const myT = localStorage.getItem('myTeam') || localStorage.getItem('favoriteTeam') || '';
+        const url = myT ? `/api/battle/today?team=${encodeURIComponent(myT)}` : '/api/battle/today';
+        const todayRes = await fetch(url);
+        if (todayRes.ok) {
+          const todayBattles = await todayRes.json();
+          if (todayBattles && todayBattles.length > 0) {
+            gameId = todayBattles[0].gameId;
+            console.log('[certify] today에서 gameId 조회:', gameId);
+          }
+        }
+      } catch(e) { console.warn('today 조회 실패:', e); }
+    }
+
+    if (user && gameId) {
+      try {
+        const seat = window._ocrResult ? (window._ocrResult.seat || '') : '';
+        console.log('[certify] 호출:', { nickname: user, gameId, seat });
+        const certRes = await fetch('/api/battle/certify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nickname: user, gameId: gameId, seat: seat })
+        });
+        if (certRes.ok) {
+          const certData = await certRes.json();
+          console.log('[certify] 응답:', certData);
+          if (certData.success === false) {
+            console.warn('certify 거부:', certData.message);
+          } else {
+            earnedPoints = certData.earnedPoints || 50;
+            // 상단 스코어보드 + 게이지 즉시 갱신
+            if (certData.homePct !== undefined) {
+              updateCheerUI(certData.homeCheerScore, certData.awayCheerScore, certData.homePct, certData.awayPct);
+              updateHeaderBattleScore(certData.homeCheerScore, certData.awayCheerScore);
+            }
+            // 전역 함수로 스코어보드 재조회
+            if (typeof refreshBattleScoreboard === 'function') refreshBattleScoreboard();
+            loadZoneScores().then(() => {
+              const activeBtn = document.querySelector('.zone-btn.active');
+              if (activeBtn) renderZone(activeBtn.dataset.zone);
+            });
+          }
+        }
+      } catch(e) { console.warn('certify 실패:', e); }
+    } else {
+      console.warn('[certify] 조건 불충족 — user:', user, 'gameId:', gameId);
+      refreshCheerPoints();
+    }
+
     const gameData  = result;
     const matchInfo = gameData ? `${gameData.homeTeam} vs ${gameData.awayTeam} (DB 매칭 ✅)` : (d.match || '-');
     const doneInfo = document.getElementById('battle-done-info');
@@ -589,7 +785,8 @@ renderZone('orange-3b'); // 초기 구역 세팅
         <div>🏟 <b>${gameData ? gameData.venue : (d.stadium||'-')}</b></div>
         <div>💺 <b>${d.seat||'-'}</b></div>
         <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);color:#4ade80;font-weight:700;font-size:12px;">
-          📔 직관 다이어리에 자동 저장되었어요!
+          ⚔️ 점령전 포인트 <span style="color:#F5C842;font-size:14px;">+${earnedPoints}점</span> 적립 완료!<br>
+          📔 직관 다이어리에도 자동 저장되었어요.
           ${gameData?.fallback ? '<br><span style="color:#fbbf24;font-size:11px;">⚠️ 팀명 매칭 실패 — 당일 첫 경기로 저장됩니다. 수정해주세요.</span>' : ''}
         </div>
       </div>`;
@@ -651,6 +848,22 @@ renderZone('orange-3b'); // 초기 구역 세팅
       const res = await fetch('/api/diary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const data = await res.json();
       if (!data.success) return { error: data.message };
+      // gameData가 없어도 certify를 위해 gameId를 포함한 객체 반환
+      if (!gameData) {
+        // gameData 없을 때: 오늘 내 팀 경기 ID를 직접 조회
+        try {
+          const myT = localStorage.getItem('myTeam') || localStorage.getItem('favoriteTeam') || '';
+          const todayGamesRes = await fetch(`/api/games/today`);
+          if (todayGamesRes.ok) {
+            const todayGames = await todayGamesRes.json();
+            const matched = todayGames.find(g =>
+              !myT || g.homeTeam === myT || g.awayTeam === myT
+            );
+            if (matched) return { id: matched.id, homeTeam: matched.homeTeam, awayTeam: matched.awayTeam, date: matched.gameDate || matched.date, venue: matched.venue || '' };
+          }
+        } catch(e) {}
+        return null;
+      }
       return gameData;
     } catch(e) { return null; }
   }
