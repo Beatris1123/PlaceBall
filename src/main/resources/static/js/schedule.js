@@ -3,28 +3,11 @@
    KBO 경기일정 페이지 — Spring Boot API 연동 버전
    ============================================================ */
 
-// ──────────────────────────────────────────────────────────────
-// 1. 상수
-// ──────────────────────────────────────────────────────────────
 const TEAM_COLORS = {
   'KIA':  '#C8102E', 'LG':   '#C30452', '삼성': '#074CA1',
   '두산': '#131230', '롯데': '#002B5B', 'SSG':  '#CE0E2D',
   'NC':   '#315288', 'KT':   '#222222', '한화': '#FF6600', '키움': '#820024',
 };
-
-// 임시 순위 (순위 API 구현 전까지 사용)
-const MOCK_STANDINGS = [
-  { rank:1,  team:'KIA',  wins:28, losses:14, pct:'.667' },
-  { rank:2,  team:'LG',   wins:25, losses:16, pct:'.610' },
-  { rank:3,  team:'삼성', wins:23, losses:18, pct:'.561' },
-  { rank:4,  team:'SSG',  wins:22, losses:19, pct:'.537' },
-  { rank:5,  team:'두산', wins:21, losses:20, pct:'.512' },
-  { rank:6,  team:'KT',   wins:20, losses:21, pct:'.488' },
-  { rank:7,  team:'NC',   wins:19, losses:22, pct:'.463' },
-  { rank:8,  team:'한화', wins:18, losses:23, pct:'.439' },
-  { rank:9,  team:'롯데', wins:15, losses:26, pct:'.366' },
-  { rank:10, team:'키움', wins:13, losses:28, pct:'.317' },
-];
 
 // ──────────────────────────────────────────────────────────────
 // 2. 상태 변수
@@ -35,7 +18,7 @@ let currentMonth = _today.getMonth(); // 0-based
 let selectedDate = null;
 let activeTeam   = 'all';
 let activeTab    = 'all';
-let cachedGames  = [];   // API에서 받아온 원본 데이터 캐시
+let cachedGames  = [];
 
 // ──────────────────────────────────────────────────────────────
 // 3. 유틸
@@ -51,8 +34,6 @@ function getTeamColor(name) {
   return TEAM_COLORS[name] || '#6b7280';
 }
 
-// API 응답(Game 엔티티) → 프론트 통일 포맷 변환
-// LocalDate/LocalTime이 배열([2026,5,16]) 또는 문자열("18:30:00") 모두 처리
 function parseDate(v) {
   if (!v) return '';
   if (Array.isArray(v)) return `${v[0]}-${String(v[1]).padStart(2,'0')}-${String(v[2]).padStart(2,'0')}`;
@@ -111,7 +92,7 @@ async function fetchGames() {
     const data = await res.json();
     cachedGames = data.map(normalizeGame);
   } catch (e) {
-    console.warn('API 호출 실패, 빈 목록으로 처리:', e);
+    console.warn('API 호출 실패:', e);
     cachedGames = [];
   }
 
@@ -134,13 +115,8 @@ async function fetchTodayGames() {
 // ──────────────────────────────────────────────────────────────
 function getFilteredGames() {
   let games = [...cachedGames];
-
-  // 탭 필터 (today는 클라이언트에서)
   if (activeTab === 'today')    games = games.filter(g => g.date === todayStr());
-
-  // 날짜 선택 필터
   if (selectedDate) games = games.filter(g => g.date === selectedDate);
-
   games.sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
   return games;
 }
@@ -160,7 +136,6 @@ function renderGames() {
   }
   empty.style.display = 'none';
 
-  // 날짜별 그룹핑
   const grouped = {};
   games.forEach(g => {
     if (!grouped[g.date]) grouped[g.date] = [];
@@ -238,7 +213,6 @@ function renderCalendar() {
   const container = document.getElementById('calDays');
   const firstDay  = new Date(currentYear, currentMonth, 1).getDay();
   const lastDate  = new Date(currentYear, currentMonth + 1, 0).getDate();
-
   const gameDates = new Set(cachedGames.map(g => g.date));
 
   let html = '';
@@ -288,16 +262,32 @@ async function renderTodaySummary() {
 }
 
 // ──────────────────────────────────────────────────────────────
-// 9. 렌더: 순위 (임시)
+// 9. 렌더: 팀 순위 (API 연동)
 // ──────────────────────────────────────────────────────────────
-function renderStandings() {
-  document.getElementById('standingsList').innerHTML = MOCK_STANDINGS.map(s => `
-    <div class="standing-row">
-      <span class="st-rank ${s.rank<=3?'top3':''}">${s.rank}</span>
-      <span class="st-team">${s.team}</span>
-      <span class="st-stat">${s.wins}승</span>
-      <span class="st-pct">${s.pct}</span>
-    </div>`).join('');
+async function renderStandings() {
+  const listEl = document.getElementById('standingsList');
+  if (!listEl) return;
+
+  try {
+    const res  = await fetch(`/api/games/standings?year=${currentYear}`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+
+    if (!data || !data.length) {
+      listEl.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted);font-size:12px;">순위 데이터 없음</div>';
+      return;
+    }
+
+    listEl.innerHTML = data.map(s => `
+      <div class="standing-row">
+        <span class="st-rank ${s.rank <= 3 ? 'top3' : ''}">${s.rank}</span>
+        <span class="st-team">${s.team}</span>
+        <span class="st-stat">${s.wins}승</span>
+        <span class="st-pct">${s.pct}</span>
+      </div>`).join('');
+  } catch (e) {
+    listEl.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted);font-size:12px;">순위 불러오기 실패</div>';
+  }
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -344,7 +334,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     activeTab = btn.dataset.tab;
-    // today 탭은 클라이언트 필터, 나머지는 API 재호출
     if (activeTab === 'today') { renderGames(); }
     else { fetchGames(); }
   });
@@ -376,7 +365,7 @@ function initLoginState() {
 }
 
 // ──────────────────────────────────────────────────────────────
-// 14. 헤더 스코어보드 동적 로딩
+// 14. 헤더 스코어보드
 // ──────────────────────────────────────────────────────────────
 const TEAM_COLORS_HEADER = {
   'KIA':'#EF4444','기아':'#EF4444','LG':'#3B82F6','두산':'#1E3A8A',
@@ -401,37 +390,37 @@ async function loadHeaderScoreboard() {
       if (found) game = found;
     }
 
-    const ht = game.homeTeam || 'HOME';
-    const at = game.awayTeam || 'AWAY';
-    const hs = (game.homeScore != null && game.homeScore >= 0) ? game.homeScore : '-';
+    const ht  = game.homeTeam || 'HOME';
+    const at  = game.awayTeam || 'AWAY';
+    const hs  = (game.homeScore != null && game.homeScore >= 0) ? game.homeScore : '-';
     const as_ = (game.awayScore != null && game.awayScore >= 0) ? game.awayScore : '-';
-    const hc = headerTeamColor(ht);
-    const ac = headerTeamColor(at);
+    const hc  = headerTeamColor(ht);
+    const ac  = headerTeamColor(at);
 
-    document.getElementById('sch-away-badge').textContent       = at.slice(0, 1);
-    document.getElementById('sch-away-badge').style.background  = ac;
-    document.getElementById('sch-away-name').textContent        = at;
-    document.getElementById('sch-away-score').textContent       = String(as_);
-    document.getElementById('sch-away-score').style.color       = ac;
-    document.getElementById('sch-home-badge').textContent       = ht.slice(0, 1);
-    document.getElementById('sch-home-badge').style.background  = hc;
-    document.getElementById('sch-home-name').textContent        = ht;
-    document.getElementById('sch-home-score').textContent       = String(hs);
-    document.getElementById('sch-home-score').style.color       = hc;
+    document.getElementById('sch-away-badge').textContent      = at.slice(0, 1);
+    document.getElementById('sch-away-badge').style.background = ac;
+    document.getElementById('sch-away-name').textContent       = at;
+    document.getElementById('sch-away-score').textContent      = String(as_);
+    document.getElementById('sch-away-score').style.color      = ac;
+    document.getElementById('sch-home-badge').textContent      = ht.slice(0, 1);
+    document.getElementById('sch-home-badge').style.background = hc;
+    document.getElementById('sch-home-name').textContent       = ht;
+    document.getElementById('sch-home-score').textContent      = String(hs);
+    document.getElementById('sch-home-score').style.color      = hc;
 
     const statusBadge = document.getElementById('sch-status-badge');
     const inningEl    = document.getElementById('sch-inning');
     const s = (game.status || '').toLowerCase();
     if (s.includes('live') || s.includes('진행')) {
-      statusBadge.textContent        = 'LIVE';
-      statusBadge.style.background   = '#22C55E';
+      statusBadge.textContent      = 'LIVE';
+      statusBadge.style.background = '#22C55E';
       if (game.inning) inningEl.textContent = game.inning;
     } else if (s.includes('종료') || s.includes('final')) {
-      statusBadge.textContent        = '종료';
-      statusBadge.style.background   = '#64748B';
+      statusBadge.textContent      = '종료';
+      statusBadge.style.background = '#64748B';
     } else {
-      statusBadge.textContent        = parseTime(game.gameTime) || '예정';
-      statusBadge.style.background   = '#3B82F6';
+      statusBadge.textContent      = parseTime(game.gameTime) || '예정';
+      statusBadge.style.background = '#3B82F6';
     }
     board.style.visibility = 'visible';
   } catch(e) { /* 조용히 무시 */ }
@@ -443,8 +432,8 @@ async function loadHeaderScoreboard() {
 document.addEventListener('DOMContentLoaded', async () => {
   initLoginState();
   updateMonthLabel();
-  renderStandings();
+  renderStandings();       // API에서 순위 로드
   loadHeaderScoreboard();
   await renderTodaySummary();
-  await fetchGames();   // API 호출 → renderCalendar + renderGames 내부 실행
+  await fetchGames();
 });

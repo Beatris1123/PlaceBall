@@ -1,0 +1,219 @@
+/* ═══════════════════════════════════════════════════════════
+   PLACEBALL — Cyber-Light Stadium · External Style Supplement
+   (index.html의 인라인 CSS가 주력. 이 파일은 다른 페이지 보완용)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Other pages (community, schedule, diary 등) 공통 보완 */
+:root {
+  --pb-bg:         #F2F5F9;
+  --pb-bg-2:       #E8EDF5;
+  --pb-bg-3:       #DDE4EF;
+  --pb-ink:        #0F1923;
+  --pb-ink-2:      #2D3748;
+  --pb-muted:      #718096;
+  --pb-subtle:     #A0AEC0;
+  --pb-line:       rgba(15, 25, 35, 0.08);
+  --pb-line-md:    rgba(15, 25, 35, 0.13);
+  --pb-card:       rgba(255,255,255,0.88);
+  --pb-red:        #E60012;
+  --pb-blue:       #1D4ED8;
+  --pb-green:      #16A34A;
+  --pb-gold:       #F59E0B;
+  --pb-r-sm:  8px;
+  --pb-r-md:  14px;
+  --pb-r-lg:  18px;
+  --pb-r-xl:  22px;
+  --pb-r-pill: 999px;
+  --pb-shadow-sm:  0 4px 16px rgba(15,25,35,0.07);
+  --pb-shadow-md:  0 8px 32px rgba(31,38,135,0.08);
+  --pb-shadow-card:0 8px 32px 0 rgba(31,38,135,0.04);
+}
+
+/* 전역 body 배경 */
+body {
+  background:
+    radial-gradient(ellipse 55% 35% at 10% 0%, rgba(230,0,18,0.05) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 35% at 90% 0%, rgba(0,44,95,0.06) 0%, transparent 55%),
+    linear-gradient(175deg, #EDF1F8 0%, #F2F5F9 40%, #E8EDF5 100%) !important;
+  color: var(--pb-ink) !important;
+}
+
+#bg-illustration { opacity: 0.05 !important; filter: saturate(0.3) brightness(1.5) !important; }
+
+body::before, #bg-overlay {
+  background:
+    radial-gradient(circle at 25% 60%, rgba(230,0,18,0.03) 0%, transparent 40%),
+    radial-gradient(circle at 75% 70%, rgba(0,44,95,0.04) 0%, transparent 40%) !important;
+}
+
+/* Header */
+header, .site-header {
+  background: rgba(242,245,249,0.92) !important;
+  border-bottom: 1px solid rgba(15,25,35,0.08) !important;
+  box-shadow: 0 2px 20px rgba(15,25,35,0.07) !important;
+}
+
+/* Cards */
+.card, .schedule-card {
+  background: var(--pb-card) !important;
+  border: 1px solid rgba(255,255,255,0.70) !important;
+  border-radius: var(--pb-r-lg) !important;
+  box-shadow: var(--pb-shadow-card) !important;
+  color: var(--pb-ink) !important;
+}
+.card:hover, .schedule-card:hover {
+  box-shadow: var(--pb-shadow-md) !important;
+}
+
+/* Tabs — capsule style */
+.zone-buttons, .game-tabs, .team-filter {
+  background: var(--pb-bg-2) !important;
+  border: 1px solid var(--pb-line) !important;
+  border-radius: var(--pb-r-md) !important;
+  padding: 4px !important;
+  box-shadow: inset 0 1px 3px rgba(15,25,35,0.05) !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+}
+.zone-btn, .tab-btn, .team-btn, .tab-item, .sort-item, .page-btn {
+  background: transparent !important;
+  border: none !important;
+  color: var(--pb-muted) !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+  transition: all 0.18s !important;
+}
+.zone-btn:hover, .tab-btn:hover, .team-btn:hover { background: rgba(255,255,255,0.65) !important; color: var(--pb-ink) !important; }
+.zone-btn.active, .tab-btn.active, .team-btn.active, .tab-item.active, .page-btn.active {
+  background: #fff !important; color: var(--pb-red) !important;
+  box-shadow: 0 2px 8px rgba(230,0,18,0.12), 0 1px 3px rgba(15,25,35,0.07) !important;
+  border: none !important; font-weight: 800 !important;
+}
+
+/* Primary action buttons */
+.btn-login, .btn-write, .btn-submit,
+#btn-join-battle, .attendance-btn {
+  background: linear-gradient(135deg, #E60012, #B8000E) !important;
+  color: #fff !important; border: none !important;
+  border-radius: var(--pb-r-md) !important;
+  box-shadow: 0 4px 14px rgba(230,0,18,0.28) !important;
+  white-space: nowrap !important;
+  font-weight: 800 !important;
+}
+.btn-login:hover, .btn-write:hover, #btn-join-battle:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(230,0,18,0.38) !important;
+}
+
+/* Diary / secondary */
+.btn-diary {
+  background: rgba(0,44,95,0.07) !important;
+  color: #1D4ED8 !important;
+  border: 1.5px solid rgba(0,44,95,0.16) !important;
+  border-radius: var(--pb-r-md) !important;
+  white-space: nowrap !important;
+}
+
+/* Badges */
+.badge-live, .live-badge, .live-pill {
+  background: #DCFCE7 !important; color: #15803D !important;
+  border: 1px solid rgba(22,163,74,0.18) !important;
+  border-radius: 99px !important; white-space: nowrap !important;
+  box-shadow: none !important;
+}
+.badge-blue {
+  background: #DBEAFE !important; color: #1D4ED8 !important;
+  border: 1px solid rgba(29,78,216,0.15) !important;
+  border-radius: 99px !important; white-space: nowrap !important;
+}
+
+/* Inputs */
+.chat-input, .search-input, .write-input, .write-textarea, .comment-input {
+  background: #fff !important; color: var(--pb-ink) !important;
+  border: 1px solid var(--pb-line-md) !important;
+  border-radius: var(--pb-r-sm) !important;
+}
+.chat-input:focus, .search-input:focus, .write-input:focus,
+.write-textarea:focus, .comment-input:focus {
+  border-color: #1D4ED8 !important;
+  box-shadow: 0 0 0 3px rgba(29,78,216,0.10) !important;
+}
+.chat-send {
+  background: linear-gradient(135deg, #E60012, #B8000E) !important;
+  color: #fff !important; border: none !important;
+  box-shadow: 0 3px 10px rgba(230,0,18,0.22) !important;
+  white-space: nowrap !important;
+}
+
+/* Zone Panel */
+.zone-panel {
+  background: linear-gradient(140deg, #fff 0%, #F5F8FF 100%) !important;
+  border: 1px solid var(--pb-line) !important;
+  border-radius: var(--pb-r-md) !important;
+}
+.stadium-shell {
+  background: linear-gradient(160deg, #EDF3FF 0%, #E4EDFF 100%) !important;
+  border: 1px solid rgba(15,25,35,0.07) !important;
+  border-radius: var(--pb-r-md) !important;
+}
+
+/* Modals */
+.modal-backdrop { background: rgba(15,25,35,0.30) !important; backdrop-filter: blur(10px) !important; }
+.modal-box {
+  background: #fff !important; border: 1px solid var(--pb-line) !important;
+  border-radius: var(--pb-r-xl) !important; color: var(--pb-ink) !important;
+}
+
+/* Score boxes */
+.score-box-kia { background: #FFF5F5 !important; border: 1px solid rgba(230,0,18,0.10) !important; }
+.score-box-lg  { background: #EFF6FF !important; border: 1px solid rgba(29,78,216,0.10) !important; }
+
+/* Featured match */
+.featured-match {
+  background: linear-gradient(135deg, rgba(0,44,95,0.07) 0%, rgba(29,78,216,0.05) 100%) !important;
+  border: 1px solid rgba(0,44,95,0.10) !important;
+  border-radius: var(--pb-r-md) !important;
+}
+
+/* Misc */
+.divider { background: var(--pb-line) !important; }
+.post-row:hover, .today-game-item:hover { background: rgba(232,237,245,0.60) !important; }
+.card-link, .community-link-btn { color: #1D4ED8 !important; white-space: nowrap !important; }
+.bubble-bot { background: #fff !important; color: var(--pb-ink-2, #2D3748) !important; border: 1px solid var(--pb-line) !important; }
+.bubble-user { background: #1D4ED8 !important; color: #fff !important; }
+.personality-badge { white-space: nowrap !important; }
+.gallery-item { border-radius: var(--pb-r-md) !important; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--pb-bg-2); }
+::-webkit-scrollbar-thumb { background: rgba(15,25,35,0.15); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(15,25,35,0.25); }
+
+/* Community / other pages */
+.page-banner { background: linear-gradient(135deg, #EEF4FF, #FFF5F5) !important; border-bottom: 1px solid var(--pb-line) !important; }
+.upload-zone { background: var(--pb-bg-2) !important; border-color: var(--pb-line-md) !important; border-radius: var(--pb-r-md) !important; }
+.upload-zone:hover { border-color: #1D4ED8 !important; background: rgba(29,78,216,0.05) !important; }
+.upload-btn { background: #1D4ED8 !important; color: #fff !important; border-radius: var(--pb-r-sm) !important; white-space: nowrap !important; }
+
+/* Battle chip strip (if used in other pages) */
+.pb-battle-strip { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin: 0 0 1rem; grid-column: 1/-1; width: 100%; }
+.pb-battle-chip { background: #fff !important; border: 1px solid var(--pb-line) !important; border-radius: var(--pb-r-md) !important; padding: 12px 14px !important; box-shadow: 0 1px 4px rgba(15,25,35,0.05) !important; }
+.pb-chip-label { display: block; color: var(--pb-muted); font-size: 11px; font-weight: 800; letter-spacing: 0.04em; margin-bottom: 4px; white-space: nowrap; }
+.pb-chip-value { color: var(--pb-ink); font-size: 17px; font-weight: 900; }
+.pb-chip-value.red   { color: var(--pb-red); }
+.pb-chip-value.blue  { color: var(--pb-blue); }
+.pb-chip-value.green { color: var(--pb-green); }
+.pb-chip-value.gold  { color: var(--pb-gold); }
+
+/* Responsive */
+@media (max-width: 960px) {
+  .pb-battle-strip { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .zone-buttons, .game-tabs { flex-wrap: wrap !important; }
+}
+@media (max-width: 640px) {
+  main, .schedule-main, .main-wrap { padding-left: 1rem !important; padding-right: 1rem !important; }
+  .pb-battle-strip { grid-template-columns: 1fr; }
+}

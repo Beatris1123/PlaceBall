@@ -1,913 +1,974 @@
-﻿// ─── 1. 공통 유틸 및 성향 뱃지 로직 ───
-const PERSONALITY_MAP = {
-  'cheer'    : { name: '불타는 응원단장',  emoji: '🔥', color: '#EF4444', desc: '응원가를 외우고 떼창을 이끄는 열정 팬' },
-  'food'     : { name: '먹거리 탐험가',    emoji: '🌭', color: '#F59E0B', desc: '직관의 목적은 치킨과 맥주! 맛집 지도 완성' },
-  'analyst'  : { name: '데이터 분석가',    emoji: '📊', color: '#3B82F6', desc: '기록지와 스탯으로 경기를 읽는 야구 박사' },
-  'photo'    : { name: '직관 포토그래퍼',  emoji: '📸', color: '#8B5CF6', desc: '인생샷 건지러 구장 구석구석을 탐험' },
-  'social'   : { name: '인싸 직관러',      emoji: '🎉', color: '#EC4899', desc: '친구들과의 추억 만들기가 최우선' },
-  'lucky'    : { name: '행운의 마스코트',  emoji: '🍀', color: '#10B981', desc: '내가 가면 팀이 이긴다는 믿음의 팬' },
-  'vintage'  : { name: '레전드 올드팬',    emoji: '🏆', color: '#F97316', desc: '창단 멤버부터 알고 있는 산증인 팬' },
-  'relaxed'  : { name: '여유로운 관람객',  emoji: '☀️', color: '#06B6D4', desc: '잔디 냄새와 여유를 즐기는 힐링 팬' },
-  'collector': { name: '굿즈 수집가',      emoji: '🧢', color: '#6366F1', desc: '한정판 굿즈를 위해서라면 어디든 간다' },
-  'streamer' : { name: '직관 스트리머',    emoji: '📱', color: '#EF4444', desc: '실시간 중계와 SNS 공유가 직관의 이유' },
-};
-
-function getPersonality() {
-  try {
-    const raw = localStorage.getItem('placeball_personality');
-    if (!raw) return null;
-    const data = JSON.parse(raw);
-    if (data.type && PERSONALITY_MAP[data.type]) return { ...PERSONALITY_MAP[data.type], ...data };
-    if (data.name) return data;
-    return null;
-  } catch(e) { return null; }
-}
-
-function hexToRgba(hex, alpha) {
-  const r = parseInt(hex.slice(1,3), 16);
-  const g = parseInt(hex.slice(3,5), 16);
-  const b = parseInt(hex.slice(5,7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
+// ═══════════════════════════════════════════════════════════════════════════════
+// PLACEBALL INDEX.JS — FINAL INTEGRATED (v9.0 — 백엔드 API 완전 연동)
+// ═══════════════════════════════════════════════════════════════════════════════
 
 const TEAM_COLORS = {
-  'KIA':'#EF4444','기아':'#EF4444','LG':'#3B82F6','두산':'#1E3A8A',
-  '삼성':'#1D4ED8','롯데':'#EF4444','SSG':'#CE0E2D','NC':'#0EA5E9',
-  'KT':'#DC2626','한화':'#F97316','키움':'#820024'
+  'KIA':'#E60012','기아':'#E60012','LG':'#002C5F','두산':'#131230',
+  '삼성':'#074CA1','롯데':'#002955','SSG':'#CE0E2D','NC':'#315288',
+  'KT':'#000000','한화':'#FF6600','키움':'#820024'
 };
 function tc(name) { return TEAM_COLORS[name] || '#94A3B8'; }
 
-// ─── 2. 헤더 로그인 및 뱃지 처리 ───
+// ─── 1. 헤더 및 로그인 ───
 (function() {
   const user = localStorage.getItem('loggedInUser');
-  const loginBtn  = document.getElementById('login-btn');
-  const userInfo  = document.getElementById('user-info');
-  const userNick  = document.getElementById('user-nick');
+  const loginBtn = document.getElementById('login-btn');
+  const userInfo = document.getElementById('user-info');
+  const userNick = document.getElementById('user-nick');
   if (user) {
-    if (loginBtn)  loginBtn.style.display  = 'none';
-    if (userInfo)  userInfo.style.display  = 'flex';
-    if (userNick)  userNick.textContent    = user;
-
-    // 성향 뱃지
-    const p = getPersonality();
-    const wrap = document.getElementById('header-personality-badge');
-    if (p && wrap) {
-      const badgeEl = document.getElementById('header-badge-el');
-      const color = p.color || '#3B82F6';
-      if (badgeEl) badgeEl.style.cssText = `background:${hexToRgba(color,0.14)};border-color:${hexToRgba(color,0.35)};color:${color}`;
-
-      const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-      setEl('hb-emoji', p.emoji || '⚾');
-      setEl('hb-label', p.name || '');
-      setEl('hb-tooltip-emoji', p.emoji || '⚾');
-      setEl('hb-tooltip-name', p.name || '');
-      setEl('hb-tooltip-desc', p.desc || '');
-      wrap.style.display = 'block';
-    }
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (userInfo) userInfo.style.display = 'flex';
+    if (userNick) userNick.textContent = user;
   }
   const logoutBtn = document.getElementById('logout-btn');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
+    logoutBtn.onclick = () => {
       localStorage.removeItem('loggedInUser');
       location.reload();
-    });
+    };
   }
 })();
 
-// ─── 3. 통합 경기 데이터 로딩 (스코어보드, 전광판, 일정카드 완벽 동기화) ───
+// ─── 2. 경기 일정 (오늘의 전장) ───
 (function() {
-  function getDateStr(val) {
-    if (!val) return "";
-    if (Array.isArray(val)) return `${val[0]}-${String(val[1]).padStart(2,'0')}-${String(val[2]).padStart(2,'0')}`;
-    return val.toString().substring(0, 10);
-  }
-  function getTimeStr(val) {
-    if (!val) return "18:30";
-    if (Array.isArray(val)) return `${String(val[0]).padStart(2,'0')}:${String(val[1]).padStart(2,'0')}`;
-    return val.toString().substring(0, 5);
-  }
+  const TEAM_COLORS_MAP = {
+    'KIA':'#E60012','기아':'#E60012','LG':'#002C5F','두산':'#131230',
+    '삼성':'#074CA1','롯데':'#002955','SSG':'#CE0E2D','NC':'#315288',
+    'KT':'#000000','한화':'#FF6600','키움':'#820024'
+  };
 
-  // 전광판 (SVG) 업데이트
-  function updateSvgScoreboard(home, away, homeScore, awayScore, status) {
-    const svgHomeScore = document.getElementById('svg-home-score');
-    const svgAwayScore = document.getElementById('svg-away-score');
-    const svgHomeTeam  = document.getElementById('svg-home-team');
-    const svgAwayTeam  = document.getElementById('svg-away-team');
-
-    const s = (status || '').toLowerCase();
-    const isPlayingOrDone = s.includes('live') || s.includes('진행') || s.includes('종료') || s.includes('final');
-
-    if (svgHomeScore) {
-      svgHomeScore.textContent = isPlayingOrDone && homeScore != null ? String(homeScore) : '-';
-      svgHomeScore.setAttribute('fill', isPlayingOrDone ? tc(home) : '#fff');
-    }
-    if (svgAwayScore) {
-      svgAwayScore.textContent = isPlayingOrDone && awayScore != null ? String(awayScore) : '-';
-      svgAwayScore.setAttribute('fill', isPlayingOrDone ? tc(away) : '#fff');
-    }
-    if (svgHomeTeam) svgHomeTeam.textContent = home || 'HOME';
-    if (svgAwayTeam) svgAwayTeam.textContent = away || 'AWAY';
-  }
-
-  // 상단 스코어보드 — 팀명/뱃지/구장/시간만 세팅 (점수는 점령전 점수로 별도 갱신)
-  function updateHeaderScoreboard(game) {
-    const awayBadge     = document.getElementById('awayBadge');
-    const awayTeamName  = document.getElementById('awayTeamName');
-    const statusBadge   = document.getElementById('matchStatusBadge');
-    const mainMatchInfo = document.getElementById('mainMatchInfo');
-    const homeTeamName  = document.getElementById('homeTeamName');
-    const homeBadge     = document.getElementById('homeBadge');
-
-    const ht = game.homeTeam || 'HOME';
-    const at = game.awayTeam || 'AWAY';
-
-    if (awayTeamName)  awayTeamName.textContent = at;
-    if (homeTeamName)  homeTeamName.textContent = ht;
-    if (awayBadge) { awayBadge.textContent = at.slice(0,1); awayBadge.style.background = tc(at); }
-    if (homeBadge) { homeBadge.textContent = ht.slice(0,1); homeBadge.style.background = tc(ht); }
-
-    // 가운데 배지: 경기 시간 표시
-    const s = (game.status || '').toLowerCase();
-    if (statusBadge) {
-      statusBadge.style.display   = 'inline-block';
-      statusBadge.style.animation = '';
-      if (s.includes('live') || s.includes('진행')) {
-        statusBadge.textContent      = 'LIVE';
-        statusBadge.style.background = '#22C55E';
-        statusBadge.style.animation  = 'pulse-live 2s ease-in-out infinite';
-      } else if (s.includes('종료') || s.includes('final')) {
-        statusBadge.textContent      = '종료';
-        statusBadge.style.background = '#64748B';
-      } else {
-        statusBadge.textContent      = getTimeStr(game.gameTime || game.time);
-        statusBadge.style.background = '#3B82F6';
-      }
-    }
-    if (mainMatchInfo) mainMatchInfo.textContent = game.venue || '';
-
-    // 점수 자리 초기값 — 점령전 점수로 교체 예약
-    const homeScoreEl = document.getElementById('homeScore');
-    const awayScoreEl = document.getElementById('awayScore');
-    if (homeScoreEl) { homeScoreEl.textContent = '-'; homeScoreEl.style.color = tc(ht); }
-    if (awayScoreEl) { awayScoreEl.textContent = '-'; awayScoreEl.style.color = tc(at); }
-  }
-
-
-  // 통합 데이터 가져오기 및 렌더링
-  async function loadAllGameData() {
+  async function loadGames() {
     try {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = today.getMonth() + 1;
-      const todayStr = `${year}-${String(month).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-      // 이번 달 데이터 전체 가져오기
-      const res = await fetch(`/api/games?year=${year}&month=${month}`);
-      if (!res.ok) return;
+      const res   = await fetch('/api/games/today');
       const games = await res.json();
-
-      const card = document.querySelector('.schedule-card');
-      const mn = card ? card.querySelector('.match-name') : null;
-      const mt = card ? card.querySelector('.match-time') : null;
-      const mm = card ? card.querySelector('.match-meta') : null;
-      const tl = card ? card.querySelector('.match-time-label') : null;
-
       if (!games || games.length === 0) {
-        if (mn) mn.textContent = 'DB에 이번 달 경기 데이터가 없습니다.';
+        // 오늘 경기 없음 표시
+        const container = document.getElementById('today-match-container');
+        if (container) container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:1rem;">오늘 경기가 없습니다</div>';
+        const timeEl = document.getElementById('today-match-time');
+        if (timeEl) timeEl.textContent = '-';
         return;
       }
 
-      // 1순위: 오늘 경기
-      let targetGames = games.filter(g => getDateStr(g.gameDate || g.date) === todayStr);
-
-      // 2순위: 오늘 경기가 없으면 가장 가까운 미래 또는 과거 경기
-      if (targetGames.length === 0) {
-          const futureGames = games.filter(g => getDateStr(g.gameDate || g.date) > todayStr).sort((a,b) => getDateStr(a.gameDate || a.date).localeCompare(getDateStr(b.gameDate || b.date)));
-          if (futureGames.length > 0) {
-              const closestDate = getDateStr(futureGames[0].gameDate || futureGames[0].date);
-              targetGames = futureGames.filter(g => getDateStr(g.gameDate || g.date) === closestDate);
-          } else {
-              const pastGames = games.filter(g => getDateStr(g.gameDate || g.date) < todayStr).sort((a,b) => getDateStr(b.gameDate || b.date).localeCompare(getDateStr(a.gameDate || a.date)));
-              if (pastGames.length > 0) {
-                  const closestDate = getDateStr(pastGames[0].gameDate || pastGames[0].date);
-                  targetGames = pastGames.filter(g => getDateStr(g.gameDate || g.date) === closestDate);
-              }
-          }
-      }
-
-      if (targetGames.length === 0) return;
-
-      const myTeam = localStorage.getItem('myTeam') || localStorage.getItem('favoriteTeam') || '';
-      let featured = targetGames[0];
+      const myTeam = localStorage.getItem('favoriteTeam') || '';
+      let g = games[0];
       if (myTeam) {
-        const found = targetGames.find(g => g.homeTeam === myTeam || g.awayTeam === myTeam);
-        if (found) featured = found;
+        const found = games.find(x => x.homeTeam === myTeam || x.awayTeam === myTeam);
+        if (found) g = found;
       }
 
-      // 스코어보드 & 전광판 업데이트 적용
-      updateHeaderScoreboard(featured);
-      updateSvgScoreboard(featured.homeTeam, featured.awayTeam, featured.homeScore, featured.awayScore, (featured.status||'').toLowerCase());
+      // 경기 시간
+      const timeEl = document.getElementById('today-match-time');
+      if (timeEl) timeEl.textContent = g.gameTime ? String(g.gameTime).slice(0,5) : '18:30';
 
-      // 일정 카드 메인 매치 적용
-      if (mn) {
-        mn.innerHTML = `<span style="color:${tc(featured.awayTeam)};font-weight:900;">${featured.awayTeam}</span>`
-          + ` <span style="color:var(--text-3);font-size:0.85em;margin:0 4px">vs</span> `
-          + `<span style="color:${tc(featured.homeTeam)};font-weight:900;">${featured.homeTeam}</span>`;
-      }
-      if (mt) {
-        const s = (featured.status||'').toLowerCase();
-        if (s.includes('live') || s.includes('진행')) {
-          mt.innerHTML = `<span style="background:#22C55E;color:#fff;padding:2px 7px;border-radius:99px;font-size:11px;font-weight:800;">LIVE</span>`;
-        } else if (s.includes('종료') || s.includes('final')) {
-          mt.textContent = `${featured.awayScore ?? '-'} : ${featured.homeScore ?? '-'}`;
-        } else {
-          mt.textContent = getTimeStr(featured.gameTime || featured.time);
-        }
+      // 원정팀
+      const awayName  = document.getElementById('today-away-name');
+      const awayLogo  = document.getElementById('today-away-logo');
+      if (awayName) awayName.textContent = g.awayTeam || '-';
+      if (awayLogo) {
+        awayLogo.textContent       = g.awayTeam ? g.awayTeam.slice(0,2) : '-';
+        awayLogo.style.background  = TEAM_COLORS_MAP[g.awayTeam] || '#94A3B8';
+        awayLogo.style.color       = '#fff';
       }
 
-      const displayDate = getDateStr(featured.gameDate || featured.date);
-      if (tl) tl.textContent = displayDate === todayStr ? '오늘의 매치' : `${displayDate} 매치`;
-      if (mm) mm.textContent = (featured.venue || '') + (myTeam && (featured.homeTeam===myTeam||featured.awayTeam===myTeam) ? ' · 내 응원팀 경기' : '');
-
-      // 일정 카드 서브 리스트 적용
-      if (card) {
-        card.querySelectorAll('.schedule-row').forEach(row => row.remove());
-        const divider = card.querySelector('.divider');
-        const rest = targetGames.filter(g => g.id !== featured.id).slice(0, 3);
-
-        rest.forEach(g => {
-          const s = (g.status||'').toLowerCase();
-          const scoreOrTime = (s.includes('live')||s.includes('진행'))
-            ? `<span style="background:#22C55E;color:#fff;padding:1px 6px;border-radius:99px;font-size:10px;">LIVE</span>`
-            : (s.includes('종료') ? `${g.awayScore??'-'}:${g.homeScore??'-'}` : getTimeStr(g.gameTime || g.time));
-
-          const rowDiv = document.createElement('div');
-          rowDiv.className = 'schedule-row';
-          rowDiv.innerHTML = `
-            <span><span style="color:${tc(g.awayTeam)};font-weight:700;">${g.awayTeam}</span> vs <span style="color:${tc(g.homeTeam)};font-weight:700;">${g.homeTeam}</span></span>
-            <span style="color:var(--text-3)">${scoreOrTime}</span>
-          `;
-          if (divider) card.insertBefore(rowDiv, divider);
-        });
+      // 홈팀
+      const homeName  = document.getElementById('today-home-name');
+      const homeLogo  = document.getElementById('today-home-logo');
+      if (homeName) homeName.textContent = g.homeTeam || '-';
+      if (homeLogo) {
+        homeLogo.textContent       = g.homeTeam ? g.homeTeam.slice(0,2) : '-';
+        homeLogo.style.background  = TEAM_COLORS_MAP[g.homeTeam] || '#94A3B8';
+        homeLogo.style.color       = '#fff';
       }
-    } catch(e) { console.error("Schedule Load Error:", e); }
-  }
 
-  document.addEventListener('DOMContentLoaded', loadAllGameData);
-})();
-
-// ─── 4. 각종 모달창 관리 (Photos 등) ───
-function openPhotosModal() { document.getElementById('photos-modal').classList.add('open'); }
-
-const openPhotosBtn = document.getElementById('open-photos');
-if (openPhotosBtn) openPhotosBtn.addEventListener('click', openPhotosModal);
-const popupOpenPhotos = document.getElementById('popup-open-photos');
-if (popupOpenPhotos) popupOpenPhotos.addEventListener('click', openPhotosModal);
-const popupUploadBanner = document.getElementById('popup-upload-banner');
-if (popupUploadBanner) popupUploadBanner.addEventListener('click', openPhotosModal);
-
-document.querySelectorAll('.modal-close').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const target = document.getElementById(btn.dataset.target);
-    if (target) target.classList.remove('open');
-  });
-});
-document.querySelectorAll('.modal-backdrop').forEach(modal => {
-  modal.addEventListener('click', e => {
-    if (e.target === modal) modal.classList.remove('open');
-  });
-});
-
-// ─── 5. 구역 선택 (ZONE SELECTOR) ───
-const zoneData = {
-  'orange-3b':       { name: '3루 오렌지석 (원정 응원석)', desc: '잠실의 원정팀 핵심 응원 구역. 상대팀 팬이 집결해 역응원 열기가 가장 강한 곳입니다.', zones: ['zone-orange-3b','zone-orange-3b-top','zone-red-3b','zone-red-3b-side'],  seatZone: '3루' },
-  'orange-1b':       { name: '1루 오렌지석 (홈팀 응원석)', desc: '홈팀 팬의 핵심 응원 구역. 떼창과 단체 응원가가 가장 강렬하게 터지는 곳입니다.',        zones: ['zone-orange-1b','zone-orange-1b-top','zone-red-1b','zone-red-1b-side'],  seatZone: '1루' },
-  'outfield-center': { name: '중앙 외야 그린석',            desc: '홈런볼이 떨어지는 중립 외야 구역. 양 팀 응원이 교차하며 분위기가 가장 다채로운 곳입니다.', zones: ['zone-outfield-center','zone-outfield-left','zone-outfield-right'],       seatZone: '외야' },
-  'premium':         { name: '테이블석 / 프리미엄석',        desc: '포수 바로 뒤 중앙 최고급 좌석. 경기장 전체를 한눈에 볼 수 있는 명당으로 응원보다 관람 중심입니다.', zones: ['zone-premium','zone-table-top','zone-exciting-l','zone-exciting-r'], seatZone: '중앙' },
-  'foul':            { name: '외야 파울존 / 블루석',         desc: '1·3루 파울라인 바깥 구역. 접근성이 좋고 가성비 높아 응원보다 여유로운 관람을 즐기는 팬이 많습니다.', zones: ['zone-foul','zone-blue-bottom','zone-blue-bottom-r','zone-navy-3b','zone-navy-1b'], seatZone: '내야' },
-  'online':          { name: '온라인 응원',                  desc: '게시글, 댓글, 출석 등 플랫폼 활동으로 쌓인 응원 점수입니다.',                           zones: [],                                                                       seatZone: null }
-};
-
-// 구역별 점수 캐시
-let _zoneScoreCache = null;
-
-async function loadZoneScores() {
-  try {
-    const myTeam = localStorage.getItem('myTeam') || localStorage.getItem('favoriteTeam') || '';
-    const url = myTeam ? `/api/battle/zones?team=${encodeURIComponent(myTeam)}` : '/api/battle/zones';
-    const res = await fetch(url);
-    if (!res.ok) return;
-    _zoneScoreCache = await res.json();
-  } catch(e) { _zoneScoreCache = null; }
-}
-
-function getZoneScore(seatZone) {
-  if (!_zoneScoreCache) return null;
-  if (seatZone === null) return _zoneScoreCache.online || null;
-  return (_zoneScoreCache.zones || {})[seatZone] || null;
-}
-
-function renderZone(key) {
-  const d = zoneData[key];
-  if (!d) return;
-  const zoneName = document.getElementById('zone-name');
-  const zoneDesc = document.getElementById('zone-desc');
-  if (zoneName) zoneName.textContent = d.name;
-  if (zoneDesc) zoneDesc.textContent = d.desc;
-
-  document.querySelectorAll('.zone-btn').forEach(b => b.classList.toggle('active', b.dataset.zone === key));
-
-  // SVG 구역 하이라이트
-  document.querySelectorAll('.seat-zone').forEach(z => { z.style.opacity = '0.10'; z.style.filter = 'brightness(0.7)'; });
-  if (d.zones && d.zones.length > 0) {
-    d.zones.forEach(zid => {
-      const el = document.getElementById(zid);
-      if (el) { el.style.opacity = '0.72'; el.style.filter = 'brightness(1.3)'; }
-    });
-  }
-
-  // 점수 패널 갱신
-  const score = getZoneScore(d.seatZone);
-  updateZonePanel(score, key === 'online');
-}
-
-function updateZonePanel(score, isOnline) {
-  const kiaScoreEl  = document.getElementById('kia-score');
-  const lgScoreEl   = document.getElementById('lg-score');
-  const kiaPctEl    = document.getElementById('kia-pct');
-  const lgPctEl     = document.getElementById('lg-pct');
-  const kiaBarEl    = document.getElementById('kia-bar');
-  const lgBarEl     = document.getElementById('lg-bar');
-  const zoneRatioEl = document.getElementById('zone-ratio');
-  const homeLabel   = document.querySelector('.score-box-kia .score-box-label');
-  const awayLabel   = document.querySelector('.score-box-lg .score-box-label');
-  const homeValEl   = document.querySelector('.score-box-kia .score-box-val');
-  const awayValEl   = document.querySelector('.score-box-lg .score-box-val');
-
-  const homeTeam = _zoneScoreCache ? (_zoneScoreCache.homeTeam || '홈팀') : '홈팀';
-  const awayTeam = _zoneScoreCache ? (_zoneScoreCache.awayTeam || '원정팀') : '원정팀';
-  const homeColor = tc(homeTeam);
-  const awayColor = tc(awayTeam);
-
-  // 라벨에 팀명 반영
-  if (homeLabel) homeLabel.textContent = isOnline ? `${homeTeam} 온라인` : `${homeTeam} 응원`;
-  if (awayLabel) awayLabel.textContent = isOnline ? `${awayTeam} 온라인` : `${awayTeam} 응원`;
-
-  // 점수 색상 팀컬러로
-  if (homeValEl) homeValEl.style.color = homeColor;
-  if (awayValEl) awayValEl.style.color = awayColor;
-  if (kiaBarEl)  kiaBarEl.style.background = homeColor;
-  if (lgBarEl)   lgBarEl.style.background  = awayColor;
-
-  if (!score) {
-    if (kiaScoreEl) kiaScoreEl.textContent = '-';
-    if (lgScoreEl)  lgScoreEl.textContent  = '-';
-    if (kiaPctEl)   kiaPctEl.textContent   = '50%';
-    if (lgPctEl)    lgPctEl.textContent    = '50%';
-    if (kiaBarEl)   kiaBarEl.style.width   = '50%';
-    if (lgBarEl)    lgBarEl.style.width    = '50%';
-    if (kiaPctEl)   kiaPctEl.style.color   = homeColor;
-    if (lgPctEl)    lgPctEl.style.color    = awayColor;
-    if (zoneRatioEl) zoneRatioEl.innerHTML =
-      `<span style="color:${homeColor}">${homeTeam} 50%</span>`
-      + `<span style="color:var(--text-3);margin:0 4px">:</span>`
-      + `<span style="color:${awayColor}">${awayTeam} 50%</span>`;
-    return;
-  }
-
-  if (kiaScoreEl) kiaScoreEl.textContent = score.homeScore;
-  if (lgScoreEl)  lgScoreEl.textContent  = score.awayScore;
-  if (kiaPctEl)   { kiaPctEl.textContent = score.homePct + '%'; kiaPctEl.style.color = homeColor; }
-  if (lgPctEl)    { lgPctEl.textContent  = score.awayPct + '%'; lgPctEl.style.color  = awayColor; }
-  if (kiaBarEl)   kiaBarEl.style.width   = score.homePct + '%';
-  if (lgBarEl)    lgBarEl.style.width    = score.awayPct + '%';
-  if (zoneRatioEl) zoneRatioEl.innerHTML =
-    `<span style="color:${homeColor}">${homeTeam} ${score.homePct}%</span>`
-    + `<span style="color:var(--text-3);font-size:1rem;margin:0 4px">:</span>`
-    + `<span style="color:${awayColor}">${awayTeam} ${score.awayPct}%</span>`;
-
-  // gauge 라벨 팀명 반영
-  const homeGaugeLabel = document.getElementById('home-gauge-label');
-  const awayGaugeLabel = document.getElementById('away-gauge-label');
-  const homeTeamLabel  = document.getElementById('home-team-label');
-  const awayTeamLabel  = document.getElementById('away-team-label');
-  if (homeGaugeLabel) { homeGaugeLabel.textContent = `${homeTeam} 응원 비중`; homeGaugeLabel.style.color = homeColor; }
-  if (awayGaugeLabel) { awayGaugeLabel.textContent = `${awayTeam} 응원 비중`; awayGaugeLabel.style.color = awayColor; }
-  if (homeTeamLabel)  { homeTeamLabel.textContent  = isOnline ? `${homeTeam} 온라인` : `${homeTeam} 응원`; homeTeamLabel.style.color = homeColor; }
-  if (awayTeamLabel)  { awayTeamLabel.textContent  = isOnline ? `${awayTeam} 온라인` : `${awayTeam} 응원`; awayTeamLabel.style.color = awayColor; }
-}
-
-document.querySelectorAll('.zone-btn').forEach(btn => {
-  btn.addEventListener('click', () => renderZone(btn.dataset.zone));
-});
-
-// 온라인 응원 버튼 추가 (zone-buttons 뒤에 삽입)
-document.addEventListener('DOMContentLoaded', async () => {
-  await loadZoneScores();
-  renderZone('orange-3b');
-
-  const zoneBtnsEl = document.querySelector('.zone-buttons');
-  if (zoneBtnsEl) {
-    const onlineBtn = document.createElement('button');
-    onlineBtn.className = 'zone-btn';
-    onlineBtn.dataset.zone = 'online';
-    onlineBtn.innerHTML = '🌐 온라인 응원';
-    onlineBtn.style.cssText = 'grid-column: 1 / -1; margin-top: 6px; background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.3); color: #93C5FD;';
-    onlineBtn.addEventListener('click', () => renderZone('online'));
-    zoneBtnsEl.after(onlineBtn);
-  }
-});
-
-// ─── 6. 응원 지수 실시간 반영 (서버 API 기반) ───
-function updateCheerUI(homeScore, awayScore, homePct, awayPct) {
-  const els = {
-    kiaScore:  document.getElementById('kia-score'),
-    lgScore:   document.getElementById('lg-score'),
-    kiaPct:    document.getElementById('kia-pct'),
-    lgPct:     document.getElementById('lg-pct'),
-    kiaBar:    document.getElementById('kia-bar'),
-    lgBar:     document.getElementById('lg-bar'),
-    zoneRatio: document.getElementById('zone-ratio'),
-  };
-  if (els.kiaScore)  els.kiaScore.textContent  = homeScore;
-  if (els.lgScore)   els.lgScore.textContent   = awayScore;
-  if (els.kiaPct)    els.kiaPct.textContent    = homePct + '%';
-  if (els.lgPct)     els.lgPct.textContent     = awayPct + '%';
-  if (els.kiaBar)    els.kiaBar.style.width    = homePct + '%';
-  if (els.lgBar)     els.lgBar.style.width     = awayPct + '%';
-  if (els.zoneRatio) els.zoneRatio.innerHTML   =
-    `<span style="color:var(--kia)">홈 ${homePct}%</span>`
-    + `<span style="color:var(--text-3);font-size:1rem;margin:0 4px">:</span>`
-    + `<span style="color:var(--lg)">원정 ${awayPct}%</span>`;
-}
-
-async function refreshCheerPoints() {
-  try {
-    const myTeam = localStorage.getItem('myTeam') || localStorage.getItem('favoriteTeam') || '';
-    const url = myTeam
-      ? `/api/battle/today?team=${encodeURIComponent(myTeam)}`
-      : '/api/battle/today';
-    const res = await fetch(url);
-    if (!res.ok) return;
-    const battles = await res.json();
-    if (!battles || battles.length === 0) return;
-    const battle = battles[0];
-    // 가운데 게이지 카드 갱신
-    updateCheerUI(battle.homeCheerScore, battle.awayCheerScore, battle.homePct, battle.awayPct);
-    // 상단 스코어보드 점령전 점수 갱신
-    updateHeaderBattleScore(battle.homeCheerScore, battle.awayCheerScore);
-  } catch(e) { }
-}
-
-(function() {
-  document.addEventListener('DOMContentLoaded', refreshCheerPoints);
-})();
-
-// ─── 7. 커뮤니티 인증샷 → index.html 카드 표시 (서버 API 기반) ───
-(function() {
-  const EMPTY_IMG = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" background="%231E293B"%3E%3Crect width="100%" height="100%" fill="%231E293B"/%3E%3Ctext x="50%" y="50%" fill="%2364748B" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle"%3E첫 인증샷을 올려주세요!%3C/text%3E%3C/svg%3E';
-
-  async function renderPhotoCards() {
-    let communityPhotos = [];
-    try {
-      const res  = await fetch('/api/posts/photos?limit=12');
-      if (res.ok) communityPhotos = await res.json();
     } catch(e) {}
-
-    document.querySelectorAll('.photo-item').forEach((item, i) => {
-      const img = item.querySelector('img');
-      if (!img) return;
-      if (communityPhotos[i]) {
-        img.src = communityPhotos[i].imageData;
-        item.setAttribute('data-caption', '@' + communityPhotos[i].author);
-        item.style.cursor = 'pointer';
-        item.onclick = e => { e.stopPropagation(); window.location.href = 'community.html?tab=photo'; };
-      } else {
-        img.src = EMPTY_IMG;
-        item.setAttribute('data-caption', '인증샷 대기 중');
-        item.onclick = null;
-      }
-    });
-
-    document.querySelectorAll('.popup-photo-item').forEach((item, i) => {
-      const img = item.querySelector('img');
-      if (!img) return;
-      if (communityPhotos[i]) {
-        img.src = communityPhotos[i].imageData;
-        item.setAttribute('data-nick', '@' + communityPhotos[i].author);
-      } else {
-        img.src = EMPTY_IMG;
-        item.setAttribute('data-nick', '대기 중');
-      }
-    });
-
-    const galleryItems = document.querySelectorAll('#photos-modal .gallery-item');
-    galleryItems.forEach((item, i) => {
-      const img     = item.querySelector('img');
-      const overlay = item.querySelector('.gallery-overlay');
-      if (!img) return;
-      if (communityPhotos[i]) {
-        img.src = communityPhotos[i].imageData;
-        if (overlay) overlay.textContent = '@' + communityPhotos[i].author;
-      } else {
-        img.src = EMPTY_IMG;
-        if (overlay) overlay.textContent = '대기 중';
-      }
-    });
   }
-
-  document.addEventListener('DOMContentLoaded', renderPhotoCards);
+  document.addEventListener('DOMContentLoaded', loadGames);
 })();
 
-// ─── 8. AI 챗봇 ───
+// ─── 3. 점령전 점수판 & 응원 게이지 (오늘 경기 기준) ───
 (function() {
-  const chatMessages = document.getElementById('chat-messages');
-  const chatInput    = document.getElementById('chat-input');
-  const chatSend     = document.getElementById('chat-send');
-  const typingEl     = document.getElementById('typing');
-  if (!chatMessages || !chatInput || !chatSend) return;
+  const TEAM_COLORS_BOARD = {
+    'KIA':'#E60012','기아':'#E60012','LG':'#002C5F','두산':'#131230',
+    '삼성':'#074CA1','롯데':'#002955','SSG':'#CE0E2D','NC':'#315288',
+    'KT':'#000000','한화':'#FF6600','키움':'#820024'
+  };
 
-  function addBubble(text, type) {
-    const row    = document.createElement('div');
-    row.className = `chat-msg-row${type === 'user' ? ' user-row' : ''}`;
-    const bubble  = document.createElement('div');
-    bubble.className = `bubble bubble-${type === 'user' ? 'user' : 'bot'}`;
-    bubble.textContent = text;
-    if (type === 'user') {
-      const p = getPersonality();
-      if (p) {
-        const badge = document.createElement('div');
-        badge.className = 'inline-badge';
-        badge.style.cssText = `background:${hexToRgba(p.color||'#3B82F6',0.15)};border-color:${hexToRgba(p.color||'#3B82F6',0.35)};color:${p.color||'#3B82F6'}`;
-        badge.innerHTML = `<span class="b-emoji">${p.emoji||'⚾'}</span><span>${p.name||''}</span>`;
-        row.appendChild(badge);
-      }
-    }
-    row.appendChild(bubble);
-    chatMessages.appendChild(row);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-
-  function fallback(msg) {
-    if (msg.includes('응원') && msg.includes('문구')) return '오늘도 분위기는 우리가 가져간다! 구장 전체를 우리 응원으로 채워보자! ⚾';
-    if (msg.includes('게시글')) return '직관 열기 가득했던 오늘 경기. 응원 열기가 올라오면서 분위기도 완전히 우리 쪽으로 넘어왔어요.';
-    if (msg.includes('댓글'))  return '오늘 분위기 진짜 좋다. 이 흐름 끝까지 가져가자! 🔥';
-    if (msg.includes('KIA'))   return 'KIA 팬 분위기를 더 살리려면 짧고 강한 문장으로 통일해서 반복 응원하는 게 좋아요!';
-    if (msg.includes('LG'))    return 'LG 쪽 분위기는 역응원과 떼창 포인트를 같이 살리는 문장이 잘 어울려요.';
-    return '응원 문구, 게시글 초안, 댓글 문장, 경기 분위기 정리 중에서 원하는 걸 편하게 물어보세요! ⚾';
-  }
-
-  async function sendChat(text) {
-    const trimmed = text.trim();
-    if (!trimmed) return;
-    addBubble(trimmed, 'user');
-    chatInput.value = '';
-    if (typingEl) typingEl.classList.add('visible');
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    let reply = '';
+  async function updateBattleBoard() {
     try {
-      const res = await fetch('/api/chatbot', {
+      const myTeam = localStorage.getItem('favoriteTeam') || '';
+
+      // 오늘 경기 기준 배틀 현황
+      const res    = await fetch('/api/battle/today');
+      const battles = await res.json();
+      if (!battles || !battles.length) return;
+
+      // 내 응원팀 경기 우선, 없으면 첫 번째
+      let b = battles[0];
+      if (myTeam) {
+        const found = battles.find(x => x.homeTeam === myTeam || x.awayTeam === myTeam);
+        if (found) b = found;
+      }
+
+      const homeTeam  = b.homeTeam  || '-';
+      const awayTeam  = b.awayTeam  || '-';
+      const homeScore = b.homeCheerScore || 0;
+      const awayScore = b.awayCheerScore || 0;
+      const homePct   = b.homePct   || 50;
+      const awayPct   = b.awayPct   || 50;
+
+      // ── 점수판 팀명 업데이트 ──
+      const bbHomeLogo = document.getElementById('bb-home-logo');
+      const bbAwayLogo = document.getElementById('bb-away-logo');
+      if (bbHomeLogo) {
+        bbHomeLogo.textContent      = homeTeam.slice(0, 3);
+        bbHomeLogo.style.background = TEAM_COLORS_BOARD[homeTeam] || '#94A3B8';
+      }
+      if (bbAwayLogo) {
+        bbAwayLogo.textContent      = awayTeam.slice(0, 3);
+        bbAwayLogo.style.background = TEAM_COLORS_BOARD[awayTeam] || '#94A3B8';
+      }
+
+      // ── 점수판 점수 업데이트 (오늘 경기 기준 누적) ──
+      const homeScoreEl = document.getElementById('homeScore');
+      const awayScoreEl = document.getElementById('awayScore');
+      if (homeScoreEl) homeScoreEl.textContent = homeScore.toLocaleString() + ' pt';
+      if (awayScoreEl) awayScoreEl.textContent = awayScore.toLocaleString() + ' pt';
+
+      // ── 게이지 바 ──
+      const bbgKia     = document.getElementById('bbgKia');
+      const bbGaugeKia = document.getElementById('bbGaugeKia');
+      if (bbgKia)     bbgKia.style.width     = homePct + '%';
+      if (bbGaugeKia) bbGaugeKia.style.width = homePct + '%';
+
+      // ── 구역 패널 비율 ──
+      const zoneRatio = document.getElementById('zone-ratio');
+      if (zoneRatio) {
+        const homeColor = TEAM_COLORS_BOARD[homeTeam] || 'var(--kia)';
+        zoneRatio.innerHTML = `
+          <span style="color:${homeColor}">${homeTeam} ${homePct}%</span>
+          <span style="color:var(--muted); margin:0 5px;">:</span>
+          <span style="color:var(--lg-mid)">${awayTeam} ${awayPct}%</span>`;
+      }
+
+      // ── 응원 반응 수치 (왼쪽 카드) ──
+      const statBig = document.querySelector('.stat-big span:first-child');
+      if (statBig) {
+        statBig.textContent = homePct + '%';
+        statBig.style.color = TEAM_COLORS_BOARD[homeTeam] || 'var(--kia)';
+      }
+      const statUnit = document.querySelector('.stat-unit');
+      if (statUnit) statUnit.textContent = homeTeam + ' 응원';
+
+      const fills = document.querySelectorAll('.progress-fill');
+      if (fills[0]) fills[0].style.width = Math.min(homePct, 100) + '%';
+
+    } catch(e) {}
+  }
+
+  document.addEventListener('DOMContentLoaded', updateBattleBoard);
+  setInterval(updateBattleBoard, 30000); // 30초마다 갱신
+})();
+
+// ─── 4. 구역 선택 (ZONE SELECTOR) ───
+(function() {
+  const zoneData = {
+    'orange-3b':       { name: '3루 오렌지석 (원정 응원석)', desc: '잠실의 원정팀 핵심 응원 구역. 상대팀 팬이 집결해 역응원 열기가 가장 강한 곳입니다.', zones: ['zone-orange-3b','zone-orange-3b-top','zone-red-3b','zone-red-3b-side'] },
+    'orange-1b':       { name: '1루 오렌지석 (홈팀 응원석)', desc: '홈팀 팬의 핵심 응원 구역. 떼창과 단체 응원가가 가장 강렬하게 터지는 곳입니다.', zones: ['zone-orange-1b','zone-orange-1b-top','zone-red-1b','zone-red-1b-side'] },
+    'outfield-center': { name: '중앙 외야 그린석', desc: '홈런볼이 떨어지는 중립 외야 구역. 양 팀 응원이 교차하며 분위기가 가장 다채로운 곳입니다.', zones: ['zone-outfield-center','zone-outfield-left','zone-outfield-right'] },
+    'premium':         { name: '테이블석 / 프리미엄석', desc: '포수 바로 뒤 중앙 최고급 좌석. 경기장 전체를 한눈에 볼 수 있는 명당으로 응원보다 관람 중심입니다.', zones: ['zone-premium','zone-table-top','zone-exciting-l','zone-exciting-r'] },
+    'foul':            { name: '외야 파울존 / 블루석', desc: '1·3루 파울라인 바깥 구역. 접근성이 좋고 가성비 높아 응원보다 여유로운 관람을 즐기는 팬이 많습니다.', zones: ['zone-foul','zone-blue-bottom','zone-blue-bottom-r','zone-navy-3b','zone-navy-1b'] }
+  };
+
+  function renderZone(key) {
+    const d = zoneData[key];
+    if (!d) return;
+    const zoneName = document.getElementById('zone-name');
+    const zoneDesc = document.getElementById('zone-desc');
+    if (zoneName) zoneName.textContent = d.name;
+    if (zoneDesc) zoneDesc.textContent = d.desc;
+
+    document.querySelectorAll('.zone-btn').forEach(b => b.classList.toggle('active', b.dataset.zone === key));
+    document.querySelectorAll('.seat-zone').forEach(z => {
+      z.style.opacity = '0.10';
+      z.style.filter  = 'brightness(0.7)';
+    });
+    if (d.zones) {
+      d.zones.forEach(zid => {
+        const el = document.getElementById(zid);
+        if (el) { el.style.opacity = '0.72'; el.style.filter = 'brightness(1.3)'; }
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.zone-btn').forEach(btn => {
+      btn.onclick = () => renderZone(btn.dataset.zone);
+    });
+    renderZone('orange-3b');
+  });
+})();
+
+// ─── 5. 인증샷 갤러리 & 직접 업로드 ───
+(function() {
+  const MAX_FILE_MB  = 5;
+  let selectedBase64 = null;
+
+  function buildModalContent() {
+    const modal = document.getElementById('photos-modal');
+    if (!modal) return;
+    const box = modal.querySelector('.modal-box');
+    if (!box || box.querySelector('#gallery-modal-content')) return;
+
+    const content = document.createElement('div');
+    content.id    = 'gallery-modal-content';
+    content.innerHTML = `
+      <div id="gallery-upload-zone" style="border:2px dashed rgba(0,0,0,0.15);border-radius:14px;padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:1rem;background:rgba(0,0,0,0.02);transition:all .2s;">
+        <div id="gallery-upload-default">
+          <div style="font-size:2.2rem;margin-bottom:0.5rem;">📸</div>
+          <div style="font-size:13px;font-weight:800;margin-bottom:4px;color:var(--ink);">구장에서 찍은 사진을 올려보세요!</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:1rem;">클릭하거나 파일을 드래그하세요 · 사진 1장당 포인트 <b style="color:var(--kia);">+10점</b></div>
+          <button type="button" id="gallery-pick-btn" style="padding:8px 18px;background:var(--ink);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px;">사진 선택</button>
+        </div>
+        <div id="gallery-upload-preview" style="display:none;">
+          <img id="gallery-preview-img" style="max-height:200px;max-width:100%;border-radius:10px;margin-bottom:0.8rem;">
+          <div id="gallery-preview-name" style="font-size:11px;color:var(--muted);margin-bottom:0.8rem;"></div>
+          <input id="gallery-caption" type="text" maxlength="80" placeholder="한 줄 코멘트 (선택)" style="width:100%;max-width:360px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;font-size:12px;margin-bottom:0.8rem;">
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <button type="button" id="gallery-cancel-btn" style="padding:8px 14px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:8px;font-weight:700;cursor:pointer;font-size:12px;">취소</button>
+            <button type="button" id="gallery-submit-btn" style="padding:8px 18px;background:var(--kia);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px;">업로드하고 +10pt</button>
+          </div>
+        </div>
+      </div>
+      <input type="file" id="gallery-file-input" style="display:none" accept="image/*">
+      <div id="gallery-upload-status" style="display:none;text-align:center;margin-bottom:1rem;font-size:12px;font-weight:700;padding:8px;border-radius:8px;"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;">
+        <div style="font-size:14px;font-weight:900;color:var(--ink);">🖼️ 팬 갤러리</div>
+        <div id="gallery-count" style="font-size:11px;color:var(--muted);"></div>
+      </div>
+      <div id="gallery-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-height:380px;overflow-y:auto;padding:2px;"></div>
+      <div id="gallery-empty" style="display:none;text-align:center;padding:2rem;color:var(--muted);font-size:12px;">아직 등록된 인증샷이 없습니다.<br>첫 번째로 올려보세요!</div>
+    `;
+    box.appendChild(content);
+
+    const zone      = content.querySelector('#gallery-upload-zone');
+    const fileIn    = content.querySelector('#gallery-file-input');
+    const pickBtn   = content.querySelector('#gallery-pick-btn');
+    const cancelBtn = content.querySelector('#gallery-cancel-btn');
+    const submitBtn = content.querySelector('#gallery-submit-btn');
+
+    pickBtn.onclick = (e) => { e.stopPropagation(); fileIn.click(); };
+    zone.onclick    = (e) => {
+      if (content.querySelector('#gallery-upload-preview').style.display === 'none') fileIn.click();
+    };
+
+    ['dragenter','dragover'].forEach(ev => zone.addEventListener(ev, e => {
+      e.preventDefault(); zone.style.borderColor = 'var(--kia)'; zone.style.background = 'rgba(230,0,18,0.05)';
+    }));
+    ['dragleave','drop'].forEach(ev => zone.addEventListener(ev, e => {
+      e.preventDefault(); zone.style.borderColor = 'rgba(0,0,0,0.15)'; zone.style.background = 'rgba(0,0,0,0.02)';
+    }));
+    zone.addEventListener('drop', e => { const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); });
+    fileIn.onchange = () => { const f = fileIn.files?.[0]; if (f) handleFile(f); };
+    cancelBtn.onclick = resetUploadUI;
+    submitBtn.onclick = doUpload;
+  }
+
+  function setStatus(msg, type) {
+    const el = document.getElementById('gallery-upload-status');
+    if (!el) return;
+    if (!msg) { el.style.display = 'none'; return; }
+    el.style.display = 'block'; el.textContent = msg;
+    el.style.background = type === 'success' ? '#E6F7EC' : type === 'error' ? '#FDECEC' : '#F0F4F8';
+    el.style.color      = type === 'success' ? '#0F7A3A' : type === 'error' ? '#C0392B' : 'var(--ink)';
+  }
+
+  function resetUploadUI() {
+    selectedBase64 = null;
+    const fileIn = document.getElementById('gallery-file-input');
+    if (fileIn) fileIn.value = '';
+    document.getElementById('gallery-upload-default').style.display = 'block';
+    document.getElementById('gallery-upload-preview').style.display = 'none';
+    const cap = document.getElementById('gallery-caption');
+    if (cap) cap.value = '';
+    setStatus('');
+  }
+
+  function handleFile(file) {
+    if (!file.type.startsWith('image/')) { setStatus('❌ 이미지 파일만 업로드 가능합니다.', 'error'); return; }
+    if (file.size > MAX_FILE_MB * 1024 * 1024) { setStatus(`❌ 파일이 너무 큽니다. (최대 ${MAX_FILE_MB}MB)`, 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      selectedBase64 = reader.result;
+      document.getElementById('gallery-preview-img').src = reader.result;
+      document.getElementById('gallery-preview-name').textContent = `${file.name} · ${(file.size/1024).toFixed(0)}KB`;
+      document.getElementById('gallery-upload-default').style.display = 'none';
+      document.getElementById('gallery-upload-preview').style.display = 'block';
+      setStatus('');
+    };
+    reader.onerror = () => setStatus('❌ 파일을 읽지 못했습니다.', 'error');
+    reader.readAsDataURL(file);
+  }
+
+  async function doUpload() {
+    if (!selectedBase64) return;
+    const user = localStorage.getItem('loggedInUser');
+    if (!user) { setStatus('❌ 로그인이 필요합니다.', 'error'); setTimeout(() => location.href = 'login.html', 1200); return; }
+    const caption = (document.getElementById('gallery-caption')?.value || '').trim();
+    const submitBtn = document.getElementById('gallery-submit-btn');
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '업로드 중...'; }
+    setStatus('⏳ 업로드 중...');
+    try {
+      const res  = await fetch('/api/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: trimmed })
+        body: JSON.stringify({ author: user, tab: 'photo', title: caption || '📸 직관 인증샷', content: caption || '메인 화면에서 업로드한 인증샷입니다.', images: [selectedBase64] })
       });
-      if (res.ok) {
-        const data = await res.json();
-        reply = data.reply || fallback(trimmed);
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success !== false) {
+        const pointMsg = data.points > 0
+          ? `✅ 업로드 완료! +${data.points}pt 획득`
+          : `✅ 업로드 완료! (오늘 포인트는 이미 획득하셨어요)`;
+        setStatus(pointMsg, 'success');
+        setTimeout(() => { resetUploadUI(); loadPhotos(); }, 1200);
       } else {
-        reply = fallback(trimmed);
+        setStatus('❌ ' + (data.message || '업로드 실패'), 'error');
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '업로드하고 +10pt'; }
       }
-    } catch { reply = fallback(trimmed); }
-    if (typingEl) typingEl.classList.remove('visible');
-    addBubble(reply, 'bot');
+    } catch {
+      setStatus('❌ 네트워크 오류가 발생했습니다.', 'error');
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '업로드하고 +10pt'; }
+    }
   }
 
-  chatSend.addEventListener('click', () => sendChat(chatInput.value));
-  chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendChat(chatInput.value); } });
+  function openModal() {
+    const modal = document.getElementById('photos-modal');
+    if (!modal) return;
+    buildModalContent();
+    modal.classList.add('open');
+    loadPhotos();
+  }
+
+  async function loadPhotos() {
+    let photos = [];
+    try {
+      const res = await fetch('/api/posts/photos?limit=12');
+      if (res.ok) photos = await res.json();
+    } catch {}
+
+    const slots = document.querySelectorAll('.pb-inv-slot');
+    slots.forEach((slot, i) => {
+      slot.style.cursor = 'pointer';
+      if (photos[i]) {
+        slot.innerHTML = `
+          <img src="${photos[i].imageData}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">
+          <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);color:#fff;font-size:9px;padding:3px 4px;text-align:center;border-radius:0 0 10px 10px;font-weight:700;">@${esc(photos[i].author)}</div>`;
+      }
+      slot.onclick = openModal;
+    });
+
+    const grid  = document.getElementById('gallery-grid');
+    const empty = document.getElementById('gallery-empty');
+    const count = document.getElementById('gallery-count');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+    if (count) count.textContent = `총 ${photos.length}장`;
+    if (!photos.length) { grid.style.display = 'none'; if (empty) empty.style.display = 'block'; return; }
+    grid.style.display = 'grid';
+    if (empty) empty.style.display = 'none';
+
+    photos.forEach(p => {
+      const item = document.createElement('div');
+      item.style.cssText = 'aspect-ratio:1;position:relative;overflow:hidden;border-radius:10px;cursor:pointer;transition:transform .15s;';
+      item.innerHTML = `
+        <img src="${p.imageData}" style="width:100%;height:100%;object-fit:cover;">
+        <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));color:#fff;font-size:10px;padding:8px 6px 4px;font-weight:700;">@${esc(p.author)}</div>`;
+      item.onmouseenter = () => item.style.transform = 'scale(1.03)';
+      item.onmouseleave = () => item.style.transform = '';
+      item.onclick = () => {
+        const lb = document.createElement('div');
+        lb.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:2rem;cursor:zoom-out;';
+        lb.innerHTML = `<div style="max-width:90vw;max-height:90vh;"><img src="${p.imageData}" style="max-width:90vw;max-height:80vh;border-radius:12px;"><div style="text-align:center;color:#fff;margin-top:1rem;font-weight:700;">@${esc(p.author)}</div></div>`;
+        lb.onclick = () => lb.remove();
+        document.body.appendChild(lb);
+      };
+      grid.appendChild(item);
+    });
+  }
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    buildModalContent();
+    loadPhotos();
+    document.getElementById('open-photos')?.addEventListener('click', openModal);
+  });
 })();
 
-// ─── 9. 점령전 티켓 인증 모달 (OCR & Diary 연동) ───
-(function() {
-  const modal       = document.getElementById('battle-modal');
-  const fileInput   = document.getElementById('battle-file-input');
-  const uploadZone  = document.getElementById('battle-upload-zone');
-  const previewWrap = document.getElementById('battle-preview-wrap');
-  const previewImg  = document.getElementById('battle-preview-img');
-  const ocrBtn      = document.getElementById('battle-ocr-btn');
-  const resetBtn    = document.getElementById('battle-reset-btn');
-  const stepUpload  = document.getElementById('battle-step-upload');
-  const stepLoading = document.getElementById('battle-step-loading');
-  const stepResult  = document.getElementById('battle-step-result');
-  const stepDone    = document.getElementById('battle-step-done');
-  const stepError   = document.getElementById('battle-step-error');
-
-  if (!modal) return;
-
-  let selectedFile = null;
-
+// ─── 6. 점령전 티켓 인증 ───
+// DOMContentLoaded 안에서 전부 처리 → 타이밍 문제 완전 해결
+document.addEventListener('DOMContentLoaded', function() {
+  const modal   = document.getElementById('battle-modal');
   const joinBtn = document.getElementById('btn-join-battle');
-  if (joinBtn) joinBtn.addEventListener('click', () => { resetModal(); modal.classList.add('open'); });
+  if (!modal || !joinBtn) return;
 
-  if (uploadZone) {
-    uploadZone.addEventListener('click', () => { if (fileInput) fileInput.click(); });
-    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.style.borderColor='var(--lg)'; uploadZone.style.background='rgba(59,130,246,0.08)'; });
-    uploadZone.addEventListener('dragleave', () => { uploadZone.style.borderColor=''; uploadZone.style.background=''; });
-    uploadZone.addEventListener('drop', e => {
+  // ── 스텝 전환 ──
+  function showStep(step) {
+    ['upload','loading','result','done'].forEach(s => {
+      const el = document.getElementById('battle-step-' + s);
+      if (el) el.style.display = s === step ? 'block' : 'none';
+    });
+    const err = document.getElementById('battle-error');
+    if (err) err.style.display = 'none';
+  }
+
+  function showError(msg) {
+    const err = document.getElementById('battle-error');
+    if (err) { err.textContent = '❌ ' + msg; err.style.display = 'block'; }
+  }
+
+  // ── 모달 열기 ──
+  function openBattleModal() {
+    const fi = document.getElementById('battle-file-input');
+    if (fi) fi.value = '';
+    const pw = document.getElementById('battle-preview-wrap');
+    if (pw) pw.style.display = 'none';
+    const uz = document.getElementById('battle-upload-zone');
+    if (uz) uz.style.display = 'block';
+
+    // 구역 선택 초기화
+    window._selectedBattleZone = null;
+    document.querySelectorAll('.battle-zone-btn').forEach(b => {
+      b.style.background  = '#fff';
+      b.style.color       = 'var(--ink-2)';
+      b.style.borderColor = 'var(--line)';
+    });
+    const zoneSelectedEl = document.getElementById('battle-zone-selected');
+    if (zoneSelectedEl) zoneSelectedEl.textContent = '';
+
+    showStep('upload');
+    modal.classList.add('open');
+
+    // 오늘 이미 참여했는지 체크
+    checkAlreadyCertified();
+  }
+
+  // ── 오늘 이미 참여 여부 확인 ──
+  async function checkAlreadyCertified() {
+    const user = localStorage.getItem('loggedInUser');
+    if (!user) return;
+
+    try {
+      const res     = await fetch('/api/battle/today');
+      const battles = await res.json();
+      if (!battles || !battles.length) return;
+
+      const myTeam = localStorage.getItem('favoriteTeam') || '';
+      let b = battles[0];
+      if (myTeam) {
+        const found = battles.find(x => x.homeTeam === myTeam || x.awayTeam === myTeam);
+        if (found) b = found;
+      }
+
+      const gameId = b.gameId;
+      if (!gameId) return;
+
+      const certRes  = await fetch(`/api/battle/certified?nickname=${encodeURIComponent(user)}&gameId=${gameId}`);
+      const certData = await certRes.json();
+
+      if (certData.certified) {
+        showAlreadyCertified();
+      }
+    } catch {}
+  }
+
+  // ── 이미 참여 화면 ──
+  function showAlreadyCertified() {
+    ['upload','loading','result','done'].forEach(s => {
+      const el = document.getElementById('battle-step-' + s);
+      if (el) el.style.display = 'none';
+    });
+    const err = document.getElementById('battle-error');
+    if (err) err.style.display = 'none';
+
+    // 이미 참여 안내 스텝 표시
+    let alreadyEl = document.getElementById('battle-step-already');
+    if (!alreadyEl) {
+      alreadyEl = document.createElement('div');
+      alreadyEl.id = 'battle-step-already';
+      alreadyEl.className = 'battle-step';
+      alreadyEl.style.cssText = 'text-align:center; padding:2.5rem 1rem;';
+      alreadyEl.innerHTML = `
+        <div style="font-size:3rem; margin-bottom:0.75rem;">✅</div>
+        <div style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:0.4rem;">오늘 이미 참여하셨습니다!</div>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:1.5rem;">점령전 티켓 인증은 하루에 1번만 가능합니다.<br>내일 또 참여해주세요 ⚾</div>
+        <div style="display:flex; justify-content:center;">
+          <button class="modal-close" data-target="battle-modal"
+                  style="padding:10px 28px; background:var(--ink); color:#fff;
+                         border:1.5px solid var(--line); border-radius:10px;
+                         font-family:inherit; font-size:13px; font-weight:700;
+                         cursor:pointer; line-height:1; white-space:nowrap;
+                         display:inline-flex; align-items:center; justify-content:center;">
+            확인
+          </button>
+        </div>
+      `;
+      document.getElementById('battle-modal')
+        .querySelector('.modal-body')
+        .appendChild(alreadyEl);
+    }
+    alreadyEl.style.display = 'block';
+  }
+
+  joinBtn.addEventListener('click', openBattleModal);
+
+  // ── 업로드 존 클릭 / 드래그앤드롭 ──
+  const uz = document.getElementById('battle-upload-zone');
+  const fi = document.getElementById('battle-file-input');
+
+  if (uz) {
+    uz.addEventListener('click', () => fi?.click());
+    uz.addEventListener('dragover',  e => { e.preventDefault(); uz.style.borderColor = 'var(--kia)'; });
+    uz.addEventListener('dragleave', e => { uz.style.borderColor = 'var(--line-dash)'; });
+    uz.addEventListener('drop', e => {
       e.preventDefault();
-      uploadZone.style.borderColor=''; uploadZone.style.background='';
+      uz.style.borderColor = 'var(--line-dash)';
       const f = e.dataTransfer.files[0];
-      if (f && f.type.startsWith('image/')) handleFile(f);
+      if (f) handleFileSelect(f);
     });
   }
-  if (fileInput) fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
 
-  function handleFile(f) {
-    selectedFile = f;
-    const url = URL.createObjectURL(f);
-    if (previewImg) previewImg.src = url;
-    if (previewWrap) previewWrap.style.display = 'block';
-    if (uploadZone) uploadZone.style.display = 'none';
-    if (ocrBtn) { ocrBtn.style.opacity = '1'; ocrBtn.style.pointerEvents = 'auto'; ocrBtn.disabled = false; }
+  if (fi) {
+    fi.addEventListener('change', () => { if (fi.files[0]) handleFileSelect(fi.files[0]); });
   }
 
-  if (resetBtn) resetBtn.addEventListener('click', resetModal);
+  // ── 다른 사진 선택 ──
+  const reselectBtn = document.getElementById('battle-reselect-btn');
+  if (reselectBtn) {
+    reselectBtn.addEventListener('click', () => {
+      if (fi) { fi.value = ''; fi.click(); }
+    });
+  }
 
-  if (ocrBtn) ocrBtn.addEventListener('click', async () => {
-    if (!selectedFile) return;
-    showStep('loading');
-    animateProgress();
-    try {
-      const base64 = await fileToBase64(selectedFile);
-      const res = await fetch('/api/vision/ticket-ocr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64: base64, mimeType: selectedFile.type })
+  // ── 티켓 자동 분석하기 버튼 ──
+  const ocrBtn = document.getElementById('battle-ocr-btn');
+  if (ocrBtn) {
+    ocrBtn.addEventListener('click', runOCR);
+  }
+
+  // ── 다시 분석 버튼 ──
+  const retryBtn = document.getElementById('battle-retry-btn');
+  if (retryBtn) {
+    retryBtn.addEventListener('click', () => showStep('upload'));
+  }
+
+  // ── 점령전 참여 확정 버튼 ──
+  const confirmBtn = document.getElementById('battle-confirm-btn');
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', confirmBattle);
+  }
+
+  // ── 파일 선택 처리 ──
+  function handleFileSelect(file) {
+    if (!file.type.startsWith('image/')) { showError('이미지 파일만 업로드 가능합니다.'); return; }
+    if (file.size > 10 * 1024 * 1024)   { showError('파일이 너무 큽니다. (최대 10MB)'); return; }
+
+    const pi = document.getElementById('battle-preview-img');
+    if (pi) pi.src = URL.createObjectURL(file);
+
+    const pw = document.getElementById('battle-preview-wrap');
+    if (pw) pw.style.display = 'block';
+    if (uz) uz.style.display = 'none';
+
+    // 구역 선택 초기화
+    document.querySelectorAll('.battle-zone-btn').forEach(b => {
+      b.style.background   = '#fff';
+      b.style.color        = 'var(--ink-2)';
+      b.style.borderColor  = 'var(--line)';
+    });
+    window._selectedBattleZone = null;
+    const zoneSelectedEl = document.getElementById('battle-zone-selected');
+    if (zoneSelectedEl) zoneSelectedEl.textContent = '';
+  }
+
+  // ── 구역 버튼 이벤트 (중첩 DOMContentLoaded 제거 — 이미 DOMContentLoaded 안에 있음) ──
+  document.querySelectorAll('.battle-zone-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.battle-zone-btn').forEach(b => {
+        b.style.background  = '#fff';
+        b.style.color       = 'var(--ink-2)';
+        b.style.borderColor = 'var(--line)';
       });
-      if (!res.ok) throw new Error('서버 오류: ' + res.status);
-      const data = await res.json();
-      renderResult(data);
-      showStep('result');
-    } catch (err) {
-      alert('티켓 분석 중 오류가 발생했어요. 다시 시도해주세요.\n' + err.message);
-      showStep('upload');
-    }
+      btn.style.background  = 'var(--kia)';
+      btn.style.color       = '#fff';
+      btn.style.borderColor = 'var(--kia)';
+      window._selectedBattleZone = btn.dataset.zone;
+      const zoneSelectedEl = document.getElementById('battle-zone-selected');
+      if (zoneSelectedEl) zoneSelectedEl.textContent = `✅ ${btn.dataset.label} 선택됨`;
+
+      // 구역 선택 시 해당 구역의 응원 데이터도 즉시 갱신
+      if (window._zoneRenderFn) window._zoneRenderFn(btn.dataset.zone);
+    });
   });
 
-  function renderResult(data) {
-    const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '인식 불가'; };
-    setEl('ocr-date', data.date);
-    setEl('ocr-match', data.match);
-    setEl('ocr-stadium', data.stadium);
-    setEl('ocr-seat', data.seat);
-    const rawEl = document.getElementById('ocr-raw-text');
-    if (rawEl) rawEl.textContent = data.rawText || '';
-    const conf  = data.confidence || 0;
-    const badge = document.getElementById('ocr-confidence-badge');
-    if (badge) {
-      if (conf >= 80) { badge.textContent = `✅ 신뢰도 ${conf}%`; badge.style.background='rgba(34,197,94,0.15)'; badge.style.color='#4ade80'; badge.style.borderColor='rgba(34,197,94,0.3)'; }
-      else if (conf >= 50) { badge.textContent = `⚠️ 신뢰도 ${conf}%`; badge.style.background='rgba(245,158,11,0.15)'; badge.style.color='#fbbf24'; badge.style.borderColor='rgba(245,158,11,0.3)'; }
-      else { badge.textContent = '❓ 낮은 신뢰도'; badge.style.background='rgba(239,68,68,0.12)'; badge.style.color='#f87171'; badge.style.borderColor='rgba(239,68,68,0.2)'; }
-    }
-    window._ocrResult = data;
-  }
-
-  const retryBtn = document.getElementById('battle-retry-btn');
-  if (retryBtn) retryBtn.addEventListener('click', () => { resetModal(); showStep('upload'); });
-
-  const confirmBtn = document.getElementById('battle-confirm-btn');
-  if (confirmBtn) confirmBtn.addEventListener('click', async () => {
-    const d = window._ocrResult || {};
-
-    // ── 오늘 날짜 검증: 티켓 날짜가 오늘이 아니면 차단 ──
-    const todayStr = new Date().toISOString().slice(0, 10);
-    let ticketDateStr = '';
-    if (d.date) {
-      const m = d.date.match(/(\d{4})[년\s\-\/\.]+(\d{1,2})[월\s\-\/\.]+(\d{1,2})/);
-      if (m) ticketDateStr = `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
-    }
-    if (ticketDateStr && ticketDateStr !== todayStr) {
-      const errMsg = document.getElementById('battle-error-msg');
-      if (errMsg) errMsg.innerHTML =
-        `오늘(${todayStr}) 경기 티켓만 점령전에 참여할 수 있어요.<br>` +
-        `인식된 티켓 날짜: <b>${d.date}</b>`;
-      showStep('error');
+  // ── OCR 분석 실행 ──
+  async function runOCR() {
+    // fi를 클릭 시점에 다시 조회 (DOMContentLoaded 시점과 다를 수 있음)
+    const fileInput = document.getElementById('battle-file-input');
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+      showError('먼저 티켓 사진을 선택해주세요.');
       return;
     }
 
-    confirmBtn.disabled = true;
-    confirmBtn.textContent = '저장 중...';
-    console.log('[점령전] 확정 시작. OCR결과:', d, '오늘:', todayStr, '티켓날짜:', ticketDateStr);
+    showStep('loading');
 
-    // ── 1. 다이어리 저장 (실패해도 certify는 시도) ──
-    const result = await saveToDiary(d);
-    console.log('[점령전] saveToDiary 결과:', result);
-    if (result && result.error) {
-      // 이미 저장된 다이어리는 무시하고 certify 계속 진행
-      if (result.error.includes('응원팀') || result.error.includes('포함')) {
-        // 응원팀 불일치 에러는 차단
-        confirmBtn.disabled = false;
-        confirmBtn.textContent = '⚔️ 점령전 참여 확정!';
-        const errMsg = document.getElementById('battle-error-msg');
-        if (errMsg) errMsg.textContent = result.error;
-        showStep('error');
-        return;
-      }
-      // 그 외 에러(중복 저장 등)는 경고만 하고 certify 계속 진행
-      console.warn('[점령전] 다이어리 저장 실패 (certify 계속):', result.error);
-    }
+    let progress = 0;
+    const bar = document.getElementById('ocr-progress-bar');
+    const iv = setInterval(() => {
+      progress = Math.min(progress + 8, 88);
+      if (bar) bar.style.width = progress + '%';
+    }, 200);
 
-    // ── 2. 점령전 포인트 적립 (certify API) ──
-    const user = localStorage.getItem('loggedInUser');
-    let earnedPoints = 0;
-
-    // gameId: saveToDiary 결과 또는 오늘 경기 직접 조회
-    let gameId = result && result.id ? result.id : null;
-    console.log('[certify] result:', result, 'gameId:', gameId);
-
-    // gameId 없으면 오늘 경기에서 직접 찾기
-    if (!gameId && user) {
-      try {
-        const myT = localStorage.getItem('myTeam') || localStorage.getItem('favoriteTeam') || '';
-        const url = myT ? `/api/battle/today?team=${encodeURIComponent(myT)}` : '/api/battle/today';
-        const todayRes = await fetch(url);
-        if (todayRes.ok) {
-          const todayBattles = await todayRes.json();
-          if (todayBattles && todayBattles.length > 0) {
-            gameId = todayBattles[0].gameId;
-            console.log('[certify] today에서 gameId 조회:', gameId);
-          }
-        }
-      } catch(e) { console.warn('today 조회 실패:', e); }
-    }
-
-    if (user && gameId) {
-      try {
-        const seat = window._ocrResult ? (window._ocrResult.seat || '') : '';
-        console.log('[certify] 호출:', { nickname: user, gameId, seat });
-        const certRes = await fetch('/api/battle/certify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nickname: user, gameId: gameId, seat: seat })
-        });
-        if (certRes.ok) {
-          const certData = await certRes.json();
-          console.log('[certify] 응답:', certData);
-          if (certData.success === false) {
-            console.warn('certify 거부:', certData.message);
-          } else {
-            earnedPoints = certData.earnedPoints || 50;
-            // 상단 스코어보드 + 게이지 즉시 갱신
-            if (certData.homePct !== undefined) {
-              updateCheerUI(certData.homeCheerScore, certData.awayCheerScore, certData.homePct, certData.awayPct);
-              updateHeaderBattleScore(certData.homeCheerScore, certData.awayCheerScore);
-            }
-            // 전역 함수로 스코어보드 재조회
-            if (typeof refreshBattleScoreboard === 'function') refreshBattleScoreboard();
-            loadZoneScores().then(() => {
-              const activeBtn = document.querySelector('.zone-btn.active');
-              if (activeBtn) renderZone(activeBtn.dataset.zone);
-            });
-          }
-        }
-      } catch(e) { console.warn('certify 실패:', e); }
-    } else {
-      console.warn('[certify] 조건 불충족 — user:', user, 'gameId:', gameId);
-      refreshCheerPoints();
-    }
-
-    const gameData  = result;
-    const matchInfo = gameData ? `${gameData.homeTeam} vs ${gameData.awayTeam} (DB 매칭 ✅)` : (d.match || '-');
-    const doneInfo = document.getElementById('battle-done-info');
-    if (doneInfo) doneInfo.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;">
-        <div>📅 <b>${gameData ? gameData.date : (d.date||'-')}</b></div>
-        <div>⚾ <b>${matchInfo}</b></div>
-        <div>🏟 <b>${gameData ? gameData.venue : (d.stadium||'-')}</b></div>
-        <div>💺 <b>${d.seat||'-'}</b></div>
-        <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);color:#4ade80;font-weight:700;font-size:12px;">
-          ⚔️ 점령전 포인트 <span style="color:#F5C842;font-size:14px;">+${earnedPoints}점</span> 적립 완료!<br>
-          📔 직관 다이어리에도 자동 저장되었어요.
-          ${gameData?.fallback ? '<br><span style="color:#fbbf24;font-size:11px;">⚠️ 팀명 매칭 실패 — 당일 첫 경기로 저장됩니다. 수정해주세요.</span>' : ''}
-        </div>
-      </div>`;
-    confirmBtn.disabled = false;
-    confirmBtn.textContent = '⚔️ 점령전 참여 확정!';
-    showStep('done');
-  });
-
-  async function saveToDiary(ocrData) {
-    const user = localStorage.getItem('loggedInUser');
-    if (!user) return null;
     try {
-      let dateStr = '';
-      if (ocrData.date) {
-        const m = ocrData.date.match(/(\d{4})[년\s\-\/\.]+(\d{1,2})[월\s\-\/\.]+(\d{1,2})/);
-        if (m) dateStr = `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
-      }
-      if (!dateStr) dateStr = new Date().toISOString().slice(0, 10);
-      const myTeam = localStorage.getItem('myTeam') || localStorage.getItem('favoriteTeam') || '';
-      let teamHint = myTeam;
-      if (ocrData.match) {
-        const parts = ocrData.match.split(/\s*vs\s*/i);
-        const found = parts.find(p => p.trim().toUpperCase().includes(myTeam.toUpperCase()));
-        teamHint = (found || parts[0] || '').trim();
-      }
-      let gameData = null;
-      try {
-        const params = new URLSearchParams({ date: dateStr });
-        if (teamHint) params.append('hint', teamHint);
-        const res = await fetch(`/api/games/match?${params}`);
-        if (res.ok) { const data = await res.json(); if (data.found) gameData = data; }
-      } catch(e) { }
+      const base64 = await fileToBase64(fileInput.files[0]);
+      const res = await fetch('/api/vision/ticket-ocr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: base64, mimeType: fileInput.files[0].type })
+      });
 
-      let home = '', away = '', homeScore = null, awayScore = null, stadium = '', gameDate = dateStr;
-      if (gameData) {
-        home = gameData.homeTeam || ''; away = gameData.awayTeam || '';
-        homeScore = gameData.homeScore >= 0 ? gameData.homeScore : null;
-        awayScore = gameData.awayScore >= 0 ? gameData.awayScore : null;
-        stadium = gameData.venue || ocrData.stadium || '';
-        gameDate = gameData.date || dateStr;
+      clearInterval(iv);
+      if (bar) bar.style.width = '100%';
+
+      if (!res.ok) throw new Error('서버 오류 ' + res.status);
+
+      const data = await res.json();
+
+      // ── DB에서 구장 조회 ──
+      // OCR에서 팀+날짜 추출 후 /api/games/match 로 실제 구장을 가져옴
+      let stadiumFromDB = '';
+      let gameIdFromDB  = null;
+      try {
+        const isoDate = toISODate(data.date);
+        const hint    = data.match ? data.match.split('vs')[0].trim() : '';
+        if (isoDate) {
+          const gameRes  = await fetch(`/api/games/match?date=${isoDate}&hint=${encodeURIComponent(hint)}`);
+          const gameData = await gameRes.json();
+          if (gameData.found) {
+            stadiumFromDB = gameData.venue || '';
+            gameIdFromDB  = gameData.id    || null;
+          }
+        }
+      } catch {}
+
+      // DB 구장을 OCR 결과에 덮어씀
+      data.stadium = stadiumFromDB || data.stadium || '';
+      if (gameIdFromDB) data.gameId = gameIdFromDB;
+
+      window._ocrResult = data;
+
+      if (data.error === 'API_KEY_MISSING') {
+        setText('ocr-date',    '직접 확인 필요');
+        setText('ocr-match',   '직접 확인 필요');
+        setText('ocr-stadium', stadiumFromDB || '직접 확인 필요');
+        setText('ocr-seat',    '직접 확인 필요');
       } else {
-        if (ocrData.match) { const parts = ocrData.match.split(/\s*vs\s*/i); if (parts.length >= 2) { away = parts[0].trim(); home = parts[1].trim(); } }
-        stadium = ocrData.stadium || '';
+        setText('ocr-date',    data.date    || '인식 불가');
+        setText('ocr-match',   data.match   || '인식 불가');
+        setText('ocr-stadium', data.stadium || '인식 불가');
+        setText('ocr-seat',    data.seat    || '인식 불가');
       }
-      let result = 'draw';
-      if (homeScore !== null && awayScore !== null) {
-        const isHome = home === myTeam;
+
+      setTimeout(() => showStep('result'), 300);
+
+    } catch(e) {
+      clearInterval(iv);
+      showStep('upload');
+      showError('분석 중 오류가 발생했습니다: ' + e.message);
+    }
+  }
+
+  // ── 점령전 참여 확정 ──
+  async function confirmBattle() {
+    const user = localStorage.getItem('loggedInUser');
+    if (!user) {
+      showError('로그인이 필요합니다.');
+      setTimeout(() => location.href = 'login.html', 1200);
+      return;
+    }
+
+    const ocr = window._ocrResult || {};
+    const cb  = document.getElementById('battle-confirm-btn');
+    if (cb) { cb.disabled = true; cb.textContent = '처리 중...'; }
+
+    try {
+      const matchParts = (ocr.match || '').split('vs').map(s => s.trim());
+      const isoDate    = toISODate(ocr.date) || new Date().toISOString().slice(0, 10);
+
+      // 1) gameId 확보 (OCR 분석 시 이미 저장된 값 우선 사용)
+      let gameId   = ocr.gameId || null;
+      let gameData = null;
+
+      if (!gameId) {
+        try {
+          const gameRes = await fetch(`/api/games/match?date=${isoDate}&hint=${encodeURIComponent(matchParts[0] || '')}`);
+          gameData = await gameRes.json();
+          if (gameData.found) gameId = gameData.id;
+        } catch {}
+      } else {
+        // gameId 있으면 상세 조회
+        try {
+          const gameRes = await fetch(`/api/games/${gameId}`);
+          gameData = await gameRes.json();
+          gameData.found = true;
+        } catch {}
+      }
+
+      // 2) 경기 결과 자동 판단
+      const myTeam    = localStorage.getItem('favoriteTeam') || '';
+      const today     = new Date(); today.setHours(0, 0, 0, 0);
+      const gameDateObj = new Date(isoDate + 'T00:00:00');
+
+      let result    = 'cancel';
+      let homeScore = null;
+      let awayScore = null;
+      let home      = matchParts[1] || (gameData?.homeTeam) || '';
+      let away      = matchParts[0] || (gameData?.awayTeam) || '';
+
+      if (gameData && gameData.found) {
+        home      = gameData.homeTeam || home;
+        away      = gameData.awayTeam || away;
+        homeScore = (gameData.homeScore >= 0) ? gameData.homeScore : null;
+        awayScore = (gameData.awayScore >= 0) ? gameData.awayScore : null;
+      }
+
+      if (gameDateObj > today) {
+        // 미래 경기
+        result = 'scheduled';
+      } else if (homeScore !== null && awayScore !== null) {
+        // 점수 있음 → 승/패/무 판단
+        const isHome = myTeam && home === myTeam;
         const myScore  = isHome ? homeScore : awayScore;
         const oppScore = isHome ? awayScore : homeScore;
         result = myScore > oppScore ? 'win' : myScore < oppScore ? 'lose' : 'draw';
+      } else {
+        // 지난 날짜인데 점수 없음 → 취소
+        result = 'cancel';
       }
-      const payload = {
-        nickname: user, date: gameDate, home, away, homeScore, awayScore,
-        myteam: myTeam, result, stadium, seat: ocrData.seat || '',
-        weather: '', mate: '', mood: '',
-        memo: `🎫 점령전 티켓 인증으로 자동 저장${gameData ? ' (DB 매칭)' : ' (OCR 데이터)'}`,
-        costTicket: 0, costTransport: 0, costFood: 0, costGoods: 0,
-      };
-      const res = await fetch('/api/diary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      const data = await res.json();
-      if (!data.success) return { error: data.message };
-      // gameData가 없어도 certify를 위해 gameId를 포함한 객체 반환
-      if (!gameData) {
-        // gameData 없을 때: 오늘 내 팀 경기 ID를 직접 조회
+
+      // 3) 다이어리 자동 등록
+      await fetch('/api/diary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nickname:  user,
+          gameId:    gameId,
+          date:      isoDate,
+          home:      home,
+          away:      away,
+          homeScore: homeScore,
+          awayScore: awayScore,
+          myteam:    myTeam,
+          result:    result,
+          stadium:   ocr.stadium || '',
+          seat:      ocr.seat    || '',
+          memo:      '🎫 점령전 티켓 인증 (자동 등록)'
+        })
+      });
+
+      // 4) 배틀 포인트 적립 — 선택된 구역 포함
+      if (gameId) {
         try {
-          const myT = localStorage.getItem('myTeam') || localStorage.getItem('favoriteTeam') || '';
-          const todayGamesRes = await fetch(`/api/games/today`);
-          if (todayGamesRes.ok) {
-            const todayGames = await todayGamesRes.json();
-            const matched = todayGames.find(g =>
-              !myT || g.homeTeam === myT || g.awayTeam === myT
-            );
-            if (matched) return { id: matched.id, homeTeam: matched.homeTeam, awayTeam: matched.awayTeam, date: matched.gameDate || matched.date, venue: matched.venue || '' };
-          }
-        } catch(e) {}
-        return null;
+          // 구역 선택값: 모달에서 직접 선택 > OCR 좌석 파싱 순서
+          const selectedZone = window._selectedBattleZone || null;
+          await fetch('/api/battle/certify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nickname: user,
+              gameId:   gameId,
+              stadium:  ocr.stadium || '',
+              seat:     selectedZone
+                          ? (selectedZone + ' ' + (ocr.seat || '')).trim()
+                          : (ocr.seat || '')
+            })
+          });
+        } catch {}
       }
-      return gameData;
-    } catch(e) { return null; }
+
+    } catch(e) {
+      // 저장 실패해도 완료 처리 (UX 우선)
+    }
+
+    showStep('done');
+
+    // 완료 후 점수판 갱신
+    setTimeout(() => {
+      if (typeof updateBattleBoard === 'function') updateBattleBoard();
+    }, 1000);
   }
 
-  const doneClose = document.getElementById('battle-done-close');
-  if (doneClose) doneClose.addEventListener('click', () => { modal.classList.remove('open'); });
-
-  const errorClose = document.getElementById('battle-error-close');
-  if (errorClose) errorClose.addEventListener('click', () => { modal.classList.remove('open'); });
-
-  function showStep(name) {
-    if (stepUpload)  stepUpload.style.display  = name === 'upload'  ? 'block' : 'none';
-    if (stepLoading) stepLoading.style.display = name === 'loading' ? 'block' : 'none';
-    if (stepResult)  stepResult.style.display  = name === 'result'  ? 'block' : 'none';
-    if (stepDone)    stepDone.style.display    = name === 'done'    ? 'block' : 'none';
-    if (stepError)   stepError.style.display   = name === 'error'   ? 'block' : 'none';
-  }
-
-  function resetModal() {
-    selectedFile = null;
-    if (fileInput) fileInput.value = '';
-    if (previewWrap) previewWrap.style.display = 'none';
-    if (uploadZone) uploadZone.style.display = 'block';
-    if (ocrBtn) { ocrBtn.style.opacity = '0.4'; ocrBtn.style.pointerEvents = 'none'; ocrBtn.disabled = true; }
-    showStep('upload');
-  }
-
-  function animateProgress() {
-    const bar = document.getElementById('ocr-progress-bar');
-    if (!bar) return;
-    let w = 0;
-    const iv = setInterval(() => {
-      w = Math.min(w + Math.random() * 12, 88);
-      bar.style.width = w + '%';
-      if (w >= 88) clearInterval(iv);
-    }, 200);
+  // ── 헬퍼 ──
+  function setText(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
   }
 
   function fileToBase64(file) {
-    return new Promise((res, rej) => {
+    return new Promise((resolve, reject) => {
       const r = new FileReader();
-      r.onload  = () => res(r.result.split(',')[1]);
-      r.onerror = rej;
+      r.onload  = () => resolve(r.result.split(',')[1]);
+      r.onerror = reject;
       r.readAsDataURL(file);
     });
   }
+
+  function toISODate(str) {
+    if (!str) return '';
+    const m = str.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
+    if (m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+    if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0, 10);
+    return '';
+  }
+});
+
+// ─── 7. 모달 공통 닫기 ───
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-close')) {
+    const target = document.getElementById(e.target.dataset.target);
+    if (target) target.classList.remove('open');
+  }
+  if (e.target.classList.contains('modal-backdrop')) {
+    e.target.classList.remove('open');
+  }
+});
+
+// ─── 8. 구역별 응원 비율 — /api/battle/zones 연동 ───
+(function() {
+  const ZONE_KEY_MAP = {
+    'orange-3b':       { api: '3루',  name: '3루 오렌지석', desc: '홈팀 핵심 응원 구역. 가장 강렬한 응원과 떼창이 펼쳐지는 곳입니다.' },
+    'orange-1b':       { api: '1루',  name: '1루 오렌지석', desc: '원정팀 핵심 응원 구역. 역응원 열기가 가장 강한 곳입니다.' },
+    'outfield-center': { api: '외야', name: '중앙 외야석',  desc: '홈런볼이 떨어지는 중립 구역. 양팀 응원이 교차합니다.' },
+    'premium':         { api: '중앙', name: '테이블·프리미엄석', desc: '포수 뒤 중앙 최고급 좌석. 경기장 전체를 한눈에 볼 수 있는 명당입니다.' },
+    'foul':            { api: '내야', name: '외야 파울존',  desc: '1·3루 파울라인 바깥 구역. 여유로운 관람을 즐기는 팬이 많습니다.' },
+  };
+
+  let zoneData      = null;  // API에서 받은 전체 데이터
+  let currentZone   = 'orange-3b';
+
+  // ── 구역 패널 UI 업데이트 ──
+  function renderZonePanel(zoneKey) {
+    const info    = ZONE_KEY_MAP[zoneKey] || ZONE_KEY_MAP['orange-3b'];
+    const apiKey  = info.api;
+    const zoneEl  = zoneData?.zones?.[apiKey];
+
+    // 구역 이름/설명 (삭제됨 — 구역 버튼 클릭 시 별도 처리 없음)
+
+    const homeTeam = zoneData?.homeTeam || '홈';
+    const awayTeam = zoneData?.awayTeam || '원정';
+    const homePct  = zoneEl?.homePct  ?? 50;
+    const awayPct  = zoneEl?.awayPct  ?? 50;
+    const homeScore = zoneEl?.homeScore ?? 0;
+    const awayScore = zoneEl?.awayScore ?? 0;
+
+    // 홈팀 컬러
+    const TEAM_COLORS_ZONE = {
+      'KIA':'#E60012','기아':'#E60012','LG':'#002C5F','두산':'#131230',
+      '삼성':'#074CA1','롯데':'#002955','SSG':'#CE0E2D','NC':'#315288',
+      'KT':'#000000','한화':'#FF6600','키움':'#820024'
+    };
+    const homeColor = TEAM_COLORS_ZONE[homeTeam] || '#E60012';
+    const awayColor = TEAM_COLORS_ZONE[awayTeam] || '#2563EB';
+
+    // 홈팀 카드
+    const homeBig   = document.getElementById('zone-home-big');
+    const homeLabelEl  = document.getElementById('zone-home-label');
+    const homeScoreEl  = document.getElementById('zone-home-score');
+    if (homeBig)     { homeBig.textContent = homePct + '%'; homeBig.style.color = homeColor; }
+    if (homeLabelEl) { homeLabelEl.textContent = homeTeam + ' 응원'; homeLabelEl.style.color = homeColor; }
+    if (homeScoreEl)   homeScoreEl.textContent = homeScore.toLocaleString();
+
+    // 원정팀 카드
+    const awayBig   = document.getElementById('zone-away-big');
+    const awayLabelEl  = document.getElementById('zone-away-label');
+    const awayScoreEl  = document.getElementById('zone-away-score');
+    if (awayBig)     { awayBig.textContent = awayPct + '%'; awayBig.style.color = awayColor; }
+    if (awayLabelEl) { awayLabelEl.textContent = awayTeam + ' 응원'; awayLabelEl.style.color = awayColor; }
+    if (awayScoreEl)   awayScoreEl.textContent = awayScore.toLocaleString();
+
+    // 전체 비율 바
+    const totalHomeBar = document.getElementById('total-home-bar');
+    const totalHomePct = document.getElementById('total-home-pct');
+    const totalAwayBar = document.getElementById('total-away-bar');
+    const totalAwayPct = document.getElementById('total-away-pct');
+    if (totalHomeBar) { totalHomeBar.style.width = homePct + '%'; totalHomeBar.style.background = homeColor; }
+    if (totalHomePct) { totalHomePct.textContent = homePct + '%'; totalHomePct.style.color = homeColor; }
+    if (totalAwayBar) { totalAwayBar.style.width = awayPct + '%'; totalAwayBar.style.background = awayColor; }
+    if (totalAwayPct) { totalAwayPct.textContent = awayPct + '%'; totalAwayPct.style.color = awayColor; }
+
+    // 헤더 비율 (삭제됨)
+  }
+
+  // ── API 로드 ──
+  async function loadZoneData() {
+    try {
+      const myTeam = localStorage.getItem('favoriteTeam') || '';
+      const url    = myTeam ? `/api/battle/zones?team=${encodeURIComponent(myTeam)}` : '/api/battle/zones';
+      const res    = await fetch(url);
+      if (!res.ok) return;
+      zoneData = await res.json();
+    } catch {}
+    renderZonePanel(currentZone);
+  }
+
+  // 전역에서 접근 가능하도록 등록 (티켓 구역 선택 시 즉시 갱신용)
+  window._zoneRenderFn = (zoneKey) => {
+    currentZone = zoneKey;
+    renderZonePanel(currentZone);
+  };
+
+  // ── 존 버튼 이벤트 ──
+  document.addEventListener('DOMContentLoaded', () => {
+    loadZoneData();
+    setInterval(loadZoneData, 30000); // 30초마다 갱신
+
+    document.querySelectorAll('.zone-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentZone = btn.dataset.zone;
+        renderZonePanel(currentZone);
+
+        // 구장 SVG 하이라이트
+        const zoneConfig = {
+          'orange-3b':       ['zone-orange-3b','zone-orange-3b-top','zone-red-3b','zone-red-3b-side'],
+          'orange-1b':       ['zone-orange-1b','zone-orange-1b-top','zone-red-1b','zone-red-1b-side'],
+          'outfield-center': ['zone-outfield-center','zone-outfield-left','zone-outfield-right'],
+          'premium':         ['zone-premium','zone-table-top','zone-exciting-l','zone-exciting-r'],
+          'foul':            ['zone-foul','zone-blue-bottom','zone-blue-bottom-r','zone-navy-3b','zone-navy-1b'],
+        };
+        document.querySelectorAll('.seat-zone').forEach(z => {
+          z.style.opacity = '0.35';
+          z.style.filter  = 'brightness(0.7)';
+        });
+        const targets = zoneConfig[currentZone] || [];
+        targets.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) { el.style.opacity = '0.95'; el.style.filter = 'brightness(1.2)'; }
+        });
+      });
+    });
+
+    // 초기 하이라이트 (3루 오렌지)
+    document.querySelectorAll('.seat-zone').forEach(z => {
+      z.style.opacity = '0.35'; z.style.filter = 'brightness(0.7)';
+    });
+    ['zone-orange-3b','zone-orange-3b-top'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.style.opacity = '0.95'; el.style.filter = 'brightness(1.2)'; }
+    });
+  });
 })();

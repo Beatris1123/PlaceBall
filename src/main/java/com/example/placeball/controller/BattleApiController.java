@@ -192,8 +192,30 @@ public class BattleApiController {
     }
 
     // ══════════════════════════════════════════════
-    // 5. 점령전 최종 결과 저장
+    // 6. 오늘 인증 여부 확인
+    // GET /api/battle/certified?nickname=xxx&gameId=xxx
     // ══════════════════════════════════════════════
+    @GetMapping("/certified")
+    @Transactional(readOnly = true)
+    public ResponseEntity<Map<String, Object>> checkCertified(
+            @RequestParam String nickname,
+            @RequestParam Long gameId) {
+
+        Optional<Member> memberOpt = memberRepository.findByNickname(nickname);
+        if (memberOpt.isEmpty())
+            return ResponseEntity.ok(Map.of("certified", false));
+
+        Member member = memberOpt.get();
+        Optional<Game> gameOpt = gameRepository.findById(gameId);
+        if (gameOpt.isEmpty())
+            return ResponseEntity.ok(Map.of("certified", false));
+
+        Game game = gameOpt.get();
+        String desc = "티켓 인증: " + game.getGameDate() + " " + game.getHomeTeam() + " vs " + game.getAwayTeam();
+        boolean certified = cheerPointRepository.existsByMemberAndPointTypeAndDescription(member, "BATTLE_TICKET", desc);
+
+        return ResponseEntity.ok(Map.of("certified", certified));
+    }
     @PostMapping("/finalize")
     @Transactional
     public ResponseEntity<Map<String, Object>> finalizeBattle(

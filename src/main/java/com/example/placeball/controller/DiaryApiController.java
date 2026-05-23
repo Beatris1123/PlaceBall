@@ -173,7 +173,23 @@ public class DiaryApiController {
         m.put("homeScore", d.getHomeScore());
         m.put("awayScore", d.getAwayScore());
         m.put("myteam",    d.getMyTeam()     != null ? d.getMyTeam()     : "");
-        m.put("result",    d.getResult()     != null ? d.getResult()     : "");
+    // result 날짜 기준 자동 보정
+    // - 미래 경기 → scheduled
+    // - 지난 날짜 + 점수 없음 → cancel
+    // - 저장된 result 그대로 사용
+    String result = d.getResult();
+    LocalDate gameDate = d.getGameDate();
+    LocalDate today    = LocalDate.now();
+    if (result == null || result.isBlank() || result.equals("draw")) {
+        if (gameDate.isAfter(today)) {
+            result = "scheduled";
+        } else if (gameDate.isBefore(today) && (d.getHomeScore() == null || d.getAwayScore() == null)) {
+            result = "cancel";
+        } else if (result == null || result.isBlank()) {
+            result = "cancel";
+        }
+    }
+    m.put("result", result);
         m.put("stadium",   d.getStadium()    != null ? d.getStadium()    : "");
         m.put("seat",      d.getSeat()       != null ? d.getSeat()       : "");
         m.put("weather",   d.getWeather()    != null ? d.getWeather()    : "");

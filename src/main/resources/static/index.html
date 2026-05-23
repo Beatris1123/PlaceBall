@@ -4,745 +4,634 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PLACEBALL — 직관의 모든 것</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
   <style>
+    /* ════════════════════════════════════════════════════════════════
+       PLACEBALL · BALLPARK COMMUNITY — Clean Sketch Dashboard
+       (라이트그레이 페이퍼 · 가는 검정 라인 · 중립 산세리프)
+       ※ 디자인 전용. 모든 ID/클래스/JS 훅 그대로 보존.
+       ════════════════════════════════════════════════════════════════ */
     :root {
-      --kia: #EF4444;
-      --kia-dark: #B91C1C;
-      --lg: #3B82F6;
-      --lg-dark: #1D4ED8;
-      --surface: rgba(10,18,30,0.72);
-      --surface-2: rgba(8,14,24,0.60);
-      --surface-3: rgba(6,12,22,0.55);
-      --border: rgba(255,255,255,0.08);
-      --border-md: rgba(255,255,255,0.14);
-      --text-1: #F1F5F9;
-      --text-2: #CBD5E1;
-      --text-3: #64748B;
-      --green: #22C55E;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
-      --shadow-md: 0 4px 16px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.25);
-      --shadow-lg: 0 12px 40px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.3);
-      --radius: 1rem;
-      --radius-lg: 1.5rem;
+      --kia:        #E60012;
+      --kia-dark:   #B8000E;
+      --kia-soft:   #FCE9EB;
+      --lg:         #6B7280;     /* LG측은 중립 그레이로 */
+      --lg-mid:     #4B5563;
+      --lg-light:   #9CA3AF;
+      --brand:      #E60012;
+      --green:      #16A34A;
+      --gold:       #F5B400;
+      --purple:     #6D28D9;
+
+      /* Light paper base — 따뜻한 크림 X, 차분한 라이트 그레이 O */
+      --bg:         #ECEDEF;
+      --bg-2:       #E4E6E9;
+      --bg-3:       #DADCDF;
+      --paper:      #FFFFFF;
+      --paper-2:    #FAFAFB;
+
+      --ink:        #111827;
+      --ink-2:      #1F2937;
+      --ink-3:      #374151;
+      --muted:      #6B7280;
+      --subtle:     #9CA3AF;
+
+      --line:       #111827;       /* 손그림 외곽선 (얇게) */
+      --line-soft:  rgba(17,24,39,0.18);
+      --line-dash:  rgba(17,24,39,0.30);
+
+      /* Card */
+      --card-bg:    #FFFFFF;
+      --card-bd:    #111827;
+      --card-sh:    0 1px 0 rgba(17,24,39,0.04), 0 6px 18px rgba(17,24,39,0.06);
+
+      --r-sm:  8px;
+      --r-md:  12px;
+      --r-lg:  16px;
+      --r-xl:  20px;
+      --r-pill:999px;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    html, body { -webkit-font-smoothing: antialiased; }
+
     body {
-      font-family: 'Noto Sans KR', sans-serif;
-      background: #060D1A;
-      color: var(--text-1);
+      font-family: 'Pretendard','Noto Sans KR',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo',sans-serif;
+      font-weight: 400;
+      letter-spacing: -0.005em;
+      color: var(--ink);
       min-height: 100vh;
-      position: relative;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,");
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    #bg-illustration {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    #bg-illustration svg {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center bottom;
-    }
-
-    #bg-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
       background:
-        linear-gradient(180deg,
-          rgba(6,13,26,0.55) 0%,
-          rgba(6,13,26,0.30) 35%,
-          rgba(6,13,26,0.20) 65%,
-          rgba(6,13,26,0.50) 100%
-        ),
-        radial-gradient(ellipse 60% 30% at 28% 80%, rgba(220,38,38,0.12) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 30% at 72% 80%, rgba(29,78,216,0.12) 0%, transparent 70%);
+        /* 차분한 도트 페이퍼 */
+        radial-gradient(circle at 1px 1px, rgba(17,24,39,0.06) 1px, transparent 0) 0 0/20px 20px,
+        linear-gradient(180deg, #EFF1F3 0%, #E8EAED 100%);
     }
+    body::before {
+      content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+      background:
+        radial-gradient(ellipse 50% 30% at 12% 0%, rgba(230,0,18,0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 30% at 88% 0%, rgba(17,24,39,0.04) 0%, transparent 60%);
+    }
+
+    #bg-illustration { display:none !important; }
+    #bg-overlay      { display:none !important; }
 
     header, main, footer { position: relative; z-index: 2; }
 
-    header {
-      background: rgba(6,13,26,0.82);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 4px 24px rgba(0,0,0,0.4);
+    /* ══ HEADER ════════════════════════════════════════════════════════ */
+    header{
+      background: var(--paper);
+      border-bottom: 1.5px solid var(--line);
+      position: sticky; top: 0; z-index: 100;
+      padding: 0.85rem 1.5rem;
+    }
+    .header-inner{
+      max-width: 1600px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      align-items: center; gap: 1.5rem;
+    }
+    .logo-area{ display:flex; align-items:center; gap:0.7rem; }
+    .logo-mark{
+      width:42px; height:42px; border-radius:50%;
+      background:#fff; border:1.5px solid var(--line);
+      position:relative; flex-shrink:0; overflow:hidden;
+    }
+    .logo-mark::before{
+      content:''; position:absolute; width:22px; height:46px; left:4px; top:-2px;
+      border:2px solid transparent; border-right-color: var(--kia);
+      border-radius:50%; transform: rotate(14deg);
+    }
+    .logo-mark::after{
+      content:''; position:absolute; width:22px; height:46px; right:4px; top:-2px;
+      border:2px solid transparent; border-left-color: var(--kia);
+      border-radius:50%; transform: rotate(-14deg);
+    }
+    .logo-text{ display:flex; flex-direction:column; line-height:1.05; }
+    .logo-name{
+      font-family:'Bebas Neue',sans-serif; font-size:1.55rem;
+      letter-spacing:0.06em; color:var(--ink); font-weight:700;
+    }
+    .logo-sub{
+      font-family:'Inter','Pretendard',sans-serif;
+      font-size:9px; font-weight:600; letter-spacing:0.18em;
+      color:var(--muted); text-transform:uppercase; margin-top:1px;
     }
 
-    .header-inner {
-      max-width: 1440px;
-      margin: 0 auto;
-      padding: 0 2rem;
-      height: 72px;
+    /* HEADER 가운데 — 점령전 게이지 보드 */
+    .battle-board{
+      position: relative;
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       align-items: center;
-      gap: 1.5rem;
+      gap: 0;
+      background:#fff; border:1.5px solid var(--line);
+      border-radius: var(--r-pill);
+      padding: 7px 18px;
+      min-width: 420px;
+      max-width: 500px;
+    }
+    .battle-board-gauge{ display:none; }
+
+    /* 왼쪽(KIA) — 로고+정보 좌→우 */
+    .bb-side{
+      display:flex; align-items:center; gap:8px;
+    }
+    .bb-side:last-of-type{
+      /* 오른쪽(LG) — 로고+정보 우→좌 */
+      flex-direction: row-reverse;
     }
 
-    .logo-area { display: flex; align-items: center; gap: 0.75rem; }
-    .logo-mark {
-      width: 42px; height: 42px; border-radius: 50%;
-      background: #FFFFFF;
-      border: 1.5px solid rgba(220,38,38,0.2);
-      box-shadow: 0 2px 8px rgba(220,38,38,0.12);
-      position: relative; flex-shrink: 0; overflow: hidden;
+    .bb-logo{
+      width:36px; height:36px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Bebas Neue',sans-serif; font-weight:700;
+      font-size:12px; letter-spacing:0.04em;
+      border:1.5px solid var(--line);
+      flex-shrink:0;
     }
-    .logo-mark::before {
-      content: '';
-      position: absolute;
-      width: 24px; height: 48px;
-      left: 3px; top: -4px;
-      border: 2.5px solid transparent;
-      border-right-color: var(--kia);
-      border-radius: 50%;
-      transform: rotate(14deg);
+    .bb-logo-kia{ background: var(--kia); color:#fff; }
+    .bb-logo-lg { background: var(--ink); color:#fff; }
+
+    .bb-info{ display:flex; flex-direction:column; line-height:1.15; min-width:0; }
+    .bb-side:last-of-type .bb-info{ text-align:right; }
+    .bb-label { font-size:9px; color:var(--muted); font-weight:600; white-space:nowrap; }
+    .bb-pts   { font-family:'Bebas Neue',sans-serif; font-size:15px; font-weight:700;
+                letter-spacing:0.02em; white-space:nowrap; }
+    .bb-pts-kia{ color:var(--kia); }
+    .bb-pts-lg { color:var(--ink); }
+
+    /* 가운데 — VS + LIVE */
+    .bb-center{
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      gap:3px; padding: 0 14px; flex-shrink:0;
     }
-    .logo-mark::after {
-      content: '';
-      position: absolute;
-      width: 24px; height: 48px;
-      right: 3px; top: -4px;
-      border: 2.5px solid transparent;
-      border-left-color: var(--kia);
-      border-radius: 50%;
-      transform: rotate(-14deg);
+    .bb-vs{
+      font-family:'Bebas Neue',sans-serif; font-size:1.05rem;
+      color:var(--muted); letter-spacing:0.08em; line-height:1;
     }
-    .logo-text { display: flex; flex-direction: column; line-height: 1; }
-    .logo-name {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.6rem;
-      letter-spacing: 0.06em;
-      color: var(--text-1);
+    .bb-live-badge{
+      font-size:8.5px; font-weight:700; letter-spacing:0.12em;
+      color:var(--kia); white-space:nowrap;
     }
-    .logo-sub {
-      font-size: 9px;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--text-3);
-      font-weight: 700;
+    /* 사용 안 하는 요소 숨김 */
+    .bb-gauge-bar, .bb-gauge-kia, .bb-gauge-lg,
+    .bb-center-label{ display:none; }
+
+    .nav-right{ display:flex; align-items:center; gap:8px; justify-content:flex-end; }
+    .btn-diary, .btn-login{
+      padding:8px 14px; background:#fff; color:var(--ink);
+      border:1.5px solid var(--line); border-radius:10px;
+      font-family:inherit; font-size:12px; font-weight:600;
+      cursor:pointer; text-decoration:none;
+      display:inline-flex; align-items:center; gap:6px;
+      transition: background .15s, color .15s;
+    }
+    .btn-diary:hover, .btn-login:hover{ background: var(--ink); color:#fff; }
+    .btn-login{ background: var(--kia); color:#fff; border-color: var(--line); }
+    .btn-login:hover{ background: var(--kia-dark); }
+
+    /* HEADER personality badge */
+    .personality-badge{
+      position:relative; display:inline-flex; align-items:center; gap:6px;
+      padding:4px 12px 4px 8px; border-radius: var(--r-pill);
+      background:#fff; border:1.5px solid var(--line);
+      cursor:pointer; font-size:12px; font-weight:600; color:var(--ink);
+    }
+    .badge-emoji{ font-size:14px; }
+    .badge-label{ letter-spacing:-0.005em; }
+    .badge-tooltip{
+      position:absolute; top:calc(100% + 8px); right:0; min-width:240px;
+      background:#fff; border:1.5px solid var(--line); border-radius:12px;
+      padding:12px 14px; box-shadow: var(--card-sh);
+      opacity:0; pointer-events:none; transform: translateY(-4px);
+      transition: opacity .15s ease, transform .15s ease;
+      z-index: 50;
+    }
+    .personality-badge:hover .badge-tooltip{ opacity:1; pointer-events:auto; transform: translateY(0); }
+    .tooltip-name{ font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:4px; }
+    .tooltip-desc{ font-size:11.5px; color:var(--muted); line-height:1.55; }
+    .tooltip-retake{
+      display:inline-block; margin-top:8px; font-size:11px; font-weight:600;
+      color: var(--kia); cursor:pointer;
     }
 
-    .scoreboard {
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 2rem;
-      padding: 0.5rem 1.25rem;
+    .badge-live{
+      display:inline-flex; align-items:center; gap:5px;
+      padding:3px 9px; border-radius: var(--r-pill);
+      background: var(--kia-soft); color: var(--kia);
+      font-size:10px; font-weight:700; letter-spacing:0.05em;
+      border: 1px solid rgba(230,0,18,0.25);
     }
-    .score-team {
-      display: flex; align-items: center; gap: 0.6rem;
+    .pulse-dot{
+      width:8px; height:8px; border-radius:50%;
+      background: var(--kia); position:relative;
     }
-    .team-badge {
-      width: 24px; height: 24px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; font-weight: 900; color: #fff;
+    .pulse-dot::after{
+      content:''; position:absolute; inset:-4px; border-radius:50%;
+      border:1.5px solid var(--kia); animation: pulse-ring 1.6s ease-out infinite;
     }
-    .team-name { font-size: 12px; font-weight: 800; color: var(--text-2); letter-spacing: -0.02em; }
-    .score-num {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 2rem;
-      letter-spacing: -0.02em;
-      line-height: 1;
+    @keyframes pulse-ring{
+      0%{ transform:scale(0.6); opacity:1; }
+      100%{ transform:scale(1.4); opacity:0; }
     }
-    .score-divider {
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    @keyframes pulse-live{
+      0%,100%{ opacity:1; } 50%{ opacity:.6; }
     }
-    .live-badge {
-      font-size: 9px; font-weight: 900;
-      background: var(--green);
-      color: #fff;
-      padding: 2px 7px; border-radius: 99px;
-      letter-spacing: 0.1em;
-      animation: pulse-live 2s ease-in-out infinite;
-    }
-    .inning-info { font-size: 9px; color: var(--text-3); font-weight: 700; letter-spacing: 0.05em; }
-    @keyframes pulse-live { 0%,100%{opacity:1} 50%{opacity:0.6} }
 
-    .nav-right { display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; }
-    .btn-diary {
-      display: flex; align-items: center; gap: 6px;
-      padding: 8px 16px;
-      background: rgba(29,78,216,0.15); color: var(--lg);
-      border: 1.5px solid #BFDBFE;
-      border-radius: 10px;
-      font-weight: 700; font-size: 13px;
-      cursor: pointer; text-decoration: none;
-      transition: all 0.15s;
-    }
-    .btn-diary:hover { background: #DBEAFE; transform: translateY(-1px); }
-    .btn-login {
-      padding: 8px 20px;
-      background: var(--kia); color: #fff;
-      border: none; border-radius: 10px;
-      font-weight: 700; font-size: 13px;
-      cursor: pointer; transition: all 0.15s;
-    }
-    .btn-login:hover { background: var(--kia-dark); transform: translateY(-1px); }
-
-    main {
-      max-width: 1440px;
-      margin: 0 auto;
-      padding: 1.5rem 2rem 4rem;
+    /* ══ MAIN GRID ═════════════════════════════════════════════════════ */
+    main{
+      max-width: 1600px; margin: 1.25rem auto 3rem;
+      padding: 0 1.5rem;
       display: grid;
-      grid-template-columns: 300px 1fr 300px;
+      grid-template-columns: 22fr 56fr 22fr;
       gap: 1.25rem;
+      align-items: start;
+    }
+    .left-col, .center-col, .right-col{
+      display:flex; flex-direction:column; gap:1.1rem; min-width:0;
     }
 
-    .card {
-      background: var(--surface);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.06);
+    /* ══ CARD ══════════════════════════════════════════════════════════ */
+    .card{
+      background: var(--card-bg);
+      border: 1.5px solid var(--line);
+      border-radius: var(--r-lg);
+      box-shadow: var(--card-sh);
+      padding: 1.1rem 1.15rem 1.15rem;
+      position:relative;
+    }
+    .card-header{
+      display:flex; align-items:center; gap:10px;
+      margin-bottom: 0.9rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px dashed var(--line-dash);
+    }
+    .card-header-icon{
+      width:32px; height:32px; flex-shrink:0;
+      background:#fff; border:1.5px solid var(--line);
+      border-radius:9px;
+      display:flex; align-items:center; justify-content:center;
+      color: var(--ink);
+    }
+    .card-header-icon svg{
+      width:18px; height:18px;
+      fill:none; stroke:currentColor; stroke-width:1.6;
+      stroke-linecap:round; stroke-linejoin:round;
+    }
+    .card-title-group{ flex:1; min-width:0; line-height:1.1; }
+    .card-title{
+      font-size: 14.5px; font-weight: 700; color: var(--ink);
+      letter-spacing:-0.01em;
+    }
+    .card-subtitle{
+      font-family:'Inter','Pretendard',sans-serif;
+      font-size:10px; font-weight:600; letter-spacing:0.14em;
+      color: var(--muted); text-transform: uppercase; margin-top:2px;
     }
 
-    .card-header {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      margin-bottom: 1.25rem;
+    .divider{ height:1px; background: var(--line-soft); margin: 0.85rem 0; }
+
+    .card-link, .community-link-btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:6px; padding:9px 14px; border-radius:10px;
+      background:#fff; color:var(--ink);
+      border:1.5px solid var(--line); cursor:pointer;
+      font-family:inherit; font-size:12.5px; font-weight:600;
+      text-decoration:none; transition: background .15s, color .15s;
     }
-    .card-title-group { display: flex; align-items: center; gap: 0.5rem; }
-    .card-icon { font-size: 1.1rem; }
-    .card-title { font-size: 15px; font-weight: 800; color: var(--text-1); }
-    .card-subtitle { font-size: 11px; color: var(--text-3); font-weight: 600; margin-top: 2px; }
-    .badge-live {
-      font-size: 9px; font-weight: 900;
-      background: #DCFCE7; color: #15803D;
-      padding: 3px 8px; border-radius: 99px;
+    .card-link:hover, .community-link-btn:hover{
+      background: var(--ink); color:#fff;
     }
-    .badge-blue {
-      font-size: 9px; font-weight: 900;
-      background: #DBEAFE; color: var(--lg);
-      padding: 3px 8px; border-radius: 99px;
+    .community-link-btn{ width:100%; }
+
+    /* ══ Battle Feed ═══════════════════════════════════════════════════ */
+    .stat-big{
+      display:flex; align-items:baseline; gap:8px;
+      font-family:'Bebas Neue',sans-serif;
+      font-size: 2.2rem; font-weight: 700; line-height:1;
+      letter-spacing:0.01em;
+    }
+    .stat-unit{
+      font-family:'Pretendard','Inter',sans-serif;
+      font-size: 12px; font-weight: 600; color: var(--muted);
+    }
+    .chart-bars{
+      display:flex; align-items:flex-end; gap:4px; height:40px;
+      margin: 0.5rem 0 1rem;
+    }
+    .chart-bars .bar{
+      flex:1; background: var(--kia); border-radius: 3px 3px 0 0;
+      border:1px solid var(--line); border-bottom:none;
+      opacity:0.85; animation: barRise 0.8s ease both;
+    }
+    .chart-bars .bar:nth-child(1){ height:35%; animation-delay:.05s; }
+    .chart-bars .bar:nth-child(2){ height:55%; animation-delay:.10s; }
+    .chart-bars .bar:nth-child(3){ height:80%; animation-delay:.15s; opacity:1; }
+    .chart-bars .bar:nth-child(4){ height:65%; animation-delay:.20s; }
+    .chart-bars .bar:nth-child(5){ height:48%; animation-delay:.25s; }
+    @keyframes barRise{ from{ transform: scaleY(0); transform-origin:bottom; } to{ transform: scaleY(1); } }
+
+    .reaction-row{ margin-bottom: 0.6rem; }
+    .reaction-label{
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:12px; font-weight:600; margin-bottom:5px;
+      color: var(--ink-2);
+    }
+    .progress-track{
+      height:8px; background:#F1F2F4; border:1px solid var(--line);
+      border-radius: var(--r-pill); overflow:hidden;
+    }
+    .progress-fill{
+      height:100%; border-radius: var(--r-pill);
+      background: var(--kia);
+      transition: width .6s ease;
     }
 
-    .left-col { display: flex; flex-direction: column; gap: 1.25rem; }
-
-    .stat-big { font-size: 2.4rem; font-weight: 900; color: var(--text-1); line-height: 1; }
-    .stat-unit { font-size: 13px; color: var(--text-3); font-weight: 600; margin-left: 4px; }
-
-    .chart-bars {
-      display: flex; align-items: flex-end; gap: 3px; height: 52px; margin: 1rem 0;
+    /* ══ AI Chat ═══════════════════════════════════════════════════════ */
+    .chat-window{
+      display:flex; flex-direction:column;
+      background: var(--paper-2);
+      border:1.5px solid var(--line); border-radius:14px;
+      overflow:hidden;
     }
-    .bar {
-      flex: 1; background: var(--lg); border-radius: 3px 3px 0 0; opacity: 0.3;
-      transition: opacity 0.2s;
-    }
-    .bar:last-child { opacity: 0.9; }
-    .bar:nth-last-child(2) { opacity: 0.7; }
-    .bar:nth-last-child(3) { opacity: 0.55; }
-
-    .reaction-row { margin-bottom: 0.75rem; }
-    .reaction-label {
-      display: flex; justify-content: space-between;
-      font-size: 11px; font-weight: 700; margin-bottom: 4px;
-    }
-    .progress-track { height: 6px; background: var(--surface-3); border-radius: 99px; overflow: hidden; }
-    .progress-fill { height: 100%; border-radius: 99px; }
-
-    .card-link {
-      font-size: 11px; font-weight: 700; color: var(--lg);
-      background: none; border: none; cursor: pointer;
-      padding: 0; text-decoration: none;
-      transition: opacity 0.15s;
-    }
-    .card-link:hover { opacity: 0.7; }
-
-    /* ─── community-link-btn ─── */
-    .community-link-btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 11px; font-weight: 700; color: var(--lg);
-      text-decoration: none;
-      transition: opacity 0.15s;
-    }
-    .community-link-btn:hover { opacity: 0.7; }
-
-    .chat-window {
-      background: rgba(4,10,20,0.55);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: var(--radius);
-      padding: 1rem;
-    }
-    .chat-scroll { height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; }
-    .chat-msg-row { display: flex; align-items: flex-start; gap: 6px; }
-    .chat-msg-row.user-row { flex-direction: row-reverse; }
-    .bubble { max-width: 85%; }
-    .bubble {
-      padding: 10px 12px; border-radius: 12px;
-      font-size: 12px; line-height: 1.5; max-width: 90%;
-    }
-    .bubble-bot { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.10); color: var(--text-2); align-self: flex-start; }
-    .bubble-user { background: var(--lg); color: #fff; align-self: flex-end; }
-    .chat-input-row { display: flex; gap: 6px; margin-top: 8px; }
-    .chat-input {
-      flex: 1; padding: 8px 12px;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 8px; font-size: 12px;
-      font-family: inherit; outline: none;
-      background: rgba(255,255,255,0.07);
-      color: var(--text-1);
-      transition: border-color 0.15s;
-    }
-    .chat-input:focus { border-color: var(--lg); }
-    .chat-send {
-      padding: 8px 14px;
-      background: var(--text-1); color: #fff;
-      border: none; border-radius: 8px;
-      font-size: 12px; font-weight: 700;
-      cursor: pointer; transition: background 0.15s;
-      font-family: inherit;
-    }
-    .chat-send:hover { background: #1e293b; }
-
-    .typing-indicator { display: none; align-items: center; gap: 4px; padding: 8px 12px; }
-    .typing-indicator.visible { display: flex; }
-    .typing-dot { width: 6px; height: 6px; background: var(--text-3); border-radius: 50%; animation: bounce 1.2s ease-in-out infinite; }
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
-
-    .center-col { display: flex; flex-direction: column; gap: 1.25rem; }
-
-    .stadium-shell {
-      background: linear-gradient(170deg, #0F172A 0%, #1E293B 100%);
-      border-radius: 1.25rem;
-      padding: 1.25rem;
-      border: 1px solid rgba(255,255,255,0.06);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
-    }
-
-    .zone-buttons {
-      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
-      margin-bottom: 1.25rem;
-    }
-    .zone-btn {
-      padding: 10px 6px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.06);
-      border-radius: 10px;
-      font-size: 11px; font-weight: 800;
-      color: var(--text-2); cursor: pointer;
-      transition: all 0.2s; text-align: center;
-      font-family: inherit;
-    }
-    .zone-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.18); transform: translateY(-1px); }
-    .zone-btn.active {
-      background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3);
-      color: #fff;
-      box-shadow: var(--shadow-md);
-    }
-
-    .zone-panel {
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: var(--radius);
-      padding: 1.25rem;
-      background: rgba(6,12,24,0.55);
-    }
-    .zone-panel-top {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      margin-bottom: 1rem; gap: 1rem;
-    }
-    .zone-name { font-size: 17px; font-weight: 900; color: var(--text-1); }
-    .zone-desc { font-size: 11px; color: var(--text-3); margin-top: 3px; line-height: 1.4; }
-    .zone-ratio-label { font-size: 9px; font-weight: 900; color: var(--text-3); letter-spacing: 0.1em; text-align: right; }
-    .zone-ratio-val { font-size: 1.3rem; font-weight: 900; white-space: nowrap; margin-top: 2px; }
-
-    .score-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
-    .score-box { border-radius: 10px; padding: 14px 16px; }
-    .score-box-kia { background: #FFF1F2; }
-    .score-box-lg { background: #EFF6FF; }
-    .score-box-label { font-size: 10px; font-weight: 900; margin-bottom: 4px; letter-spacing: 0.05em; }
-    .score-box-val { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; line-height: 1; }
-
-    .gauge-row { margin-bottom: 10px; }
-    .gauge-label { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; margin-bottom: 4px; }
-    .gauge-track { height: 8px; background: var(--surface-3); border-radius: 99px; overflow: hidden; }
-    .gauge-fill { height: 100%; border-radius: 99px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
-
-    .right-col { display: flex; flex-direction: column; gap: 1.25rem; }
-
-    .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .photo-item {
-      position: relative; border-radius: 8px; overflow: hidden;
-      aspect-ratio: 4/3; cursor: pointer;
-    }
-    .photo-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-    .photo-item:hover img { transform: scale(1.05); }
-    .photo-item::after {
-      content: attr(data-caption);
-      position: absolute; bottom: 0; left: 0; right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,0.6));
-      color: #fff; font-size: 10px; font-weight: 700;
-      padding: 14px 8px 6px;
-      opacity: 0; transition: opacity 0.2s;
-    }
-    .photo-item:hover::after { opacity: 1; }
-
-    .schedule-card {
-      display: block; text-decoration: none;
-      background: var(--surface);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.06);
-      transition: box-shadow 0.2s, transform 0.2s;
-    }
-    .schedule-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
-
-    .featured-match {
-      background: linear-gradient(135deg, rgba(29,78,216,0.2) 0%, rgba(59,130,246,0.15) 100%);
-      border: 1px solid rgba(59,130,246,0.3);
-      border-radius: var(--radius);
-      padding: 1rem 1.25rem; margin-bottom: 1rem;
-    }
-    .match-time-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-    .match-time-label { font-size: 10px; font-weight: 900; color: var(--lg); letter-spacing: 0.08em; }
-    .match-time { font-size: 11px; font-weight: 700; color: var(--text-2); }
-    .match-name { font-size: 1.1rem; font-weight: 900; color: var(--text-1); margin-bottom: 4px; }
-    .match-meta { font-size: 11px; color: var(--text-3); }
-
-    .schedule-row {
-      display: flex; justify-content: space-between; align-items: center;
-      background: rgba(255,255,255,0.06); border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.06);
-      padding: 10px 14px; margin-bottom: 6px;
-      font-size: 12px; font-weight: 700; color: var(--text-2);
-    }
-
-    .modal-backdrop {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.65);
-      backdrop-filter: blur(12px);
-      align-items: center; justify-content: center;
-      z-index: 200; padding: 1.5rem;
-    }
-    .modal-backdrop.open { display: flex; }
-    .modal-box {
-      width: min(720px, 100%);
-      max-height: 85vh; overflow-y: auto;
-      background: rgba(8,16,30,0.95);
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.05);
-      padding: 2rem;
+    .chat-scroll{
+      max-height: 220px; overflow-y:auto;
+      padding: 12px 14px; display:flex; flex-direction:column; gap:8px;
       scrollbar-width: thin;
     }
-    .modal-header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding-bottom: 1rem; border-bottom: 1px solid var(--border);
-      margin-bottom: 1.5rem;
+    .bubble{
+      max-width:85%; padding:9px 13px; border-radius:14px;
+      font-size:13px; line-height:1.55; color:var(--ink-2);
+      border:1.5px solid var(--line);
     }
-    .modal-title { font-size: 1.2rem; font-weight: 900; color: var(--text-1); }
-    .modal-close {
-      background: none; border: none; font-size: 1.8rem;
-      color: var(--text-3); cursor: pointer; line-height: 1;
-      transition: color 0.15s;
+    .bubble-bot{ background:#fff; align-self:flex-start; border-top-left-radius:6px; }
+    .typing-indicator{
+      display:none; gap:4px; padding: 6px 14px;
     }
-    .modal-close:hover { color: var(--text-1); }
+    .typing-indicator.visible{ display:flex; }
+    .typing-dot{
+      width:6px; height:6px; border-radius:50%; background: var(--muted);
+      animation: typing 1.2s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2){ animation-delay:.15s; }
+    .typing-dot:nth-child(3){ animation-delay:.30s; }
+    @keyframes typing{ 0%,100%{ transform:translateY(0); opacity:.4; } 50%{ transform:translateY(-3px); opacity:1; } }
 
-    .post-item {
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: var(--radius);
+    .chat-input-row{
+      display:flex; gap:6px; padding: 8px;
+      background:#fff; border-top:1.5px solid var(--line);
+    }
+    .chat-input{
+      flex:1; padding: 9px 12px;
+      background:#fff; color:var(--ink);
+      border:1.5px solid var(--line); border-radius:10px;
+      font-family:inherit; font-size:13px; outline:none;
+    }
+    .chat-input::placeholder{ color: var(--subtle); }
+    .chat-input:focus{ border-color: var(--kia); }
+    .chat-send{
+      padding: 9px 16px; background: var(--kia); color:#fff;
+      border:1.5px solid var(--line); border-radius:10px;
+      font-family:inherit; font-size:12.5px; font-weight:600;
+      cursor:pointer; transition: background .15s;
+    }
+    .chat-send:hover{ background: var(--kia-dark); }
+
+    /* ══ Zone Distribution ═════════════════════════════════════════════ */
+    #btn-join-battle{
+      padding:7px 12px; background: var(--ink); color:#fff;
+      border:1.5px solid var(--line); border-radius:10px;
+      font-family:inherit; font-size:11.5px; font-weight:600;
+      cursor:pointer; letter-spacing:-0.005em;
+    }
+    #btn-join-battle:hover{ background: var(--kia); }
+
+    .stadium-shell{
+      background: var(--paper-2);
+      border:1.5px solid var(--line); border-radius: var(--r-md);
+      padding: 0.5rem;
+    }
+    .stadium-shell svg{ display:block; width:100%; height:auto; }
+    .seat-zone{ cursor:pointer; transition: filter .15s, opacity .15s; }
+    .seat-zone:hover{ filter: brightness(1.1); }
+    .seat-zone.active-zone{ filter: drop-shadow(0 0 6px rgba(230,0,18,0.5)); }
+
+    .zone-buttons{
+      display:flex; flex-wrap:wrap; gap:6px;
+      margin-bottom: 1rem;
+    }
+    .zone-btn{
+      padding: 7px 13px; background:#fff; color: var(--ink-2);
+      border:1.5px solid var(--line); border-radius: var(--r-pill);
+      font-family:inherit; font-size:12px; font-weight:600;
+      cursor:pointer; transition: all .12s;
+    }
+    .zone-btn:hover{ background: var(--bg); }
+    .zone-btn.active{
+      background: var(--kia); color:#fff; border-color: var(--line);
+    }
+
+    .zone-panel{
+      background: var(--paper-2);
+      border:1.5px solid var(--line); border-radius: var(--r-md);
+      padding: 0.95rem 1.1rem;
+    }
+    .zone-panel-top{
+      display:flex; justify-content:space-between; align-items:center;
+      gap: 1rem; flex-wrap:wrap;
+    }
+    .zone-name{ font-size: 14.5px; font-weight: 700; color: var(--ink); margin-bottom:3px; }
+    .zone-desc{ font-size: 12.5px; color: var(--muted); line-height:1.55; }
+    .zone-ratio-label{ font-size: 10px; font-weight:600; color: var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:2px; }
+    .zone-ratio-val{
+      font-family:'Bebas Neue',sans-serif; font-size: 1.25rem; font-weight: 700; letter-spacing:0.01em;
+    }
+
+    /* ══ Live Talk ═════════════════════════════════════════════════════ */
+    .pb-live-talk{
+      background: var(--paper-2);
+      border:1.5px solid var(--line); border-radius: var(--r-md);
+      overflow:hidden;
+    }
+    .pb-live-talk-header{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 10px 14px;
+      background:#fff; border-bottom:1.5px solid var(--line);
+    }
+    .pb-live-talk-title{ font-size: 12.5px; font-weight: 700; color: var(--ink); }
+    .pb-talk-scroll{
+      max-height: 180px; overflow:hidden; position:relative;
+    }
+    .pb-talk-scroll::after{
+      content:''; position:absolute; left:0; right:0; bottom:0; height:30px;
+      background: linear-gradient(to bottom, transparent, var(--paper-2));
+      pointer-events:none;
+    }
+    .pb-talk-scroll-inner{
+      display:flex; flex-direction:column; gap:6px; padding: 10px 14px;
+      animation: talk-scroll 22s linear infinite;
+    }
+    @keyframes talk-scroll{
+      0%{ transform: translateY(0); }
+      100%{ transform: translateY(-50%); }
+    }
+    .pb-talk-item{
+      display:grid; grid-template-columns: auto 1fr auto; gap:8px;
+      align-items:center; padding: 7px 10px;
+      background:#fff; border:1.5px solid var(--line); border-radius:10px;
+      font-size: 12px;
+    }
+    .pb-talk-kia{ border-left: 4px solid var(--kia); padding-left:7px; }
+    .pb-talk-lg { border-left: 4px solid var(--ink-3); padding-left:7px; }
+    .pb-talk-nick{ font-weight:700; color: var(--ink); white-space:nowrap; }
+    .pb-talk-msg{ color: var(--ink-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .pb-talk-time{ font-size: 10.5px; color: var(--subtle); white-space:nowrap; }
+
+    /* ══ Photo Verification (Right) ════════════════════════════════════ */
+    .photo-grid{
+      display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;
+    }
+    .pb-inv-slot{
+      position:relative; aspect-ratio: 1 / 1;
+      background: var(--paper-2);
+      border:1.5px solid var(--line); border-radius: var(--r-md);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:4px; cursor:pointer; overflow:hidden;
+      transition: background .15s, transform .15s;
+    }
+    .pb-inv-slot:hover{ background:#fff; transform: translateY(-1px); }
+    .pb-inv-corner{
+      position:absolute; top:0; right:0; width:16px; height:16px;
+      background: var(--ink);
+      clip-path: polygon(100% 0, 0 0, 100% 100%);
+    }
+    .pb-inv-icon{ font-size:1.5rem; }
+    .pb-inv-lock{
+      font-size:8.5px; font-weight:700; letter-spacing:0.08em;
+      color: var(--muted); border:1px dashed var(--line-dash);
+      padding: 1px 6px; border-radius: var(--r-pill);
+    }
+    .pb-inv-text{ font-size:9.5px; font-weight:600; color: var(--kia); }
+
+    /* ══ Match Schedule (Right) ════════════════════════════════════════ */
+    .match-schedule-card{
+      position:relative; overflow:hidden;
+      background: var(--card-bg);
+      border: 1.5px solid var(--line);
+      border-radius: var(--r-lg);
+      box-shadow: var(--card-sh);
+      padding: 1.1rem 1.15rem 1.15rem;
+    }
+    .match-bg-illust{
+      position:absolute; right:-30px; bottom:-30px;
+      width:200px; height:200px; pointer-events:none; opacity:.5;
+    }
+    .match-schedule-content{ position:relative; z-index:1; }
+    .match-schedule-header{
+      display:flex; align-items:center; gap:10px;
+      margin-bottom: 0.9rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px dashed var(--line-dash);
+    }
+    .match-time-row{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 9px 12px; margin-bottom: 0.95rem;
+      background: var(--paper-2);
+      border:1.5px solid var(--line); border-radius:10px;
+    }
+    .match-time-label{ font-size:11px; color:var(--muted); font-weight:600; letter-spacing:0.08em; text-transform:uppercase; }
+    .match-time{ font-family:'Bebas Neue',sans-serif; font-size:18px; font-weight:700; color: var(--ink); letter-spacing:0.01em; }
+    .match-versus-container{
+      display:grid; grid-template-columns: 1fr auto 1fr; align-items:center;
+      gap: 0.6rem;
+    }
+    .match-team{ display:flex; align-items:center; gap:8px; min-width:0; }
+    .match-team:last-child{ justify-content:flex-end; }
+    .match-team-logo{
+      width:42px; height:42px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Bebas Neue',sans-serif; font-size:13px; font-weight:700;
+      letter-spacing:0.04em;
+      border:1.5px solid var(--line);
+    }
+    .match-team-kia{ background: var(--kia); color:#fff; }
+    .match-team-lg { background: #fff; color: var(--ink); }
+    .match-team-info{ display:flex; flex-direction:column; line-height:1.1; min-width:0; }
+    .match-team-name{ font-size:14px; font-weight:700; color:var(--ink); }
+    .match-team-role{ font-size:10.5px; font-weight:600; color: var(--muted); margin-top:1px; }
+    .match-versus{
+      font-family:'Bebas Neue',sans-serif; font-size:1.25rem;
+      color: var(--muted); letter-spacing:0.06em;
+    }
+
+    /* ══ MODALS ════════════════════════════════════════════════════════ */
+    .modal-backdrop{
+      display:none; position:fixed; inset:0; z-index:300;
+      background: rgba(17,24,39,0.55);
+      align-items:center; justify-content:center; padding:1.25rem;
+    }
+    .modal-backdrop.open{ display:flex; }
+    .modal-box{
+      width:100%; max-width: 640px; max-height: 90vh;
+      background: var(--paper);
+      border:1.5px solid var(--line); border-radius: var(--r-xl);
+      box-shadow: 0 20px 60px rgba(17,24,39,0.18);
+      display:flex; flex-direction:column; overflow:hidden;
+    }
+    .modal-header{
+      display:flex; align-items:center; justify-content:space-between;
       padding: 1rem 1.25rem;
-      margin-bottom: 0.75rem;
-      transition: background 0.15s;
+      border-bottom: 1.5px solid var(--line);
     }
-    .post-item:hover { background: rgba(255,255,255,0.05); }
-    .post-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-    .post-avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--lg), #1E3A8A);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: 800; font-size: 14px; flex-shrink: 0;
+    .modal-title{ font-size:14.5px; font-weight:700; color: var(--ink); }
+    .modal-close{
+      background:#fff; border:1.5px solid var(--line); color: var(--ink);
+      width:30px; height:30px; border-radius:50%; font-size:18px;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      line-height:1; transition: background .12s, color .12s;
     }
-    .post-name { font-weight: 700; font-size: 14px; color: var(--text-1); }
-    .post-time { font-size: 11px; color: var(--text-3); }
-    .post-body { font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 8px; }
-    .post-stats { display: flex; gap: 12px; font-size: 11px; color: var(--text-3); }
+    .modal-close:hover{ background: var(--ink); color:#fff; }
 
-    .gallery-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 10px; margin-bottom: 1.5rem;
-    }
-    .gallery-item {
-      position: relative; border-radius: 10px; overflow: hidden;
-      aspect-ratio: 1; cursor: pointer;
-    }
-    .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-    .gallery-item:hover img { transform: scale(1.05); }
-    .gallery-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(transparent 50%, rgba(0,0,0,0.55));
-      display: flex; align-items: flex-end; padding: 8px;
-      color: #fff; font-size: 11px; font-weight: 600; opacity: 0; transition: opacity 0.2s;
-    }
-    .gallery-item:hover .gallery-overlay { opacity: 1; }
+    .modal-body { padding: 1.25rem 1.5rem 1.5rem; overflow-y: auto; flex: 1; }
+    .battle-step { animation: fadeIn .25s ease; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .upload-zone {
-      border: 2px dashed rgba(255,255,255,0.12); border-radius: var(--radius);
-      padding: 2rem; text-align: center; margin-bottom: 1.5rem;
-      background: rgba(255,255,255,0.04); cursor: pointer;
-      transition: all 0.2s;
+    #battle-upload-zone:hover {
+      border-color: var(--kia);
+      background: var(--kia-soft);
     }
-    .upload-zone:hover { border-color: var(--lg); background: rgba(59,130,246,0.10); }
-    .upload-icon { font-size: 2rem; margin-bottom: 8px; }
-    .upload-text { font-size: 13px; color: var(--text-2); margin-bottom: 12px; line-height: 1.5; }
-    .upload-btn {
-      padding: 8px 24px; background: var(--lg); color: #fff;
-      border: none; border-radius: 8px; font-weight: 700;
-      font-size: 13px; cursor: pointer; font-family: inherit;
-    }
+    #battle-ocr-btn:hover { background: var(--kia) !important; }
+    #battle-confirm-btn:hover { background: var(--kia-dark) !important; }
 
-    .divider { height: 1px; background: rgba(255,255,255,0.07); margin: 1rem 0; }
+    /* ══ Animations / Misc ═════════════════════════════════════════════ */
+    .fade-in{ opacity:0; transform: translateY(6px); animation: fadeIn .5s ease both; }
+    @keyframes fadeIn{ to{ opacity:1; transform:none; } }
 
-    .fade-in { animation: fadeIn 0.4s ease forwards; }
-    @keyframes fadeIn { from{opacity:0; transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-
-    .pulse-dot {
-      width: 8px; height: 8px; border-radius: 50%; background: var(--green);
-      animation: pulse-dot 2s ease-in-out infinite;
+    /* ══ Responsive ════════════════════════════════════════════════════ */
+    @media (max-width: 1280px){
+      main{ grid-template-columns: 24fr 52fr 24fr; }
+      .battle-board{ min-width: 380px; }
     }
-    @keyframes pulse-dot { 0%,100%{transform:scale(1)} 50%{transform:scale(1.4)} }
-
-    .personality-badge {
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 5px 12px 5px 8px;
-      border-radius: 99px;
-      border: 1.5px solid;
-      font-size: 12px; font-weight: 800;
-      cursor: pointer; transition: all 0.2s;
-      white-space: nowrap; user-select: none;
-      backdrop-filter: blur(10px);
-      position: relative;
+    @media (max-width: 980px){
+      main{ grid-template-columns: 1fr; }
+      .header-inner{ grid-template-columns: 1fr auto; }
+      .battle-board{ display:none; }
     }
-    .personality-badge:hover { transform: translateY(-1px); filter: brightness(1.15); }
-    .personality-badge .badge-emoji { font-size: 14px; line-height: 1; }
-    .personality-badge .badge-label { letter-spacing: -0.02em; }
-
-    .badge-tooltip {
-      position: absolute;
-      bottom: calc(100% + 10px);
-      left: 50%; transform: translateX(-50%);
-      background: rgba(6,13,26,0.97);
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 12px;
-      padding: 10px 14px;
-      min-width: 200px; max-width: 260px;
-      pointer-events: none;
-      opacity: 0; transition: opacity 0.18s;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-      z-index: 200;
-    }
-    .personality-badge:hover .badge-tooltip { opacity: 1; }
-    .badge-tooltip::after {
-      content: '';
-      position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
-      border: 6px solid transparent;
-      border-top-color: rgba(255,255,255,0.14);
-    }
-    .tooltip-emoji { font-size: 1.6rem; margin-bottom: 4px; }
-    .tooltip-name { font-size: 13px; font-weight: 900; color: #F1F5F9; margin-bottom: 3px; }
-    .tooltip-desc { font-size: 11px; color: #94A3B8; line-height: 1.4; }
-    .tooltip-retake {
-      margin-top: 8px; font-size: 10px; font-weight: 700;
-      color: #F5C842; display: inline-block; pointer-events: auto;
-      cursor: pointer;
-    }
-
-    .inline-badge {
-      display: inline-flex; align-items: center; gap: 3px;
-      padding: 2px 7px 2px 4px;
-      border-radius: 99px; border: 1px solid;
-      font-size: 10px; font-weight: 800;
-      white-space: nowrap; flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .inline-badge .b-emoji { font-size: 11px; }
-
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 99px; }
-
-    .widget-popup-anchor { position: relative; }
-
-    .hover-popup {
-      position: absolute;
-      left: calc(100% + 14px);
-      top: 0;
-      width: 340px;
-      background: rgba(8,16,30,0.88);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: var(--radius-lg);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 6px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
-      z-index: 50;
-      pointer-events: none;
-      opacity: 0;
-      transform: translateX(-8px) scale(0.97);
-      transform-origin: left top;
-      transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
-      overflow: hidden;
-    }
-
-    .left-col { position: relative; z-index: 10; }
-
-    .right-col .hover-popup {
-      left: auto;
-      right: calc(100% + 14px);
-      transform-origin: right top;
-      transform: translateX(8px) scale(0.97);
-    }
-
-    .widget-popup-anchor:hover .hover-popup {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-      pointer-events: auto;
-    }
-
-    .hover-popup::before {
-      content: '';
-      position: absolute;
-      left: -7px;
-      top: 22px;
-      width: 13px; height: 13px;
-      background: var(--surface);
-      border-left: 1px solid var(--border-md);
-      border-bottom: 1px solid var(--border-md);
-      transform: rotate(45deg);
-    }
-
-    .right-col .hover-popup::before {
-      left: auto;
-      right: -7px;
-      border-left: none;
-      border-bottom: none;
-      border-right: 1px solid var(--border-md);
-      border-top: 1px solid var(--border-md);
-    }
-
-    .popup-header {
-      padding: 1rem 1.25rem 0.75rem;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .popup-header-title {
-      font-size: 13px; font-weight: 800; color: var(--text-1);
-      display: flex; align-items: center; gap: 6px;
-    }
-    .popup-header-meta { font-size: 10px; color: var(--text-3); font-weight: 600; }
-
-    .popup-post-item {
-      padding: 0.9rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      transition: background 0.12s;
-    }
-    .popup-post-item:last-child { border-bottom: none; }
-    .popup-post-item:hover { background: rgba(255,255,255,0.06); }
-    .popup-post-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-    .popup-avatar {
-      width: 28px; height: 28px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 800; color: #fff; flex-shrink: 0;
-    }
-    .popup-author { font-size: 12px; font-weight: 700; color: var(--text-1); }
-    .popup-time { font-size: 10px; color: var(--text-3); }
-    .popup-body {
-      font-size: 11.5px; color: var(--text-2); line-height: 1.55;
-      margin-bottom: 6px;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .popup-stats { display: flex; gap: 10px; font-size: 10px; color: var(--text-3); }
-    .popup-footer {
-      padding: 0.75rem 1.25rem;
-      background: rgba(255,255,255,0.04);
-      border-top: 1px solid rgba(255,255,255,0.06);
-      text-align: center;
-    }
-    .popup-footer-btn {
-      font-size: 11px; font-weight: 800; color: var(--lg);
-      background: none; border: none; cursor: pointer;
-      font-family: inherit; transition: opacity 0.15s;
-    }
-    .popup-footer-btn:hover { opacity: 0.7; }
-
-    .popup-photo-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
-      padding: 0.9rem 1.25rem;
-    }
-    .popup-photo-item {
-      position: relative; border-radius: 8px; overflow: hidden;
-      aspect-ratio: 1; cursor: pointer;
-    }
-    .popup-photo-item img {
-      width: 100%; height: 100%; object-fit: cover;
-      transition: transform 0.25s;
-    }
-    .popup-photo-item:hover img { transform: scale(1.07); }
-    .popup-photo-item::after {
-      content: attr(data-nick);
-      position: absolute; bottom: 0; left: 0; right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,0.65));
-      color: #fff; font-size: 9px; font-weight: 700;
-      padding: 12px 5px 4px; opacity: 0; transition: opacity 0.2s;
-    }
-    .popup-photo-item:hover::after { opacity: 1; }
-
-    .popup-upload-banner {
-      margin: 0 1.25rem 1rem;
-      background: linear-gradient(135deg, rgba(29,78,216,0.2), rgba(59,130,246,0.15));
-      border: 1px dashed rgba(147,197,253,0.4);
-      border-radius: 10px;
-      padding: 10px 14px;
-      display: flex; align-items: center; gap: 10px;
-      cursor: pointer; transition: background 0.15s;
-    }
-    .popup-upload-banner:hover { background: linear-gradient(135deg, rgba(29,78,216,0.3), rgba(59,130,246,0.22)); }
-    .popup-upload-icon { font-size: 1.4rem; flex-shrink: 0; }
-    .popup-upload-text { font-size: 11px; color: var(--lg); font-weight: 700; line-height: 1.4; }
-
-    .card:hover { box-shadow: var(--shadow-md); transition: box-shadow 0.2s; }
-
-    @media (max-width: 1200px) {
-      main { grid-template-columns: 260px 1fr 260px; gap: 1rem; }
-    }
-    @media (max-width: 960px) {
-      main { grid-template-columns: 1fr; padding: 1rem; }
-      .header-inner { grid-template-columns: 1fr auto; }
-      .scoreboard { display: none; }
+    @media (max-width: 600px){
+      header{ padding: 0.7rem 1rem; }
+      main{ padding: 0 1rem; }
+      .photo-grid{ grid-template-columns: repeat(2, 1fr); }
+      .stat-big{ font-size: 1.7rem; }
+      .nav-right{ gap:6px; }
+      .btn-diary, .btn-login{ padding:6px 10px; font-size:11.5px; }
     }
   </style>
+
 </head>
 <body>
 
@@ -750,94 +639,15 @@
   <svg viewBox="0 0 1400 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
     <defs>
       <linearGradient id="bsky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#03070F"/>
-        <stop offset="40%" stop-color="#060D1F"/>
-        <stop offset="100%" stop-color="#0A1628"/>
+        <stop offset="0%" stop-color="#D6E4F5"/><stop offset="100%" stop-color="#BDD0EE"/>
       </linearGradient>
       <linearGradient id="bgrass" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#1A5C2A"/>
-        <stop offset="100%" stop-color="#0D3A18"/>
+        <stop offset="0%" stop-color="#5BAD72"/><stop offset="100%" stop-color="#3D8A55"/>
       </linearGradient>
-      <radialGradient id="bflareR" cx="30%" cy="80%" r="55%">
-        <stop offset="0%" stop-color="#DC2626" stop-opacity="0.30"/>
-        <stop offset="100%" stop-color="#DC2626" stop-opacity="0"/>
-      </radialGradient>
-      <radialGradient id="bflareB" cx="70%" cy="80%" r="55%">
-        <stop offset="0%" stop-color="#1D4ED8" stop-opacity="0.30"/>
-        <stop offset="100%" stop-color="#1D4ED8" stop-opacity="0"/>
-      </radialGradient>
-      <radialGradient id="bcenterGlow" cx="50%" cy="60%" r="40%">
-        <stop offset="0%" stop-color="#F5C842" stop-opacity="0.14"/>
-        <stop offset="100%" stop-color="#F5C842" stop-opacity="0"/>
-      </radialGradient>
-      <radialGradient id="bspot1" cx="20%" cy="0%" r="50%">
-        <stop offset="0%" stop-color="#FFFBEA" stop-opacity="0.12"/>
-        <stop offset="100%" stop-color="#FFFBEA" stop-opacity="0"/>
-      </radialGradient>
-      <radialGradient id="bspot2" cx="80%" cy="0%" r="50%">
-        <stop offset="0%" stop-color="#FFFBEA" stop-opacity="0.12"/>
-        <stop offset="100%" stop-color="#FFFBEA" stop-opacity="0"/>
-      </radialGradient>
     </defs>
     <rect width="1400" height="700" fill="url(#bsky)"/>
-    <g opacity="0.65">
-      <circle cx="80" cy="40" r="1" fill="#fff"/><circle cx="180" cy="22" r="1.2" fill="#fff" opacity="0.8"/>
-      <circle cx="320" cy="55" r="0.8" fill="#fff"/><circle cx="450" cy="18" r="1.4" fill="#fff" opacity="0.6"/>
-      <circle cx="550" cy="38" r="0.9" fill="#fff"/><circle cx="650" cy="12" r="1.1" fill="#fff" opacity="0.9"/>
-      <circle cx="700" cy="44" r="0.7" fill="#fff"/><circle cx="800" cy="25" r="1.3" fill="#fff" opacity="0.7"/>
-      <circle cx="920" cy="48" r="0.9" fill="#fff"/><circle cx="1040" cy="16" r="1.2" fill="#fff" opacity="0.8"/>
-      <circle cx="1150" cy="36" r="1" fill="#fff"/><circle cx="1260" cy="20" r="0.8" fill="#fff" opacity="0.9"/>
-      <circle cx="1350" cy="50" r="1.1" fill="#fff" opacity="0.6"/>
-    </g>
-    <rect width="1400" height="700" fill="url(#bflareR)"/>
-    <rect width="1400" height="700" fill="url(#bflareB)"/>
-    <rect width="1400" height="700" fill="url(#bcenterGlow)"/>
-    <rect width="1400" height="700" fill="url(#bspot1)"/>
-    <rect width="1400" height="700" fill="url(#bspot2)"/>
-    <path d="M0 420 Q350 200 700 180 Q1050 200 1400 420 L1400 700 L0 700 Z" fill="#0C1C10" opacity="0.88"/>
-    <path d="M60 400 Q700 195 1340 400 L1340 430 Q700 225 60 430 Z" fill="#0F2418"/>
-    <path d="M100 430 Q700 240 1300 430 L1300 465 Q700 270 100 465 Z" fill="#122A1C"/>
-    <path d="M140 465 Q700 280 1260 465 L1260 505 Q700 310 140 505 Z" fill="#163222"/>
-    <rect x="120" y="120" width="8" height="280" fill="#1E3A2A"/>
-    <rect x="115" y="116" width="18" height="12" rx="2" fill="#2A5040"/>
-    <path d="M124 128 L300 420 L200 420 Z" fill="#FFFBEA" opacity="0.035"/>
-    <rect x="1272" y="120" width="8" height="280" fill="#1E3A2A"/>
-    <rect x="1267" y="116" width="18" height="12" rx="2" fill="#2A5040"/>
-    <path d="M1276 128 L1100 420 L1200 420 Z" fill="#FFFBEA" opacity="0.035"/>
+    <path d="M0 420 Q350 200 700 180 Q1050 200 1400 420 L1400 700 L0 700 Z" fill="#E8F5EC" opacity="0.7"/>
     <path d="M180 505 Q700 340 1220 505 L1220 560 Q700 380 180 560 Z" fill="url(#bgrass)"/>
-    <path d="M700 390 L760 440 L700 490 L640 440 Z" fill="#8B5A2B" opacity="0.75"/>
-    <path d="M700 405 L748 445 L700 475 L652 445 Z" fill="#1A6628" opacity="0.65"/>
-    <ellipse cx="700" cy="442" rx="16" ry="10" fill="#9B6535" opacity="0.85"/>
-    <g fill="#DC2626" opacity="0.8">
-      <ellipse cx="190" cy="497" rx="10" ry="8"/><ellipse cx="215" cy="492" rx="10" ry="8"/>
-      <ellipse cx="240" cy="497" rx="11" ry="8"/><ellipse cx="266" cy="492" rx="10" ry="8"/>
-      <ellipse cx="292" cy="497" rx="11" ry="9"/><ellipse cx="318" cy="491" rx="10" ry="8"/>
-    </g>
-    <g fill="#1D4ED8" opacity="0.8">
-      <ellipse cx="896" cy="487" rx="10" ry="8"/><ellipse cx="920" cy="492" rx="10" ry="8"/>
-      <ellipse cx="944" cy="487" rx="11" ry="8"/><ellipse cx="968" cy="492" rx="10" ry="8"/>
-      <ellipse cx="992" cy="487" rx="11" ry="9"/><ellipse cx="1016" cy="491" rx="10" ry="8"/>
-    </g>
-    <rect x="400" y="340" width="600" height="26" rx="13" fill="#111827" opacity="0.88"/>
-    <rect x="400" y="340" width="358" height="26" rx="13" fill="#DC2626" opacity="0.85"/>
-    <rect x="758" y="340" width="242" height="26" rx="13" fill="#1D4ED8" opacity="0.80"/>
-    <line x1="700" y1="334" x2="700" y2="372" stroke="#F5C842" stroke-width="3"/>
-    <circle cx="700" cy="353" r="12" fill="#F5C842"/>
-    <circle cx="700" cy="353" r="8" fill="#0A1628" stroke="#F5C842" stroke-width="1.5"/>
-    <text x="575" y="359" text-anchor="middle" font-family="'Arial Black',sans-serif" font-size="13" fill="white" font-weight="900">홈팀 60%</text>
-    <text x="835" y="359" text-anchor="middle" font-family="'Arial Black',sans-serif" font-size="13" fill="white" font-weight="900">원정 40%</text>
-    <rect x="580" y="200" width="240" height="118" rx="10" fill="#040C14" opacity="0.90"/>
-    <rect x="584" y="204" width="232" height="110" rx="8" fill="#060F1A" opacity="0.93"/>
-    <rect x="580" y="200" width="240" height="118" rx="10" fill="none" stroke="#F5C842" stroke-width="1.5" opacity="0.65"/>
-    <text x="700" y="230" text-anchor="middle" font-family="'Arial Black',sans-serif" font-size="20" fill="#F5C842" letter-spacing="3" font-weight="900">PLACEBALL</text>
-    <text x="700" y="252" text-anchor="middle" font-family="'Arial',sans-serif" font-size="11" fill="#94A3B8" letter-spacing="2">BATTLE ZONE</text>
-    <text id="svg-home-score" x="645" y="288" text-anchor="middle" font-family="'Arial Black',sans-serif" font-size="30" fill="#DC2626" font-weight="900">-</text>
-    <text x="700" y="287" text-anchor="middle" font-family="'Arial',sans-serif" font-size="11" fill="#64748B">VS</text>
-    <text id="svg-away-score" x="755" y="288" text-anchor="middle" font-family="'Arial Black',sans-serif" font-size="30" fill="#3B82F6" font-weight="900">-</text>
-    <text id="svg-home-team" x="645" y="304" text-anchor="middle" font-family="'Arial',sans-serif" font-size="8" fill="#94A3B8" letter-spacing="1">HOME</text>
-    <text id="svg-away-team" x="755" y="304" text-anchor="middle" font-family="'Arial',sans-serif" font-size="8" fill="#94A3B8" letter-spacing="1">AWAY</text>
-    <path d="M0 600 Q350 565 700 570 Q1050 565 1400 600 L1400 700 L0 700 Z" fill="#040C0A" opacity="0.65"/>
-    <path d="M0 650 Q350 625 700 630 Q1050 625 1400 650 L1400 700 L0 700 Z" fill="#020806" opacity="0.80"/>
   </svg>
 </div>
 <div id="bg-overlay" aria-hidden="true"></div>
@@ -852,25 +662,29 @@
       </div>
     </div>
 
-    <!-- Live Score -->
-    <div class="scoreboard">
-      <div class="score-team">
-        <div class="team-badge" id="awayBadge" style="background:#333;">A</div>
-        <div>
-          <div class="team-name" id="awayTeamName">AWAY</div>
-        </div>
-        <span class="score-num" id="awayScore" style="color:#fff;">-</span>
+    <div class="battle-board">
+      <div class="battle-board-gauge">
+        <div class="bbg-kia" id="bbgKia"></div>
+        <div class="bbg-lg" id="bbgLg"></div>
       </div>
-      <div class="score-divider">
-        <span class="live-badge" id="matchStatusBadge" style="display:none; animation:none;">예정</span>
-        <span class="inning-info" id="mainMatchInfo"></span>
-      </div>
-      <div class="score-team">
-        <span class="score-num" id="homeScore" style="color:#fff;">-</span>
-        <div>
-          <div class="team-name" id="homeTeamName">HOME</div>
+      <div class="bb-side">
+        <div class="bb-logo bb-logo-kia" id="bb-home-logo">-</div>
+        <div class="bb-info">
+          <div class="bb-label">홈 화력</div>
+          <div class="bb-pts bb-pts-kia" id="homeScore">- pt</div>
         </div>
-        <div class="team-badge" id="homeBadge" style="background:#333;">H</div>
+      </div>
+      <div class="bb-center">
+        <div class="bb-vs">VS</div>
+        <div class="bb-live-badge">⚡ LIVE</div>
+        <div class="bb-center-label">화력 점령전</div>
+      </div>
+      <div class="bb-side">
+        <div class="bb-info" style="text-align:right;">
+          <div class="bb-label">원정 화력</div>
+          <div class="bb-pts bb-pts-lg" id="awayScore">- pt</div>
+        </div>
+        <div class="bb-logo bb-logo-lg" id="bb-away-logo">-</div>
       </div>
     </div>
 
@@ -883,140 +697,101 @@
             <span class="badge-emoji" id="hb-emoji">⚾</span>
             <span class="badge-label" id="hb-label">성향 미설정</span>
             <div class="badge-tooltip">
-              <div class="tooltip-emoji" id="hb-tooltip-emoji">⚾</div>
               <div class="tooltip-name" id="hb-tooltip-name">성향 미설정</div>
               <div class="tooltip-desc" id="hb-tooltip-desc">로그인 후 성향 테스트를 완료하면 뱃지가 표시됩니다.</div>
               <span class="tooltip-retake" onclick="window.location.href='login.html'">⟳ 테스트 다시하기</span>
             </div>
           </div>
         </div>
-        <span style="font-size:13px; font-weight:600; color:var(--text-2)"><span id="user-nick" style="color:var(--lg); font-weight:800;"></span>님</span>
-        <button id="logout-btn" style="padding:6px 14px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.14); border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; color:var(--text-2);">로그아웃</button>
+        <span style="font-size:13px; font-weight:600; color:var(--ink-2)"><span id="user-nick"></span>님</span>
+        <button id="logout-btn" style="padding:6px 14px; cursor:pointer; font-family:inherit;">로그아웃</button>
       </div>
     </div>
   </div>
 </header>
 
 <main>
-
-  <!-- ── LEFT ── -->
+  <!-- ── LEFT COLUMN ── -->
   <div class="left-col">
-
-    <!-- Posts card -->
-    <div class="card fade-in widget-popup-anchor">
-      <div class="hover-popup">
-        <div class="popup-header">
-          <div class="popup-header-title">
-            📰 실시간 인기 게시글
-            <span class="badge-live" style="font-size:8px;">LIVE</span>
-          </div>
-          <div class="popup-header-meta">방금 업데이트</div>
-        </div>
-        <div class="popup-post-item">
-          <div class="popup-post-head">
-            <div class="popup-avatar" style="background:linear-gradient(135deg,#1D4ED8,#1E3A8A)">K</div>
-            <div><div class="popup-author">KIA_Fan92</div><div class="popup-time">2분 전</div></div>
-          </div>
-          <div class="popup-body">오늘 잠실 분위기 완전 우리 쪽이다! 응원석에서 떼창 시작되자마자 흐름이 넘어왔어요.</div>
-          <div class="popup-stats"><span>👍 124</span><span>💬 18</span><span>🔗 5</span></div>
-        </div>
-        <div class="popup-post-item">
-          <div class="popup-post-head">
-            <div class="popup-avatar" style="background:linear-gradient(135deg,#16A34A,#15803D)">B</div>
-            <div><div class="popup-author">BaseballLover</div><div class="popup-time">8분 전</div></div>
-          </div>
-          <div class="popup-body">인증샷 올리고 응원 포인트도 챙김! 외야보다 중앙 응원석 열기가 훨씬 강하네요.</div>
-          <div class="popup-stats"><span>👍 89</span><span>💬 12</span><span>🔗 3</span></div>
-        </div>
-        <div class="popup-post-item">
-          <div class="popup-post-head">
-            <div class="popup-avatar" style="background:linear-gradient(135deg,#DC2626,#991B1B)">T</div>
-            <div><div class="popup-author">TigerSupporter</div><div class="popup-time">21분 전</div></div>
-          </div>
-          <div class="popup-body">LG 역응원도 생각보다 세다. 1루 쪽은 원정 응원 밀도가 높게 느껴졌어요. 하지만 우리가 더 강했습니다!</div>
-          <div class="popup-stats"><span>👍 156</span><span>💬 28</span><span>🔗 8</span></div>
-        </div>
-        <div class="popup-footer">
-          <a href="community.html" class="popup-footer-btn" style="text-decoration:none;">전체 게시글 보기 →</a>
-        </div>
-      </div>
-
+    <!-- 실시간 전황 보고 카드 -->
+    <div class="card fade-in">
       <div class="card-header">
+        <div class="card-header-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+            <line x1="10" y1="6.5" x2="14" y2="6.5"/>
+            <line x1="10" y1="17.5" x2="14" y2="17.5"/>
+            <line x1="6.5" y1="10" x2="6.5" y2="14"/>
+            <line x1="17.5" y1="10" x2="17.5" y2="14"/>
+          </svg>
+        </div>
         <div class="card-title-group">
-          <span class="card-icon">📰</span>
-          <div>
-            <div class="card-title">게시물</div>
-            <div class="card-subtitle">커뮤니티 실시간</div>
-          </div>
+          <div class="card-title">실시간 전황 보고</div>
+          <div class="card-subtitle">Battle Feed</div>
         </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <div class="pulse-dot"></div>
-          <span class="badge-live">LIVE</span>
+        <span class="badge-live">실시간</span>
+      </div>
+
+      <div style="margin-bottom:0.75rem;">
+        <div style="font-size:11px; color:var(--muted); font-weight:700; margin-bottom:6px;">응원 반응</div>
+        <div class="stat-big">
+          <span style="color:var(--kia);">88%</span>
+          <span class="stat-unit">KIA 응원</span>
         </div>
       </div>
 
-      <div>
-        <span class="stat-big">12,548</span><span class="stat-unit">건</span>
+      <div class="chart-bars">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
       </div>
-      <div style="font-size:11px; color:var(--text-3); margin-top:4px;">오늘 올라온 응원 게시글</div>
-
-      <div class="chart-bars" style="margin-top:1rem;">
-        <div class="bar" style="height:40%"></div>
-        <div class="bar" style="height:30%"></div>
-        <div class="bar" style="height:55%"></div>
-        <div class="bar" style="height:68%"></div>
-        <div class="bar" style="height:60%"></div>
-        <div class="bar" style="height:80%"></div>
-        <div class="bar" style="height:92%"></div>
-        <div class="bar" style="height:75%"></div>
-        <div class="bar" style="height:88%"></div>
-      </div>
-
-      <div style="font-size:11px; font-weight:800; color:var(--text-1); margin-bottom:10px;">반응 온도</div>
 
       <div class="reaction-row">
         <div class="reaction-label">
-          <span style="color:var(--text-2)">공감 폭발</span>
-          <span style="color:#16A34A; font-weight:900;">68%</span>
+          <span style="color:var(--ink-2)">응원 열정</span>
+          <span style="color:var(--kia); font-weight:900;">68%</span>
         </div>
-        <div class="progress-track">
-          <div class="progress-fill" style="width:68%; background:#16A34A;"></div>
-        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:68%; background:var(--kia);"></div></div>
       </div>
       <div class="reaction-row">
         <div class="reaction-label">
-          <span style="color:var(--text-2)">정보 공유</span>
-          <span style="color:var(--text-3);">22%</span>
+          <span style="color:var(--ink-2)">정보 공유</span>
+          <span style="color:var(--muted);">22%</span>
         </div>
-        <div class="progress-track">
-          <div class="progress-fill" style="width:22%; background:#94A3B8;"></div>
-        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:22%; background:#94A3B8;"></div></div>
       </div>
       <div class="reaction-row">
         <div class="reaction-label">
-          <span style="color:var(--text-2)">논쟁 중</span>
+          <span style="color:var(--ink-2);">논쟁 중</span>
           <span style="color:var(--kia); font-weight:900;">10%</span>
         </div>
-        <div class="progress-track">
-          <div class="progress-fill" style="width:10%; background:var(--kia);"></div>
-        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:10%; background:var(--kia);"></div></div>
       </div>
 
       <div class="divider"></div>
       <a href="community.html" class="community-link-btn"><span>📋</span> 게시글 보기</a>
     </div>
 
-    <!-- AI Chatbot card -->
+    <!-- AI Chat -->
     <div class="card fade-in" style="animation-delay:0.1s">
       <div class="card-header">
-        <div class="card-title-group">
-          <span class="card-icon">🤖</span>
-          <div>
-            <div class="card-title">AI 챗봇</div>
-            <div class="card-subtitle">응원 도우미</div>
-          </div>
+        <div class="card-header-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="9"/>
+            <circle cx="9" cy="11" r="1.5" fill="currentColor"/>
+            <circle cx="15" cy="11" r="1.5" fill="currentColor"/>
+            <path d="M9 15 Q12 17 15 15" stroke-linecap="round"/>
+          </svg>
         </div>
-        <span style="font-size:10px; color:var(--text-3); font-weight:600;">Claude 연동</span>
+        <div class="card-title-group">
+          <div class="card-title">AI 챗봇</div>
+          <div class="card-subtitle">Claude AI</div>
+        </div>
       </div>
       <div class="chat-window">
         <div class="chat-scroll" id="chat-messages">
@@ -1025,103 +800,167 @@
           </div>
         </div>
         <div class="typing-indicator" id="typing">
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
+          <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
         </div>
         <div class="chat-input-row">
-          <input class="chat-input" id="chat-input" type="text" placeholder="무엇이든 물어보세요">
+          <input class="chat-input" id="chat-input" type="text" placeholder="무엇이든 물어보세요...">
           <button class="chat-send" id="chat-send">전송</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ── CENTER ── -->
+  <!-- ── CENTER COLUMN ── -->
   <div class="center-col">
     <div class="card fade-in" style="animation-delay:0.05s">
       <div class="card-header">
-        <div>
-          <div class="card-title" style="font-size:1.1rem;">구역별 응원 게이지</div>
-          <div class="card-subtitle">구역별 응원 분포를 한눈에 확인하세요</div>
+        <div class="card-header-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7 L15 12 L12 17 L9 12 Z" fill="currentColor" opacity="0.3"/>
+            <circle cx="12" cy="12" r="2" fill="currentColor"/>
+          </svg>
         </div>
-        <div style="display:flex; align-items:center; gap:10px;">
-          <button id="btn-join-battle"
-                  style="display:flex;align-items:center;gap:5px;padding:7px 13px;
-              background:linear-gradient(135deg,#DC2626,#1D4ED8);
-              color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:800;
-              cursor:pointer;font-family:inherit;transition:all .2s;
-              box-shadow:0 3px 12px rgba(220,38,38,0.35);white-space:nowrap;"
-                  onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 18px rgba(220,38,38,0.5)'"
-                  onmouseout="this.style.transform='';this.style.boxShadow='0 3px 12px rgba(220,38,38,0.35)'">
-            ⚔️ 점령전 참여하기
-          </button>
+        <div class="card-title-group">
+          <div class="card-title">구역별 응원 게이지</div>
+          <div class="card-subtitle">Zone Distribution</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:9px;">
+          <button id="btn-join-battle">⚔️ 전장 진입</button>
           <div class="pulse-dot"></div>
           <span class="badge-live">실시간</span>
         </div>
       </div>
 
+      <!-- Stadium Map -->
       <div class="stadium-shell" style="margin-bottom:1.25rem;">
-        <svg viewBox="0 0 640 400" width="100%" aria-label="잠실야구장 좌석 응원 현황">
+        <svg viewBox="0 0 680 430" width="100%" aria-label="잠실야구장 좌석 응원 현황" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="fieldG2" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#4ADE80"/>
-              <stop offset="100%" stop-color="#15803D"/>
-            </linearGradient>
-            <linearGradient id="dirtG" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#C2894A"/>
-              <stop offset="100%" stop-color="#A0692A"/>
-            </linearGradient>
-            <radialGradient id="moundG" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#C2894A"/>
-              <stop offset="100%" stop-color="#A0692A"/>
+            <radialGradient id="fieldGrad" cx="50%" cy="55%" r="55%">
+              <stop offset="0%" stop-color="#4CAF6F"/>
+              <stop offset="100%" stop-color="#2E7D45"/>
             </radialGradient>
           </defs>
-          <ellipse cx="320" cy="210" rx="308" ry="188" fill="#1a2535"/>
-          <ellipse cx="320" cy="210" rx="296" ry="176" fill="#0f1923"/>
-          <path id="zone-outfield-left" class="seat-zone" d="M90 142 Q130 88 200 68 L205 90 Q148 110 115 156 Z" fill="#16A34A"/>
-          <path id="zone-outfield-center" class="seat-zone" d="M200 68 Q260 50 320 46 Q380 50 420 68 L415 90 Q360 74 320 70 Q280 74 225 90 Z" fill="#16A34A"/>
-          <path id="zone-outfield-right" class="seat-zone" d="M420 68 Q490 88 530 142 L505 156 Q472 110 415 90 Z" fill="#16A34A"/>
-          <path id="zone-navy-3b" class="seat-zone" d="M90 142 L115 156 Q118 230 110 285 L84 272 Q76 218 78 168 Z" fill="#1E3A8A"/>
-          <path id="zone-navy-1b" class="seat-zone" d="M530 142 L505 156 Q502 230 510 285 L536 272 Q544 218 542 168 Z" fill="#DC2626"/>
-          <path id="zone-navy-lc" class="seat-zone" d="M200 68 L205 90 Q170 108 148 136 L115 156 L90 142 Q120 100 165 75 Z" fill="#1E3A8A"/>
-          <path id="zone-navy-rc" class="seat-zone" d="M420 68 L415 90 Q450 108 472 136 L505 156 L530 142 Q500 100 475 75 Z" fill="#DC2626"/>
-          <path id="zone-red-3b" class="seat-zone" d="M115 156 Q118 230 110 285 L124 291 Q118 235 122 168 Z" fill="#1E40AF"/>
-          <path id="zone-red-1b" class="seat-zone" d="M505 156 Q502 230 510 285 L496 291 Q502 235 498 168 Z" fill="#B91C1C"/>
-          <path id="zone-red-3b-side" class="seat-zone" d="M148 136 Q172 112 205 90 L215 108 Q184 128 160 152 Z" fill="#1E40AF"/>
-          <path id="zone-red-1b-side" class="seat-zone" d="M472 136 Q448 112 415 90 L405 108 Q436 128 460 152 Z" fill="#B91C1C"/>
-          <path id="zone-orange-3b" class="seat-zone active-zone" d="M122 168 Q118 235 124 291 L155 300 Q148 240 152 178 Z" fill="#1D4ED8"/>
-          <path id="zone-orange-1b" class="seat-zone" d="M498 168 Q502 235 496 291 L465 300 Q472 240 468 178 Z" fill="#DC2626"/>
-          <path id="zone-orange-3b-top" class="seat-zone active-zone" d="M160 152 Q184 128 215 108 L228 124 Q200 146 176 168 Z" fill="#1D4ED8"/>
-          <path id="zone-orange-1b-top" class="seat-zone" d="M460 152 Q436 128 405 108 L392 124 Q420 146 444 168 Z" fill="#DC2626"/>
-          <path id="zone-table-top" class="seat-zone" d="M215 108 Q265 88 320 84 Q375 88 405 108 L392 124 Q362 106 320 102 Q278 106 228 124 Z" fill="#7C3AED"/>
-          <path id="zone-blue-bottom" class="seat-zone" d="M152 178 Q148 240 155 300 L200 314 Q194 248 198 184 Z" fill="#2563EB"/>
-          <path id="zone-blue-bottom-r" class="seat-zone" d="M468 178 Q472 240 465 300 L420 314 Q426 248 422 184 Z" fill="#DC2626"/>
-          <path id="zone-exciting-l" class="seat-zone" d="M176 168 Q200 146 228 124 L242 138 Q218 158 196 180 Z" fill="#7C3AED"/>
-          <path id="zone-exciting-r" class="seat-zone" d="M444 168 Q420 146 392 124 L378 138 Q402 158 424 180 Z" fill="#DC2626"/>
-          <path id="zone-premium" class="seat-zone" d="M228 124 Q270 104 320 100 Q370 104 412 124 L398 138 Q362 120 320 116 Q278 120 242 138 Z" fill="#7C3AED"/>
-          <path d="M155 300 L200 314 Q260 328 320 330 Q380 328 440 314 L465 300 L496 291 Q506 318 498 342 Q420 364 320 366 Q220 364 142 342 Q134 318 124 291 Z" fill="#15293D" opacity="0.6"/>
-          <path id="zone-foul" class="seat-zone" d="M155 300 L200 314 Q260 328 320 330 Q380 328 440 314 L465 300 L496 291 Q506 318 498 342 Q420 364 320 366 Q220 364 142 342 Q134 318 124 291 Z" fill="#0EA5E9"/>
-          <path d="M242 138 Q280 118 320 114 Q360 118 398 138 L424 180 Q422 230 420 314 Q380 328 320 330 Q260 328 220 314 Q218 230 196 180 Z" fill="url(#fieldG2)"/>
-          <path d="M242 138 Q260 128 320 124 Q380 128 398 138 L390 180 Q370 168 320 166 Q270 168 250 180 Z" fill="url(#dirtG)" opacity="0.7"/>
-          <ellipse cx="320" cy="228" rx="14" ry="9" fill="url(#moundG)"/>
-          <rect x="315" y="296" width="10" height="8" rx="1" fill="white" opacity="0.95"/>
-          <rect x="365" y="206" width="9" height="9" rx="1" fill="white" opacity="0.9" transform="rotate(45 369 210)"/>
-          <rect x="315" y="160" width="9" height="9" rx="1" fill="white" opacity="0.9" transform="rotate(45 319 164)"/>
-          <rect x="265" y="206" width="9" height="9" rx="1" fill="white" opacity="0.9" transform="rotate(45 269 210)"/>
-          <line x1="320" y1="300" x2="196" y2="180" stroke="white" stroke-width="1.2" opacity="0.7"/>
-          <line x1="320" y1="300" x2="444" y2="180" stroke="white" stroke-width="1.2" opacity="0.7"/>
-          <text x="320" y="62" text-anchor="middle" fill="#DCFCE7" font-size="10" font-weight="900" font-family="'Noto Sans KR',sans-serif" paint-order="stroke" stroke="rgba(0,0,0,0.6)" stroke-width="3">외야 그린석</text>
-          <text x="140" y="108" text-anchor="middle" fill="#BFDBFE" font-size="9" font-weight="900" font-family="'Noto Sans KR',sans-serif" paint-order="stroke" stroke="rgba(0,0,0,0.6)" stroke-width="3">3루 응원석</text>
-          <text x="500" y="108" text-anchor="middle" fill="#FEE2E2" font-size="9" font-weight="900" font-family="'Noto Sans KR',sans-serif" paint-order="stroke" stroke="rgba(0,0,0,0.6)" stroke-width="3">1루 응원석</text>
-          <text x="108" y="220" text-anchor="middle" fill="#BFDBFE" font-size="9" font-weight="900" font-family="'Noto Sans KR',sans-serif" paint-order="stroke" stroke="rgba(0,0,0,0.6)" stroke-width="3" transform="rotate(-90 108 220)">3루 네이비</text>
-          <text x="532" y="220" text-anchor="middle" fill="#FEE2E2" font-size="9" font-weight="900" font-family="'Noto Sans KR',sans-serif" paint-order="stroke" stroke="rgba(0,0,0,0.6)" stroke-width="3" transform="rotate(90 532 220)">1루 네이비</text>
-          <text x="320" y="116" text-anchor="middle" fill="#EDE9FE" font-size="9" font-weight="900" font-family="'Noto Sans KR',sans-serif" paint-order="stroke" stroke="rgba(0,0,0,0.6)" stroke-width="3">테이블·프리미엄</text>
-          <text x="320" y="350" text-anchor="middle" fill="#BAE6FD" font-size="9" font-weight="900" font-family="'Noto Sans KR',sans-serif" paint-order="stroke" stroke="rgba(0,0,0,0.5)" stroke-width="2">내야 블루·파울존</text>
+
+          <!-- 외부 링 (관중석 외벽) -->
+          <ellipse cx="340" cy="218" rx="318" ry="200" fill="#D8DADD" stroke="#111827" stroke-width="2"/>
+          <!-- 내부 관중석 바닥 -->
+          <ellipse cx="340" cy="218" rx="302" ry="185" fill="#ECEDEF" stroke="#111827" stroke-width="1.5"/>
+
+          <!-- 외야 그린석 (상단 중앙) -->
+          <path class="seat-zone" d="M205 68 Q270 42 340 38 Q410 42 475 68 L465 92 Q405 68 340 64 Q275 68 215 92 Z"
+                fill="#22C55E" stroke="#111827" stroke-width="1.5" opacity="0.95"/>
+
+          <!-- 3루 응원석 (좌상단) KIA 레드 -->
+          <path class="seat-zone" d="M80 148 Q118 90 205 68 L215 92 Q140 112 108 162 Z"
+                fill="#DC2626" stroke="#111827" stroke-width="1.5" opacity="0.95"/>
+          <!-- 3루 네이비 (좌측) -->
+          <path class="seat-zone" d="M80 148 L108 162 Q112 242 104 295 L78 280 Q70 222 72 175 Z"
+                fill="#1D4ED8" stroke="#111827" stroke-width="1.5" opacity="0.9"/>
+
+          <!-- 1루 응원석 (우상단) LG 블루 -->
+          <path class="seat-zone" d="M600 148 Q562 90 475 68 L465 92 Q540 112 572 162 Z"
+                fill="#2563EB" stroke="#111827" stroke-width="1.5" opacity="0.95"/>
+          <!-- 1루 네이비 (우측) -->
+          <path class="seat-zone" d="M600 148 L572 162 Q568 242 576 295 L602 280 Q610 222 608 175 Z"
+                fill="#1E3A8A" stroke="#111827" stroke-width="1.5" opacity="0.9"/>
+
+          <!-- 3루 오렌지석 KIA 핫존 -->
+          <path id="zone-orange-3b" class="seat-zone active-zone"
+                d="M108 162 Q112 242 104 295 L138 308 Q132 248 136 178 Z"
+                fill="#E60012" stroke="#111827" stroke-width="1.5"
+                style="filter:drop-shadow(0 0 7px rgba(230,0,18,0.65));"/>
+          <path id="zone-orange-3b-top" class="seat-zone active-zone"
+                d="M165 158 Q140 116 215 92 L228 112 Q202 134 180 174 Z"
+                fill="#E60012" stroke="#111827" stroke-width="1.5"
+                style="filter:drop-shadow(0 0 7px rgba(230,0,18,0.65));"/>
+
+          <!-- 1루 오렌지석 LG 핫존 -->
+          <path id="zone-orange-1b" class="seat-zone"
+                d="M572 162 Q568 242 576 295 L542 308 Q548 248 544 178 Z"
+                fill="#3B82F6" stroke="#111827" stroke-width="1.5"/>
+          <path id="zone-orange-1b-top" class="seat-zone"
+                d="M515 158 Q540 116 465 92 L452 112 Q478 134 500 174 Z"
+                fill="#3B82F6" stroke="#111827" stroke-width="1.5"/>
+
+          <!-- 테이블·프리미엄석 (퍼플) -->
+          <path id="zone-table-top" class="seat-zone"
+                d="M228 112 Q278 90 340 86 Q402 90 452 112 L438 128 Q394 108 340 104 Q286 108 242 128 Z"
+                fill="#7C3AED" stroke="#111827" stroke-width="1.5" opacity="0.92"/>
+          <path id="zone-premium" class="seat-zone"
+                d="M242 128 Q284 108 340 104 Q396 108 438 128 L422 144 Q390 126 340 122 Q290 126 258 144 Z"
+                fill="#6D28D9" stroke="#111827" stroke-width="1.5" opacity="0.92"/>
+
+          <!-- 익사이팅존 -->
+          <path id="zone-exciting-l" class="seat-zone"
+                d="M180 174 Q202 134 228 112 L242 128 Q218 148 196 186 Z"
+                fill="#E60012" stroke="#111827" stroke-width="1.5" opacity="0.85"/>
+          <path id="zone-exciting-r" class="seat-zone"
+                d="M500 174 Q478 134 452 112 L438 128 Q462 148 484 186 Z"
+                fill="#3B82F6" stroke="#111827" stroke-width="1.5" opacity="0.85"/>
+
+          <!-- 내야 블루·파울존 (하단 스카이블루) -->
+          <path id="zone-foul" class="seat-zone"
+                d="M138 308 Q182 322 260 334 Q340 338 420 334 Q498 322 542 308 L558 324 Q518 342 420 354 Q340 358 260 354 Q162 342 122 324 Z"
+                fill="#0EA5E9" stroke="#111827" stroke-width="1.5" opacity="0.88"/>
+          <path id="zone-blue-bottom" class="seat-zone"
+                d="M136 178 Q132 248 138 308 L180 320 Q174 256 180 192 Z"
+                fill="#E60012" stroke="#111827" stroke-width="1.5" opacity="0.80"/>
+          <path id="zone-blue-bottom-r" class="seat-zone"
+                d="M544 178 Q548 248 542 308 L500 320 Q506 256 500 192 Z"
+                fill="#3B82F6" stroke="#111827" stroke-width="1.5" opacity="0.80"/>
+
+          <!-- 그라운드 (필드) -->
+          <path d="M258 144 Q294 124 340 120 Q386 124 422 144 L448 188 Q446 244 444 326 Q398 340 340 342 Q282 340 236 326 Q234 244 232 188 Z"
+                fill="#4CAF6F"/>
+          <path d="M258 144 Q278 134 340 130 Q402 134 422 144 L408 176 Q386 162 340 158 Q294 162 272 176 Z"
+                fill="#C2844A" opacity="0.7"/>
+          <circle cx="340" cy="232" r="48" fill="#4CAF6F"/>
+          <circle cx="340" cy="232" r="18" fill="#C2844A" opacity="0.8"/>
+
+          <!-- 베이스 -->
+          <rect x="335" y="306" width="10" height="8" rx="1.5" fill="white" opacity="0.95"/>
+          <rect x="374" y="212" width="9" height="9" rx="1" fill="white" opacity="0.9" transform="rotate(45 378 216)"/>
+          <rect x="335" y="164" width="9" height="9" rx="1" fill="white" opacity="0.9" transform="rotate(45 339 168)"/>
+          <rect x="296" y="212" width="9" height="9" rx="1" fill="white" opacity="0.9" transform="rotate(45 300 216)"/>
+          <!-- 파울 라인 -->
+          <line x1="340" y1="310" x2="224" y2="190" stroke="white" stroke-width="1.2" opacity="0.7"/>
+          <line x1="340" y1="310" x2="456" y2="190" stroke="white" stroke-width="1.2" opacity="0.7"/>
+
+          <!-- 구역 라벨 배지 -->
+          <rect x="32" y="97" width="78" height="20" rx="10" fill="#DC2626" stroke="#111827" stroke-width="1.2"/>
+          <text x="71" y="111" text-anchor="middle" font-size="10" font-weight="800" font-family="'Pretendard','Noto Sans KR',sans-serif" fill="white">3루 응원석</text>
+          <line x1="105" y1="128" x2="90" y2="117" stroke="#DC2626" stroke-width="1.5"/>
+
+          <rect x="570" y="97" width="78" height="20" rx="10" fill="#2563EB" stroke="#111827" stroke-width="1.2"/>
+          <text x="609" y="111" text-anchor="middle" font-size="10" font-weight="800" font-family="'Pretendard','Noto Sans KR',sans-serif" fill="white">1루 응원석</text>
+          <line x1="575" y1="128" x2="590" y2="117" stroke="#2563EB" stroke-width="1.5"/>
+
+          <rect x="18" y="216" width="84" height="20" rx="10" fill="#E60012" stroke="#111827" stroke-width="1.2"/>
+          <text x="60" y="230" text-anchor="middle" font-size="10" font-weight="800" font-family="'Pretendard','Noto Sans KR',sans-serif" fill="white">3루 오렌지 🔥</text>
+          <line x1="104" y1="226" x2="116" y2="226" stroke="#E60012" stroke-width="1.5"/>
+
+          <rect x="578" y="216" width="84" height="20" rx="10" fill="#3B82F6" stroke="#111827" stroke-width="1.2"/>
+          <text x="620" y="230" text-anchor="middle" font-size="10" font-weight="800" font-family="'Pretendard','Noto Sans KR',sans-serif" fill="white">1루 오렌지</text>
+          <line x1="576" y1="226" x2="564" y2="226" stroke="#3B82F6" stroke-width="1.5"/>
+
+          <rect x="272" y="58" width="136" height="20" rx="10" fill="#7C3AED" stroke="#111827" stroke-width="1.2"/>
+          <text x="340" y="72" text-anchor="middle" font-size="10" font-weight="800" font-family="'Pretendard','Noto Sans KR',sans-serif" fill="white">테이블 · 프리미엄</text>
+
+          <rect x="268" y="364" width="144" height="20" rx="10" fill="#0EA5E9" stroke="#111827" stroke-width="1.2"/>
+          <text x="340" y="378" text-anchor="middle" font-size="10" font-weight="800" font-family="'Pretendard','Noto Sans KR',sans-serif" fill="white">내야 블루 · 파울존</text>
+
+          <!-- 외야 그린 라벨 -->
+          <text x="340" y="30" text-anchor="middle" font-size="10.5" font-weight="700" font-family="'Pretendard','Noto Sans KR',sans-serif" fill="#15803D">외야 그린석</text>
+
+          <!-- 네이비 라벨 (세로) -->
+          <text x="54" y="250" text-anchor="middle" font-size="9.5" font-weight="700" font-family="'Pretendard','Noto Sans KR',sans-serif" fill="#1D4ED8" transform="rotate(-90 54 250)">3루 네이비</text>
+          <text x="628" y="250" text-anchor="middle" font-size="9.5" font-weight="700" font-family="'Pretendard','Noto Sans KR',sans-serif" fill="#1E3A8A" transform="rotate(90 628 250)">1루 네이비</text>
         </svg>
       </div>
 
-      <div class="zone-buttons" style="grid-template-columns:repeat(5,1fr);">
+      <!-- Zone buttons -->
+      <div class="zone-buttons">
         <button class="zone-btn active" data-zone="orange-3b">3루 오렌지</button>
         <button class="zone-btn" data-zone="orange-1b">1루 오렌지</button>
         <button class="zone-btn" data-zone="outfield-center">중앙 외야</button>
@@ -1129,6 +968,7 @@
         <button class="zone-btn" data-zone="foul">외야 파울존</button>
       </div>
 
+      <!-- Zone panel -->
       <div class="zone-panel">
         <div class="zone-panel-top">
           <div>
@@ -1139,111 +979,116 @@
             <div class="zone-ratio-label">현재 응원 비율</div>
             <div class="zone-ratio-val" id="zone-ratio">
               <span style="color:var(--kia)">KIA 88%</span>
-              <span style="color:var(--text-3); font-size:1rem; margin:0 4px;">:</span>
-              <span style="color:var(--lg)">LG 12%</span>
+              <span style="color:var(--muted); font-size:0.95rem; margin:0 3px;">:</span>
+              <span style="color:var(--lg-mid)">LG 12%</span>
             </div>
           </div>
         </div>
-        <div class="score-boxes">
-          <div class="score-box score-box-kia">
-            <div class="score-box-label" style="color:var(--kia)" id="home-team-label">홈팀 응원</div>
-            <div class="score-box-val" style="color:var(--kia)" id="kia-score">-</div>
+      </div>
+
+      <!-- 구역별 응원 점수 패널 -->
+      <div id="zone-cheer-panel" style="margin-top:1.25rem;">
+
+        <!-- 홈팀 / 원정팀 2단 카드 -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-bottom:0.85rem;">
+
+          <!-- 홈팀 응원 카드 -->
+          <div style="background:rgba(230,0,18,0.04); border:1.5px solid rgba(230,0,18,0.18); border-radius:12px; padding:0.85rem 1rem;">
+            <div id="zone-home-label" style="font-size:11px; font-weight:700; color:var(--kia); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.6rem;">홈팀 응원</div>
+            <div style="font-size:1.45rem; font-weight:900; font-family:'Bebas Neue',sans-serif; color:var(--kia); line-height:1;" id="zone-home-big">-</div>
+            <div style="font-size:11px; color:var(--muted); margin-top:3px;"><span id="zone-home-score">0</span> pt</div>
           </div>
-          <div class="score-box score-box-lg">
-            <div class="score-box-label" style="color:var(--lg)" id="away-team-label">원정팀 응원</div>
-            <div class="score-box-val" style="color:var(--lg)" id="lg-score">-</div>
-          </div>
-        </div>
-        <div class="gauge-row">
-          <div class="gauge-label">
-            <span id="home-gauge-label" style="color:var(--kia)">홈팀 응원 비중</span>
-            <span style="color:var(--kia); font-weight:900;" id="kia-pct">50%</span>
-          </div>
-          <div class="gauge-track">
-            <div class="gauge-fill" id="kia-bar" style="width:50%; background:var(--kia);"></div>
-          </div>
-        </div>
-        <div class="gauge-row">
-          <div class="gauge-label">
-            <span id="away-gauge-label" style="color:var(--lg)">원정팀 응원 비중</span>
-            <span style="color:var(--lg); font-weight:900;" id="lg-pct">50%</span>
-          </div>
-          <div class="gauge-track">
-            <div class="gauge-fill" id="lg-bar" style="width:50%; background:var(--lg);"></div>
+
+          <!-- 원정팀 응원 카드 -->
+          <div style="background:rgba(37,99,235,0.04); border:1.5px solid rgba(37,99,235,0.18); border-radius:12px; padding:0.85rem 1rem;">
+            <div id="zone-away-label" style="font-size:11px; font-weight:700; color:#2563EB; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.6rem;">원정팀 응원</div>
+            <div style="font-size:1.45rem; font-weight:900; font-family:'Bebas Neue',sans-serif; color:#2563EB; line-height:1;" id="zone-away-big">-</div>
+            <div style="font-size:11px; color:var(--muted); margin-top:3px;"><span id="zone-away-score">0</span> pt</div>
           </div>
         </div>
+
+        <!-- 홈팀 응원 비중 바 -->
+        <div style="margin-bottom:0.5rem;">
+          <div style="display:flex; justify-content:space-between; font-size:11.5px; font-weight:600; margin-bottom:4px; color:var(--ink-2);">
+            <span>홈팀 응원 비중</span>
+            <span id="total-home-pct" style="color:var(--kia); font-weight:800;">50%</span>
+          </div>
+          <div style="height:8px; background:var(--bg-2); border:1px solid var(--line); border-radius:99px; overflow:hidden;">
+            <div id="total-home-bar" style="height:100%; background:var(--kia); border-radius:99px; width:50%; transition:width .6s ease;"></div>
+          </div>
+        </div>
+
+        <!-- 원정팀 응원 비중 바 -->
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:11.5px; font-weight:600; margin-bottom:4px; color:var(--ink-2);">
+            <span>원정팀 응원 비중</span>
+            <span id="total-away-pct" style="color:#2563EB; font-weight:800;">50%</span>
+          </div>
+          <div style="height:8px; background:var(--bg-2); border:1px solid var(--line); border-radius:99px; overflow:hidden;">
+            <div id="total-away-bar" style="height:100%; background:#2563EB; border-radius:99px; width:50%; transition:width .6s ease;"></div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
-  <!-- ── RIGHT ── -->
+  <!-- ── RIGHT COLUMN ── -->
   <div class="right-col">
 
-    <!-- Photos card -->
-    <div class="card fade-in widget-popup-anchor" style="animation-delay:0.1s">
-      <div class="hover-popup">
-        <div class="popup-header">
-          <div class="popup-header-title">📸 최신 인증샷</div>
-          <div class="popup-header-meta">실시간 업데이트</div>
-        </div>
-        <div class="popup-photo-grid">
-          <div class="popup-photo-item" data-nick="@kia_fan92">
-            <img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=300&auto=format&fit=crop" alt="">
-          </div>
-          <div class="popup-photo-item" data-nick="@lg_supporter">
-            <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=300&auto=format&fit=crop" alt="">
-          </div>
-          <div class="popup-photo-item" data-nick="@park_hopper">
-            <img src="https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=300&auto=format&fit=crop" alt="">
-          </div>
-          <div class="popup-photo-item" data-nick="@stadium_view">
-            <img src="https://images.unsplash.com/photo-1471295253337-3ceaaedca402?q=80&w=300&auto=format&fit=crop" alt="">
-          </div>
-          <div class="popup-photo-item" data-nick="@cheering_fan">
-            <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=300&auto=format&fit=crop" alt="">
-          </div>
-          <div class="popup-photo-item" data-nick="@night_game">
-            <img src="https://images.unsplash.com/photo-1521417531039-273c86dd4cae?q=80&w=300&auto=format&fit=crop" alt="">
-          </div>
-        </div>
-        <div class="popup-upload-banner" id="popup-upload-banner">
-          <div class="popup-upload-icon">📤</div>
-          <div class="popup-upload-text">내 직관 인증샷 올리기<br><span style="font-weight:600;opacity:0.7;">업로드하면 응원 포인트 +10점!</span></div>
-        </div>
-        <div class="popup-footer">
-          <button class="popup-footer-btn" id="popup-open-photos">전체 갤러리 보기 →</button>
-        </div>
-      </div>
-
+    <!-- Photo verification card -->
+    <div class="card fade-in" style="animation-delay:0.1s">
       <div class="card-header">
-        <div class="card-title-group">
-          <span class="card-icon">📸</span>
-          <div>
-            <div class="card-title">인증샷</div>
-            <div class="card-subtitle">Photo Verification</div>
-          </div>
+        <div class="card-header-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="9" cy="9" r="1.5" fill="currentColor"/>
+            <path d="M3 15 L9 9 L15 15 L21 9 L21 19"/>
+          </svg>
         </div>
-        <span style="font-size:9px; color:var(--text-3); font-weight:600;">실시간 업데이트</span>
+        <div class="card-title-group">
+          <div class="card-title">인증샷</div>
+          <div class="card-subtitle">Photo Verification</div>
+        </div>
       </div>
 
+      <!-- Inventory slots -->
       <div class="photo-grid">
-        <div class="photo-item" data-caption="@kia_fan92">
-          <img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=600&auto=format&fit=crop" alt="Fan photo 1">
+        <div class="pb-inv-slot">
+          <div class="pb-inv-corner"></div>
+          <div class="pb-inv-icon">📷</div>
+          <div class="pb-inv-lock">🔒 LOCKED</div>
+          <div class="pb-inv-text">인증 시 +10pt</div>
         </div>
-        <div class="photo-item" data-caption="@lg_supporter">
-          <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop" alt="Fan photo 2">
+        <div class="pb-inv-slot">
+          <div class="pb-inv-corner"></div>
+          <div class="pb-inv-icon">⚾</div>
+          <div class="pb-inv-lock">🔒 LOCKED</div>
+          <div class="pb-inv-text">인증 시 +10pt</div>
         </div>
-        <div class="photo-item" data-caption="@park_hopper">
-          <img src="https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=600&auto=format&fit=crop" alt="Fan photo 3">
+        <div class="pb-inv-slot">
+          <div class="pb-inv-corner"></div>
+          <div class="pb-inv-icon">📷</div>
+          <div class="pb-inv-lock">🔒 LOCKED</div>
+          <div class="pb-inv-text">인증 시 +10pt</div>
         </div>
-        <div class="photo-item" data-caption="@stadium_view">
-          <img src="https://images.unsplash.com/photo-1471295253337-3ceaaedca402?q=80&w=600&auto=format&fit=crop" alt="Fan photo 4">
+        <div class="pb-inv-slot">
+          <div class="pb-inv-corner"></div>
+          <div class="pb-inv-icon">⚾</div>
+          <div class="pb-inv-lock">🔒 LOCKED</div>
+          <div class="pb-inv-text">인증 시 +10pt</div>
         </div>
-        <div class="photo-item" data-caption="@cheering_fan">
-          <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=600&auto=format&fit=crop" alt="Fan photo 5">
+        <div class="pb-inv-slot">
+          <div class="pb-inv-corner"></div>
+          <div class="pb-inv-icon">📷</div>
+          <div class="pb-inv-lock">🔒 LOCKED</div>
+          <div class="pb-inv-text">인증 시 +10pt</div>
         </div>
-        <div class="photo-item" data-caption="@night_game">
-          <img src="https://images.unsplash.com/photo-1521417531039-273c86dd4cae?q=80&w=600&auto=format&fit=crop" alt="Fan photo 6">
+        <div class="pb-inv-slot">
+          <div class="pb-inv-corner"></div>
+          <div class="pb-inv-icon">⚾</div>
+          <div class="pb-inv-lock">🔒 LOCKED</div>
+          <div class="pb-inv-text">인증 시 +10pt</div>
         </div>
       </div>
 
@@ -1251,175 +1096,261 @@
       <button class="card-link" id="open-photos">인증샷 전체 보기 →</button>
     </div>
 
-    <a href="schedule.html" class="schedule-card fade-in" style="animation-delay:0.15s" id="schedule-card-body">
-      <div class="card-header">
-        <div class="card-title-group">
-          <span class="card-icon">📅</span>
-          <div>
+    <!-- Today's Battlefield Schedule Card (우측 하단) — Versus Layout -->
+    <div class="match-schedule-card fade-in" style="animation-delay:0.15s">
+      <!-- Baseball illustration background -->
+      <svg class="match-bg-illust" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="batGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#E60012" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#1D4ED8" stop-opacity="0.15"/>
+          </linearGradient>
+        </defs>
+        <!-- Baseball -->
+        <circle cx="140" cy="80" r="24" fill="none" stroke="url(#batGrad)" stroke-width="2.5" opacity="0.4"/>
+        <path d="M110 80 Q140 60 170 80" fill="none" stroke="url(#batGrad)" stroke-width="2" opacity="0.3"/>
+        <!-- Bat -->
+        <rect x="50" y="130" width="180" height="12" rx="6" fill="url(#batGrad)" opacity="0.25" transform="rotate(-35 140 136)"/>
+        <!-- Glove outline -->
+        <circle cx="140" cy="200" r="35" fill="none" stroke="url(#batGrad)" stroke-width="2.5" opacity="0.2"/>
+        <path d="M100 170 Q140 145 180 170" fill="none" stroke="url(#batGrad)" stroke-width="2" opacity="0.15"/>
+      </svg>
+
+      <div class="match-schedule-content">
+        <div class="match-schedule-header">
+          <div class="card-header-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <div class="card-title-group">
             <div class="card-title">경기 일정</div>
-            <div class="card-subtitle">Today Schedule</div>
+            <div class="card-subtitle">Today's Battlefield</div>
           </div>
         </div>
-        <span class="badge-blue">전체 보기</span>
-      </div>
 
-      <div class="featured-match">
         <div class="match-time-row">
-          <span class="match-time-label">오늘의 핵심 매치</span>
-          <span class="match-time" id="schedule-main-time">18:30</span>
+          <span class="match-time-label">경기 시간</span>
+          <span class="match-time" id="today-match-time">-</span>
         </div>
-        <div class="match-name" id="schedule-main-match">데이터를 불러오는 중...</div>
-        <div class="match-meta" id="schedule-main-meta">경기 정보를 확인하세요</div>
-      </div>
-      <div id="schedule-extra-rows">
-      </div>
-      <div class="divider"></div>
-      <span class="card-link">전체 경기 일정 보기 →</span>
-    </a>
-  </div>
 
+        <!-- Versus layout -->
+        <div class="match-versus-container" id="today-match-container">
+          <div class="match-team">
+            <div class="match-team-logo" id="today-away-logo" style="background:#94A3B8; color:#fff;">-</div>
+            <div class="match-team-info">
+              <div class="match-team-name" id="today-away-name">-</div>
+              <div class="match-team-role">원정</div>
+            </div>
+          </div>
+
+          <div class="match-versus">VS</div>
+
+          <div class="match-team">
+            <div class="match-team-info">
+              <div class="match-team-name" id="today-home-name">-</div>
+              <div class="match-team-role">홈</div>
+            </div>
+            <div class="match-team-logo" id="today-home-logo" style="background:#94A3B8; color:#fff;">-</div>
+          </div>
+        </div>
+
+        <div style="font-size:11px; color:var(--muted); text-align:center; margin-top:1rem;">
+          <button class="card-link" onclick="location.href='schedule.html'" style="margin-top:10px; width:100%; justify-content:center;">전체 일정 보기 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
 
-<!-- ═══ 점령전 티켓 인증 모달 ═══ -->
+<!-- Modals -->
 <div id="battle-modal" class="modal-backdrop">
-  <div class="modal-box" style="max-width:560px;">
+  <div class="modal-box" style="max-width:540px;">
     <div class="modal-header">
-      <span class="modal-title">⚔️ 점령전 참여하기</span>
+      <span class="modal-title">⚔️ 전장 진입 — 티켓 인증</span>
       <button class="modal-close" data-target="battle-modal">×</button>
     </div>
+    <div class="modal-body" style="padding:1.25rem 1.5rem 1.5rem;">
 
-    <div id="battle-step-upload">
-      <p style="font-size:13px;color:var(--text-2);margin-bottom:1.25rem;line-height:1.6;">
-        야구 티켓 사진을 업로드하면 AI가 경기 정보를 자동으로 읽어와요.<br>
-        <span style="color:var(--green);font-weight:700;">인증된 직관은 응원 포인트 +50점!</span>
-      </p>
-      <div id="battle-upload-zone" style="border:2px dashed rgba(255,255,255,0.15);border-radius:14px;padding:2.5rem;text-align:center;cursor:pointer;transition:all .2s;background:rgba(255,255,255,0.03);">
-        <div style="font-size:3rem;margin-bottom:0.75rem;">🎫</div>
-        <div style="font-size:14px;font-weight:700;color:var(--text-2);margin-bottom:6px;">티켓 사진을 드래그하거나 클릭하여 업로드</div>
-        <div style="font-size:11px;color:var(--text-3);">JPG, PNG, HEIC 지원 · 최대 10MB</div>
-        <input type="file" id="battle-file-input" accept="image/*" style="display:none;">
-      </div>
-      <div id="battle-preview-wrap" style="display:none;margin-top:1rem;">
-        <img id="battle-preview-img" style="width:100%;max-height:260px;object-fit:contain;border-radius:10px;border:1px solid rgba(255,255,255,0.1);" alt="">
-        <button id="battle-reset-btn" style="margin-top:8px;background:none;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:inherit;">✕ 다시 선택</button>
-      </div>
-      <button id="battle-ocr-btn" style="width:100%;margin-top:1.25rem;padding:14px;background:linear-gradient(135deg,#DC2626,#1D4ED8);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;transition:all .2s;box-shadow:0 4px 16px rgba(220,38,38,0.3);opacity:0.4;pointer-events:none;" disabled>
-        🔍 티켓 정보 읽기
-      </button>
-    </div>
-
-    <div id="battle-step-loading" style="display:none;text-align:center;padding:3rem 0;">
-      <div style="font-size:3rem;margin-bottom:1rem;animation:spin 1.5s linear infinite;display:inline-block;">⚙️</div>
-      <div style="font-size:15px;font-weight:800;color:var(--text-1);margin-bottom:8px;">티켓 분석 중...</div>
-      <div style="font-size:12px;color:var(--text-3);">Cloud Vision AI가 티켓 정보를 읽고 있어요</div>
-      <div style="margin-top:1.25rem;height:4px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;">
-        <div id="ocr-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#DC2626,#1D4ED8);border-radius:99px;transition:width .4s;"></div>
-      </div>
-    </div>
-
-    <div id="battle-step-result" style="display:none;">
-      <div id="battle-result-card" style="background:linear-gradient(135deg,rgba(220,38,38,0.12),rgba(29,78,216,0.12));border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
-          <span style="font-size:1.2rem;">🎫</span>
-          <span style="font-size:14px;font-weight:900;color:var(--text-1);">티켓 인식 결과</span>
-          <span id="ocr-confidence-badge" style="margin-left:auto;font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.3);">AI 분석 완료</span>
+      <!-- STEP 1: 업로드 -->
+      <div id="battle-step-upload" class="battle-step">
+        <p style="font-size:12.5px; color:var(--muted); margin-bottom:1rem; line-height:1.6;">
+          오늘 경기 티켓 사진을 업로드하면 AI가 날짜·대진·좌석을 자동 인식합니다.<br>
+          인증 완료 시 <strong style="color:var(--kia);">화력 포인트 +50pt</strong>가 적립됩니다.
+        </p>
+        <div id="battle-upload-zone"
+             style="border:2px dashed var(--line-dash); border-radius:14px; padding:2.5rem 1.5rem;
+                    text-align:center; cursor:pointer; background:var(--paper-2);
+                    transition:all .15s;">
+          <div style="font-size:2.5rem; margin-bottom:0.75rem;">🎫</div>
+          <div style="font-size:13.5px; font-weight:700; color:var(--ink); margin-bottom:4px;">티켓 사진을 업로드하세요</div>
+          <div style="font-size:11.5px; color:var(--muted);">클릭하거나 사진을 여기로 드래그하세요</div>
+          <input type="file" id="battle-file-input" style="display:none" accept="image/*">
         </div>
-        <div style="display:grid;gap:10px;">
-          <div class="ocr-field-row"><span class="ocr-field-label">📅 경기 날짜</span><span class="ocr-field-val" id="ocr-date">-</span></div>
-          <div class="ocr-field-row"><span class="ocr-field-label">⚾ 경기</span><span class="ocr-field-val" id="ocr-match">-</span></div>
-          <div class="ocr-field-row"><span class="ocr-field-label">🏟 구장</span><span class="ocr-field-val" id="ocr-stadium">-</span></div>
-          <div class="ocr-field-row"><span class="ocr-field-label">💺 좌석</span><span class="ocr-field-val" id="ocr-seat">-</span></div>
+        <div id="battle-preview-wrap" style="display:none; margin-top:1.25rem;">
+          <img id="battle-preview-img"
+               style="width:100%; border-radius:12px; border:1.5px solid var(--line); max-height:220px; object-fit:cover;">
+
+          <!-- 구역 선택 -->
+          <div style="margin-top:1rem;">
+            <div style="font-size:12px; font-weight:700; color:var(--ink); margin-bottom:0.5rem;">📍 내 좌석 구역을 선택해주세요</div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;" id="battle-zone-btns">
+              <button class="battle-zone-btn" data-zone="3루" data-label="3루 오렌지"
+                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                       border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
+                3루 오렌지
+              </button>
+              <button class="battle-zone-btn" data-zone="1루" data-label="1루 오렌지"
+                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                       border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
+                1루 오렌지
+              </button>
+              <button class="battle-zone-btn" data-zone="외야" data-label="중앙 외야"
+                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                       border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
+                중앙 외야
+              </button>
+              <button class="battle-zone-btn" data-zone="중앙" data-label="테이블·프리미엄"
+                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                       border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
+                테이블·프리미엄
+              </button>
+              <button class="battle-zone-btn" data-zone="내야" data-label="외야 파울존"
+                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                       border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
+                외야 파울존
+              </button>
+            </div>
+            <div id="battle-zone-selected" style="margin-top:6px; font-size:11.5px; color:var(--muted); min-height:16px;"></div>
+          </div>
+
+          <button id="battle-ocr-btn"
+                  style="width:100%; padding:12px; margin-top:1rem;
+                         background:var(--ink); color:#fff; border:1.5px solid var(--line);
+                         border-radius:10px; font-family:inherit; font-size:13.5px;
+                         font-weight:700; cursor:pointer; transition:background .15s;">
+            🔍 티켓 자동 분석하기
+          </button>
+          <button id="battle-reselect-btn"
+                  style="width:100%; padding:9px; margin-top:6px;
+                         background:#fff; color:var(--muted); border:1.5px solid var(--line);
+                         border-radius:10px; font-family:inherit; font-size:12px;
+                         font-weight:600; cursor:pointer;">
+            다른 사진 선택
+          </button>
         </div>
       </div>
-      <details style="margin-bottom:1.25rem;">
-        <summary style="font-size:11px;color:var(--text-3);cursor:pointer;font-weight:700;">📄 OCR 원문 보기</summary>
-        <pre id="ocr-raw-text" style="margin-top:8px;padding:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:10px;color:var(--text-3);white-space:pre-wrap;word-break:break-all;max-height:120px;overflow-y:auto;"></pre>
-      </details>
-      <div style="display:flex;gap:8px;">
-        <button id="battle-retry-btn" style="flex:1;padding:11px;border-radius:10px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:var(--text-2);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;">↩ 다시 업로드</button>
-        <button id="battle-confirm-btn" style="flex:2;padding:11px;border-radius:10px;background:linear-gradient(135deg,#DC2626,#1D4ED8);color:#fff;border:none;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;transition:all .2s;box-shadow:0 4px 14px rgba(220,38,38,0.3);">⚔️ 점령전 참여 확정!</button>
-      </div>
-    </div>
 
-    <div id="battle-step-done" style="display:none;text-align:center;padding:2.5rem 0;">
-      <div style="font-size:4rem;margin-bottom:1rem;">🎉</div>
-      <div style="font-size:1.2rem;font-weight:900;color:var(--text-1);margin-bottom:8px;">점령전 참여 완료!</div>
-      <div style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:1.5rem;">
-        티켓이 인증되었어요.<br>
-        <span style="color:#F5C842;font-weight:800;">+50 응원 포인트</span>가 적립되었습니다! ⚾
+      <!-- STEP 2: 분석 중 -->
+      <div id="battle-step-loading" class="battle-step" style="display:none; text-align:center; padding:2.5rem 1rem;">
+        <div style="font-size:2rem; margin-bottom:1rem; animation:spin 1.2s linear infinite; display:inline-block;">⚾</div>
+        <div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:1.25rem;">티켓을 분석하고 있어요...</div>
+        <div style="width:100%; height:6px; background:var(--bg-2); border-radius:99px; overflow:hidden;">
+          <div id="ocr-progress-bar"
+               style="width:0%; height:100%; background:var(--kia);
+                      border-radius:99px; transition:width 0.3s ease;"></div>
+        </div>
       </div>
-      <div id="battle-done-info" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:1rem;font-size:13px;color:var(--text-2);text-align:left;margin-bottom:1.25rem;"></div>
-      <button id="battle-done-close" style="width:100%;padding:12px;border-radius:10px;background:linear-gradient(135deg,#DC2626,#1D4ED8);color:#fff;border:none;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;">확인</button>
-    </div>
 
-    <!-- STEP 5: 오류 -->
-    <div id="battle-step-error" style="display:none;text-align:center;padding:2.5rem 1rem;">
-      <div style="font-size:3.5rem;margin-bottom:1rem;">🚫</div>
-      <div style="font-size:1.1rem;font-weight:900;color:#f87171;margin-bottom:10px;">참여 불가</div>
-      <div id="battle-error-msg" style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:1.5rem;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:1rem;"></div>
-      <button id="battle-error-close" style="width:100%;padding:12px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:var(--text-2);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">닫기</button>
+      <!-- STEP 3: 결과 확인 -->
+      <div id="battle-step-result" class="battle-step" style="display:none;">
+        <div style="font-size:12px; font-weight:600; color:var(--muted);
+                    margin-bottom:0.75rem; letter-spacing:0.05em; text-transform:uppercase;">
+          분석 결과
+        </div>
+        <div style="background:var(--paper-2); border:1.5px solid var(--line);
+                    border-radius:12px; padding:1.1rem 1.25rem; margin-bottom:1rem;">
+          <div style="display:grid; grid-template-columns:auto 1fr; gap:6px 12px; font-size:13px;">
+            <span style="color:var(--muted); font-weight:600;">📅 날짜</span>
+            <span id="ocr-date" style="font-weight:700; color:var(--ink);">-</span>
+            <span style="color:var(--muted); font-weight:600;">⚾ 대진</span>
+            <span id="ocr-match" style="font-weight:700; color:var(--ink);">-</span>
+            <span style="color:var(--muted); font-weight:600;">🏟 구장</span>
+            <span id="ocr-stadium" style="font-weight:700; color:var(--ink);">-</span>
+            <span style="color:var(--muted); font-weight:600;">💺 좌석</span>
+            <span id="ocr-seat" style="font-weight:700; color:var(--ink);">-</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button id="battle-retry-btn"
+                  style="flex:1; padding:11px; background:#fff; color:var(--ink);
+                         border:1.5px solid var(--line); border-radius:10px;
+                         font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer;">
+            다시 분석
+          </button>
+          <button id="battle-confirm-btn"
+                  style="flex:2; padding:11px; background:var(--kia); color:#fff;
+                         border:1.5px solid var(--line); border-radius:10px;
+                         font-family:inherit; font-size:13px; font-weight:700; cursor:pointer;">
+            ⚔️ 점령전 참여 확정!
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 4: 완료 -->
+      <div id="battle-step-done" class="battle-step" style="display:none; text-align:center; padding:2.5rem 1rem;">
+        <div style="font-size:3rem; margin-bottom:0.75rem;">🏆</div>
+        <div style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:0.4rem;">참여 완료!</div>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:1.5rem;">화력 포인트 +50pt 적립되었습니다.</div>
+        <div style="display:flex; justify-content:center;">
+          <button class="modal-close" data-target="battle-modal"
+                  style="padding:10px 28px; background:var(--ink); color:#fff;
+                         border:1.5px solid var(--line); border-radius:10px;
+                         font-family:inherit; font-size:13px; font-weight:700;
+                         cursor:pointer; line-height:1; white-space:nowrap;
+                         display:inline-flex; align-items:center; justify-content:center;">
+            닫기
+          </button>
+        </div>
+      </div>
+
+      <!-- 오류 메시지 -->
+      <div id="battle-error"
+           style="display:none; margin-top:0.75rem; padding:10px 14px;
+                  background:var(--kia-soft); border:1px solid rgba(230,0,18,0.25);
+                  border-radius:9px; font-size:12px; font-weight:600; color:var(--kia);">
+      </div>
     </div>
   </div>
 </div>
 
-<style>
-  .ocr-field-row { display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06); }
-  .ocr-field-row:last-child { border-bottom:none; }
-  .ocr-field-label { font-size:12px;font-weight:700;color:var(--text-3); }
-  .ocr-field-val   { font-size:13px;font-weight:800;color:var(--text-1);text-align:right;max-width:60%; }
-  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-</style>
-
-<!-- ═══ PHOTOS MODAL ═══ -->
 <div id="photos-modal" class="modal-backdrop">
   <div class="modal-box">
     <div class="modal-header">
-      <span class="modal-title">인증샷 갤러리</span>
+      <span class="modal-title">📸 인증샷 갤러리</span>
       <button class="modal-close" data-target="photos-modal">×</button>
-    </div>
-    <div class="upload-zone">
-      <div class="upload-icon">📸</div>
-      <div class="upload-text">구장에서 찍은 사진을 올려 응원 포인트를 획득하세요!<br>사진 1장당 포인트 +10점</div>
-      <button class="upload-btn">내 사진 업로드</button>
-    </div>
-    <div style="font-size:14px; font-weight:800; color:var(--text-1); margin-bottom:1rem;">팬 갤러리</div>
-    <div class="gallery-grid">
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@baseball_lover</div></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@homerun_shot</div></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@park_hopper</div></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1471295253337-3ceaaedca402?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@stadium_view</div></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@cheering_fan</div></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1521417531039-273c86dd4cae?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@night_game</div></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@crowd_energy</div></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1624526267942-ab67cb38121d?q=80&w=400&auto=format&fit=crop" alt=""><div class="gallery-overlay">@stadium_moment</div></div>
     </div>
   </div>
 </div>
 
+
+<script src="js/index.js" onerror="console.warn('index.js missing')"></script>
 <script>
-// ── 전역 점령전 점수 갱신 함수 (index.js IIFE 스코프 문제 우회) ──
-function updateHeaderBattleScore(home, away) {
-  var h = document.getElementById('homeScore');
-  var a = document.getElementById('awayScore');
-  if (h) h.textContent = home != null ? String(home) : '-';
-  if (a) a.textContent = away != null ? String(away) : '-';
-}
-
-async function refreshBattleScoreboard() {
-  try {
-    var myTeam = localStorage.getItem('myTeam') || localStorage.getItem('favoriteTeam') || '';
-    var url = myTeam ? '/api/battle/today?team=' + encodeURIComponent(myTeam) : '/api/battle/today';
-    var res = await fetch(url);
-    if (!res.ok) return;
-    var battles = await res.json();
-    if (!battles || battles.length === 0) return;
-    var b = battles[0];
-    updateHeaderBattleScore(b.homeCheerScore, b.awayCheerScore);
-  } catch(e) {}
-}
-
-document.addEventListener('DOMContentLoaded', refreshBattleScoreboard);
+/* 챗봇 입력 더미 동작 (프리뷰용) */
+(function(){
+  const send=document.getElementById('chat-send');
+  const input=document.getElementById('chat-input');
+  const scroll=document.getElementById('chat-messages');
+  if(!send||!input||!scroll) return;
+  send.addEventListener('click', ()=>{
+    const v=input.value.trim(); if(!v) return;
+    const u=document.createElement('div');
+    u.className='bubble'; u.style.alignSelf='flex-end';
+    u.style.background='#FCE9EB'; u.style.borderColor='#E60012';
+    u.textContent=v; scroll.appendChild(u);
+    input.value=''; scroll.scrollTop=scroll.scrollHeight;
+    setTimeout(()=>{
+      const b=document.createElement('div');
+      b.className='bubble bubble-bot';
+      b.textContent='(미리보기 모드) 실제 응답은 서버 연결 후 동작합니다.';
+      scroll.appendChild(b); scroll.scrollTop=scroll.scrollHeight;
+    },350);
+  });
+  input.addEventListener('keydown',e=>{ if(e.key==='Enter') send.click(); });
+})();
 </script>
-<script src="js/index.js?v=20260521"></script>
 </body>
 </html>

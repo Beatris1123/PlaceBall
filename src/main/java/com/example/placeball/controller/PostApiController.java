@@ -49,9 +49,10 @@ public class PostApiController {
         postRepository.save(post);
         saveImages(post, req.getImages());
 
-        // 응원 탭 게시글은 오늘 1회만 점수 적립
+        // 포인트 적립 — cheer/photo 탭은 오늘 1회만
         int earnedPoints = 0;
-        if ("cheer".equals(req.getTab())) {
+        boolean oncePerDay = "cheer".equals(req.getTab()) || "photo".equals(req.getTab());
+        if (oncePerDay) {
             boolean alreadyEarned = cheerPointRepository.existsTodayByMemberAndType(
                     member, "POST_WRITE", java.time.LocalDate.now());
             if (!alreadyEarned) {

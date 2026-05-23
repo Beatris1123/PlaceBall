@@ -184,59 +184,8 @@ public class VisionApiController {
             }
         }
 
-        // ③ 구장 파싱
-        // 홈팀 기반 자동 추론 포함
-        Map<String, String> stadiumKeyword = new LinkedHashMap<>();
-        stadiumKeyword.put("잠실",         "잠실야구장");
-        stadiumKeyword.put("JAMSIL",       "잠실야구장");
-        stadiumKeyword.put("고척",         "고척스카이돔");
-        stadiumKeyword.put("GOCHEOK",      "고척스카이돔");
-        stadiumKeyword.put("광주",         "광주기아챔피언스필드");
-        stadiumKeyword.put("기아챔피언스",  "광주기아챔피언스필드");
-        stadiumKeyword.put("KIA CHAMPIONS","광주기아챔피언스필드");
-        stadiumKeyword.put("대전",         "대전한화생명이글스파크");
-        stadiumKeyword.put("한화생명",      "대전한화생명이글스파크");
-        stadiumKeyword.put("인천",         "인천SSG랜더스필드");
-        stadiumKeyword.put("SSG랜더스",    "인천SSG랜더스필드");
-        stadiumKeyword.put("수원",         "수원KT위즈파크");
-        stadiumKeyword.put("KT위즈",       "수원KT위즈파크");
-        stadiumKeyword.put("창원",         "창원NC파크");
-        stadiumKeyword.put("NC파크",       "창원NC파크");
-        stadiumKeyword.put("사직",         "사직야구장");
-        stadiumKeyword.put("SAJIK",        "사직야구장");
-        stadiumKeyword.put("대구",         "대구삼성라이온즈파크");
-        stadiumKeyword.put("삼성라이온즈파크","대구삼성라이온즈파크");
-
-        boolean stadiumFound = false;
-        for (Map.Entry<String, String> e : stadiumKeyword.entrySet()) {
-            if (upper.contains(e.getKey().toUpperCase())) {
-                resp.stadium = e.getValue();
-                score += 20;
-                stadiumFound = true;
-                break;
-            }
-        }
-
-        // 구장 못 찾으면 홈팀으로 추론
-        if (!stadiumFound && resp.match != null) {
-            Map<String, String> homeStadium = Map.of(
-                "KIA","광주기아챔피언스필드",
-                "LG","잠실야구장", "두산","잠실야구장",
-                "롯데","사직야구장",
-                "삼성","대구삼성라이온즈파크",
-                "한화","대전한화생명이글스파크",
-                "SSG","인천SSG랜더스필드",
-                "NC","창원NC파크",
-                "KT","수원KT위즈파크",
-                "키움","고척스카이돔"
-            );
-            // "A vs B" 에서 B가 홈팀 (원정 티켓 기준 두 번째 팀이 홈)
-            String[] parts = resp.match.split(" vs ");
-            if (parts.length == 2) {
-                String home = homeStadium.get(parts[1].trim());
-                if (home != null) { resp.stadium = home + " (홈팀 추론)"; score += 10; }
-            }
-        }
+        // ③ 구장은 DB에서 가져오므로 OCR 파싱 생략
+        // → 프론트에서 /api/games/match 호출 후 venue 값을 사용
 
         // ④ 좌석 파싱 — 더 넓은 패턴
         // "1루 KB 109 29열 10번" / "3루 오렌지 4블록 15열 22번" / "외야 지정 201구역" 등

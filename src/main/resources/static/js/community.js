@@ -50,9 +50,10 @@ function formatDateShort(isoStr) {
 async function apiFetch(url, options = {}) {
   try {
     const res = await fetch(url, options);
+    if (!res.ok) return null;
     return await res.json();
   } catch(e) {
-    console.error('API 오류:', e);
+    console.warn('API 응답 없음, 데모 데이터를 표시합니다:', e);
     return null;
   }
 }
