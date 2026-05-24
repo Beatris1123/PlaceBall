@@ -655,7 +655,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const isoDate = toISODate(data.date);
         const hint    = data.match ? data.match.split('vs')[0].trim() : '';
         if (isoDate) {
-          const gameRes  = await fetch(`/api/games/match?date=${isoDate}&hint=${encodeURIComponent(hint)}`);
+          const gameRes  = await fetch(`/api/games/match?date=${isoDate}&hint=${encodeURIComponent(hint)}&stadium=${encodeURIComponent(data.stadium || '')}`);
           const gameData = await gameRes.json();
           if (gameData.found) {
             stadiumFromDB = gameData.venue || '';
@@ -664,8 +664,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       } catch {}
 
-      // DB 구장을 OCR 결과에 덮어씀
-      data.stadium = stadiumFromDB || data.stadium || '';
+      // 구장 우선순위: OCR 인식값 > DB 조회값 (팀명 없을 때 DB fallback이 엉뚱한 구장 반환 방지)
+      data.stadium = data.stadium || stadiumFromDB || '';
       if (gameIdFromDB) data.gameId = gameIdFromDB;
 
       window._ocrResult = data;
@@ -714,7 +714,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       if (!gameId) {
         try {
-          const gameRes = await fetch(`/api/games/match?date=${isoDate}&hint=${encodeURIComponent(matchParts[0] || '')}`);
+          const gameRes = await fetch(`/api/games/match?date=${isoDate}&hint=${encodeURIComponent(matchParts[0] || '')}&stadium=${encodeURIComponent(ocr.stadium || '')}`);
           gameData = await gameRes.json();
           if (gameData.found) gameId = gameData.id;
         } catch {}

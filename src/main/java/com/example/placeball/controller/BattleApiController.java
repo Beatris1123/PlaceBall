@@ -145,7 +145,7 @@ public class BattleApiController {
 
         String desc = "티켓 인증: " + game.getGameDate() + " "
                 + game.getHomeTeam() + " vs " + game.getAwayTeam();
-        String seatZone = parseSeatZone(req.getSeat());
+        String seatZone = parseSeatZone(req.getSeat(), req.getStadium());
         LocalDate gameDate = game.getGameDate(); // 티켓의 실제 경기 날짜
 
         int earned = cheerPointService.awardTicket(member, 50, desc, seatZone, gameDate);
@@ -255,10 +255,29 @@ public class BattleApiController {
     }
 
     private String parseSeatZone(String seat) {
+        return parseSeatZone(seat, null);
+    }
+
+    // stadium이 있으면 구역번호 기반 fallback까지 수행
+    private String parseSeatZone(String seat, String stadium) {
         if (seat == null || seat.isBlank()) return null;
+
+        // 1순위: ZONE_MAP 키워드 직접 매칭 ("1루", "3루", "외야" 등)
         for (Map.Entry<String, String> e : ZONE_MAP.entrySet()) {
             if (seat.contains(e.getKey())) return e.getValue();
         }
+
+        // 2순위: 구역번호 + 구장명 매핑 (ex. 고척 404구역 → 1루)
+        if (stadium != null && !stadium.isBlank()) {
+            java.util.regex.Matcher m =
+                    java.util.regex.Pattern.compile("(\\d{3})").matcher(seat);
+            if (m.find()) {
+                int zoneNum = Integer.parseInt(m.group(1));
+                String resolved = VisionApiController.resolveZoneByNumber(stadium, zoneNum);
+                if (resolved != null) return resolved;
+            }
+        }
+
         return null;
     }
 
