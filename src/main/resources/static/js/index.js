@@ -29,6 +29,68 @@ function tc(name) { return TEAM_COLORS[name] || '#94A3B8'; }
   }
 })();
 
+// ─── 1-b. 내 인증 경기 캐시 & 포인트 패널 ───
+// 다른 섹션(경기일정, 배틀보드, 구역)이 참조할 수 있도록 전역 공유
+window._myGame = null; // { found, gameId, homeTeam, awayTeam, gameDate, seatZone, ... }
+
+async function loadMyGameAndSummary() {
+  const user = localStorage.getItem('loggedInUser') || '';
+  if (!user) {
+    // 로그인 안 된 경우에도 경기/배틀보드는 기본값으로 실행
+    window._myGame = null;
+    if (typeof window._loadGamesNow   === 'function') window._loadGamesNow();
+    if (typeof window._updateBattleNow === 'function') window._updateBattleNow();
+    if (typeof window._loadZoneNow    === 'function') window._loadZoneNow();
+    return;
+  }
+
+  try {
+    const gameRes = await fetch(`/api/battle/my-game?nickname=${encodeURIComponent(user)}`);
+    if (gameRes.ok) window._myGame = await gameRes.json();
+  } catch(e) { window._myGame = null; }
+
+  // _myGame 확정 후 경기 관련 섹션 실행
+  if (typeof window._loadGamesNow    === 'function') window._loadGamesNow();
+  if (typeof window._updateBattleNow === 'function') window._updateBattleNow();
+  if (typeof window._loadZoneNow     === 'function') window._loadZoneNow();
+
+  try {
+    const sumRes = await fetch(`/api/battle/my-summary?nickname=${encodeURIComponent(user)}`);
+    if (!sumRes.ok) return;
+    const data = await sumRes.json();
+
+    const panel = document.getElementById('my-points-panel');
+    if (!panel) return;
+
+    if (!data.found) { panel.classList.remove('visible'); return; }
+
+    const homeTeam = data.homeTeam || '';
+    const awayTeam = data.awayTeam || '';
+    const gameDate = data.gameDate || '';
+
+    const matchEl  = document.getElementById('mpp-match');
+    const zoneEl   = document.getElementById('mpp-zone');
+    const ticketEl = document.getElementById('mpp-ticket');
+    const writeEl  = document.getElementById('mpp-write');
+    const totalEl  = document.getElementById('mpp-total');
+
+    if (matchEl)  matchEl.textContent  = `${homeTeam} vs ${awayTeam}  (${gameDate})`;
+    if (zoneEl && data.seatZone) {
+      zoneEl.textContent   = data.seatZone + ' 구역';
+      zoneEl.style.display = 'inline';
+    }
+    if (ticketEl) ticketEl.textContent = data.ticketPt ?? 0;
+    if (writeEl)  writeEl.textContent  = data.writePt  ?? 0;
+    if (totalEl)  totalEl.textContent  = data.total    ?? 0;
+
+    panel.classList.add('visible');
+  } catch(e) {}
+}
+
+document.addEventListener('DOMContentLoaded', loadMyGameAndSummary);
+// 티켓 인증 성공 후 즉시 갱신용 전역 함수
+window._refreshMyPoints = loadMyGameAndSummary;
+
 // ─── 2. 경기 일정 (오늘의 전장) ───
 (function() {
   const TEAM_COLORS_MAP = {
@@ -42,7 +104,6 @@ function tc(name) { return TEAM_COLORS[name] || '#94A3B8'; }
       const res   = await fetch('/api/games/today');
       const games = await res.json();
       if (!games || games.length === 0) {
-        // 오늘 경기 없음 표시
         const container = document.getElementById('today-match-container');
         if (container) container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:1rem;">오늘 경기가 없습니다</div>';
         const timeEl = document.getElementById('today-match-time');
@@ -52,7 +113,14 @@ function tc(name) { return TEAM_COLORS[name] || '#94A3B8'; }
 
       const myTeam = localStorage.getItem('favoriteTeam') || '';
       let g = games[0];
-      if (myTeam) {
+
+      // ① 내 인증 경기 우선 (my-game API)
+      if (window._myGame && window._myGame.found) {
+        const certified = games.find(x =>
+          x.homeTeam === window._myGame.homeTeam && x.awayTeam === window._myGame.awayTeam);
+        if (certified) g = certified;
+      } else if (myTeam) {
+        // ② 없으면 favoriteTeam 기반
         const found = games.find(x => x.homeTeam === myTeam || x.awayTeam === myTeam);
         if (found) g = found;
       }
@@ -83,7 +151,8 @@ function tc(name) { return TEAM_COLORS[name] || '#94A3B8'; }
 
     } catch(e) {}
   }
-  document.addEventListener('DOMContentLoaded', loadGames);
+  window._loadGamesNow = loadGames;
+  // DOMContentLoaded는 loadMyGameAndSummary에서 _myGame 확정 후 호출
 })();
 
 // ─── 3. 점령전 점수판 & 응원 게이지 (오늘 경기 기준) ───
@@ -98,14 +167,17 @@ function tc(name) { return TEAM_COLORS[name] || '#94A3B8'; }
     try {
       const myTeam = localStorage.getItem('favoriteTeam') || '';
 
-      // 오늘 경기 기준 배틀 현황
       const res    = await fetch('/api/battle/today');
       const battles = await res.json();
       if (!battles || !battles.length) return;
 
-      // 내 응원팀 경기 우선, 없으면 첫 번째
+      // ① 내 인증 경기 우선
       let b = battles[0];
-      if (myTeam) {
+      if (window._myGame && window._myGame.found) {
+        const certified = battles.find(x =>
+          x.homeTeam === window._myGame.homeTeam && x.awayTeam === window._myGame.awayTeam);
+        if (certified) b = certified;
+      } else if (myTeam) {
         const found = battles.find(x => x.homeTeam === myTeam || x.awayTeam === myTeam);
         if (found) b = found;
       }
@@ -166,7 +238,8 @@ function tc(name) { return TEAM_COLORS[name] || '#94A3B8'; }
     } catch(e) {}
   }
 
-  document.addEventListener('DOMContentLoaded', updateBattleBoard);
+  window._updateBattleNow = updateBattleBoard;
+  // DOMContentLoaded는 loadMyGameAndSummary에서 _myGame 확정 후 호출
   setInterval(updateBattleBoard, 30000); // 30초마다 갱신
 })();
 
@@ -655,11 +728,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const isoDate = toISODate(data.date);
         const hint    = data.match ? data.match.split('vs')[0].trim() : '';
         if (isoDate) {
-          const gameRes  = await fetch(`/api/games/match?date=${isoDate}&hint=${encodeURIComponent(hint)}&stadium=${encodeURIComponent(data.stadium || '')}`);
+          const matchTeams = (data.match || '').split('vs').map(s => s.trim());
+          const homeHint   = matchTeams[0] || '';
+          const awayHint   = matchTeams[1] || '';
+          const gameRes  = await fetch(`/api/games/match?date=${isoDate}&hint=${encodeURIComponent(homeHint)}&awayHint=${encodeURIComponent(awayHint)}&stadium=${encodeURIComponent(data.stadium || '')}`);
           const gameData = await gameRes.json();
           if (gameData.found) {
             stadiumFromDB = gameData.venue || '';
             gameIdFromDB  = gameData.id    || null;
+            // ★ 핵심: 팀명 인식 불가일 때 DB 경기 정보로 대진 채우기
+            if (!data.match && gameData.homeTeam && gameData.awayTeam) {
+              data.match = gameData.homeTeam + ' vs ' + gameData.awayTeam;
+            }
           }
         }
       } catch {}
@@ -714,7 +794,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       if (!gameId) {
         try {
-          const gameRes = await fetch(`/api/games/match?date=${isoDate}&hint=${encodeURIComponent(matchParts[0] || '')}&stadium=${encodeURIComponent(ocr.stadium || '')}`);
+          const gameRes = await fetch(`/api/games/match?date=${isoDate}&hint=${encodeURIComponent(matchParts[0] || '')}&awayHint=${encodeURIComponent(matchParts[1] || '')}&stadium=${encodeURIComponent(ocr.stadium || '')}`);
           gameData = await gameRes.json();
           if (gameData.found) gameId = gameData.id;
         } catch {}
@@ -805,9 +885,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     showStep('done');
 
-    // 완료 후 점수판 갱신
+    // 완료 후 점수판 + 포인트 패널 갱신
     setTimeout(() => {
       if (typeof updateBattleBoard === 'function') updateBattleBoard();
+      if (typeof window._refreshMyPoints === 'function') window._refreshMyPoints();
     }, 1000);
   }
 
@@ -865,7 +946,11 @@ document.addEventListener('click', e => {
     const apiKey  = info.api;
     const zoneEl  = zoneData?.zones?.[apiKey];
 
-    // 구역 이름/설명 (삭제됨 — 구역 버튼 클릭 시 별도 처리 없음)
+    // 구역 이름/설명
+    const zoneName = document.getElementById('zone-name');
+    const zoneDesc = document.getElementById('zone-desc');
+    if (zoneName) zoneName.textContent = info.name;
+    if (zoneDesc) zoneDesc.textContent = info.desc;
 
     const homeTeam = zoneData?.homeTeam || '홈';
     const awayTeam = zoneData?.awayTeam || '원정';
@@ -909,15 +994,24 @@ document.addEventListener('click', e => {
     if (totalAwayBar) { totalAwayBar.style.width = awayPct + '%'; totalAwayBar.style.background = awayColor; }
     if (totalAwayPct) { totalAwayPct.textContent = awayPct + '%'; totalAwayPct.style.color = awayColor; }
 
-    // 헤더 비율 (삭제됨)
+    // 헤더 비율 업데이트 (상단 "현재 응원 비율" 텍스트)
+    const zoneRatioEl = document.getElementById('zone-ratio');
+    if (zoneRatioEl) {
+      zoneRatioEl.innerHTML =
+        `<span style="color:${homeColor}">${homeTeam} ${homePct}%</span>` +
+        `<span style="color:var(--muted); font-size:0.95rem; margin:0 3px;">:</span>` +
+        `<span style="color:${awayColor}">${awayTeam} ${awayPct}%</span>`;
+    }
   }
 
   // ── API 로드 ──
   async function loadZoneData() {
     try {
-      const myTeam = localStorage.getItem('favoriteTeam') || '';
-      const url    = myTeam ? `/api/battle/zones?team=${encodeURIComponent(myTeam)}` : '/api/battle/zones';
-      const res    = await fetch(url);
+      // ① 인증 경기 팀 우선, ② 없으면 favoriteTeam
+      const certTeam = window._myGame?.found ? window._myGame.homeTeam : null;
+      const myTeam   = certTeam || localStorage.getItem('favoriteTeam') || '';
+      const url      = myTeam ? `/api/battle/zones?team=${encodeURIComponent(myTeam)}` : '/api/battle/zones';
+      const res      = await fetch(url);
       if (!res.ok) return;
       zoneData = await res.json();
     } catch {}
@@ -932,7 +1026,6 @@ document.addEventListener('click', e => {
 
   // ── 존 버튼 이벤트 ──
   document.addEventListener('DOMContentLoaded', () => {
-    loadZoneData();
     setInterval(loadZoneData, 30000); // 30초마다 갱신
 
     document.querySelectorAll('.zone-btn').forEach(btn => {
@@ -971,4 +1064,7 @@ document.addEventListener('click', e => {
       if (el) { el.style.opacity = '0.95'; el.style.filter = 'brightness(1.2)'; }
     });
   });
+
+  // DOMContentLoaded는 loadMyGameAndSummary에서 _myGame 확정 후 호출
+  window._loadZoneNow = loadZoneData;
 })();

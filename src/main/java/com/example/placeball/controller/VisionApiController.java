@@ -39,6 +39,12 @@ public class VisionApiController {
         put("대전한화생명볼파크",  "대전한화생명볼파크");
         put("대전",              "대전한화생명볼파크");
         put("고양",              "고양국제야구장");
+        put("대전한화생명볼파크",  "대전한화생명볼파크");
+        put("대전볼파크",         "대전한화생명볼파크");
+        put("인천SSG랜더스필드",  "인천SSG랜더스필드");
+        put("인천SSG",           "인천SSG랜더스필드");
+        put("수원KT위즈파크",     "수원KT위즈파크");
+        put("수원위즈파크",       "수원KT위즈파크");
     }};
 
     // ── 구장별 구역번호 → seatZone 매핑 ──
@@ -59,13 +65,14 @@ public class VisionApiController {
         });
         // 잠실야구장 (LG·두산 홈구장)
         put("잠실야구장", new int[][]{
-                {101, 114, 0},
-                {201, 214, 1},
-                {301, 330, 2},
-                {114, 118, 3},
-                {214, 218, 3},
-                {118, 140, 4},
-                {218, 240, 4},
+                {101, 115, 0},   // 1루 오렌지석
+                {201, 215, 1},   // 3루 네이비석
+                {301, 321, 1},   // 3루 외야 응원석 (310블럭 포함 — 네이비 연장)
+                {321, 341, 2},   // 외야 그린석
+                {115, 121, 3},   // 중앙 테이블
+                {215, 221, 3},
+                {121, 141, 4},   // 내야
+                {221, 241, 4},
         });
         // 광주-기아 챔피언스 필드
         put("광주-기아 챔피언스 필드", new int[][]{
@@ -115,13 +122,13 @@ public class VisionApiController {
                 {112, 116, 3},
                 {116, 130, 4},
         });
-        // 대전한화생명볼파크
+        // 대전한화생명볼파크 (한화 홈)
         put("대전한화생명볼파크", new int[][]{
-                {101, 112, 0},
-                {201, 212, 1},
-                {301, 320, 2},
-                {112, 116, 3},
-                {116, 130, 4},
+                {100, 112, 0},  // 1루 (100A, 100B, 101~111)
+                {200, 212, 1},  // 3루
+                {301, 325, 2},  // 외야
+                {112, 116, 3},  // 중앙
+                {116, 135, 4},  // 내야
         });
     }};
 
@@ -226,26 +233,31 @@ public class VisionApiController {
             }
         }
 
-        // ② 구장명 파싱 (신규) ─────────────────────────────────
+        // ② 구장명 파싱: 직접 매칭 ────────────────────────────────
+        // ② 구장명 파싱: 직접 매칭 (개선판)
+        String noSpaceText = text.replaceAll("\\s+", ""); // 띄어쓰기 전부 제거
         for (Map.Entry<String, String> e : STADIUM_ALIAS.entrySet()) {
-            if (text.contains(e.getKey())) {
+            if (noSpaceText.contains(e.getKey().replaceAll("\\s+", ""))) {
                 resp.stadium = e.getValue();
                 score += 20;
                 break;
             }
         }
+        // 구장명 텍스트가 없으면 홈팀(첫 번째 팀)으로 역산
+        // 지류 티켓처럼 구장명이 인쇄되지 않는 경우 대응
+        // ※ 팀명 파싱(③)보다 먼저 실행할 수 없으므로 ③ 이후에도 한 번 더 체크한다
 
         // ③ 팀명 파싱
         Map<String, String> teamAlias = new LinkedHashMap<>();
-        // 복합 표기 먼저 (부분 매칭 오류 방지)
+        // ★ 복합 표기 먼저 — vs 패턴에서 "KT위즈 vs 삼성라이온즈" 등 정확히 정규화
         teamAlias.put("KIA타이거즈","KIA"); teamAlias.put("기아타이거즈","KIA"); teamAlias.put("KIA TIGERS","KIA");
         teamAlias.put("LG트윈스","LG");     teamAlias.put("LG TWINS","LG");
-        teamAlias.put("삼성라이온즈","삼성"); teamAlias.put("SAMSUNG LIONS","삼성");
-        teamAlias.put("두산베어스","두산");  teamAlias.put("DOOSAN BEARS","두산");
-        teamAlias.put("롯데자이언츠","롯데"); teamAlias.put("LOTTE GIANTS","롯데");
+        teamAlias.put("삼성라이온즈","삼성"); teamAlias.put("SAMSUNG LIONS","삼성"); teamAlias.put("삼성 라이온즈","삼성");
+        teamAlias.put("두산베어스","두산");  teamAlias.put("DOOSAN BEARS","두산"); teamAlias.put("두산 베어스","두산");
+        teamAlias.put("롯데자이언츠","롯데"); teamAlias.put("LOTTE GIANTS","롯데"); teamAlias.put("롯데 자이언츠","롯데");
         teamAlias.put("SSG랜더스","SSG");   teamAlias.put("SSG LANDERS","SSG"); teamAlias.put("SK와이번스","SSG");
-        teamAlias.put("NC다이노스","NC");    teamAlias.put("NC DINOS","NC");
-        teamAlias.put("KT위즈","KT");       teamAlias.put("KT WIZ","KT");
+        teamAlias.put("NC다이노스","NC");    teamAlias.put("NC DINOS","NC"); teamAlias.put("NC 다이노스","NC");
+        teamAlias.put("KT위즈","KT");       teamAlias.put("KT WIZ","KT"); teamAlias.put("KT 위즈","KT");
         teamAlias.put("한화이글스","한화");  teamAlias.put("한화 이글스","한화"); teamAlias.put("HANWHA EAGLES","한화");
         teamAlias.put("키움히어로즈","키움"); teamAlias.put("키움 히어로즈","키움"); teamAlias.put("KIWOOM HEROES","키움");
         // 단일 표기
@@ -280,25 +292,45 @@ public class VisionApiController {
             if (found.size() >= 2)      { resp.match = found.get(0) + " vs " + found.get(1); score += 15; }
             else if (found.size() == 1) { resp.match = found.get(0) + " 경기"; score += 5; }
         }
+        // ③-후처리: 구장명 여전히 없으면 홈팀으로 역산 ───────────────────
+        if (resp.stadium == null && resp.match != null && resp.match.contains(" vs ")) {
+            String homeTeam = resp.match.split(" vs ")[0].trim();
+            String derived  = homeTeamToStadium(homeTeam);
+            if (derived != null) { resp.stadium = derived; score += 10; }
+        }
+        // 팀명이 한 개뿐이어도 시도
+        if (resp.stadium == null && resp.match != null && resp.match.contains(" 경기")) {
+            String homeTeam = resp.match.replace(" 경기", "").trim();
+            String derived  = homeTeamToStadium(homeTeam);
+            if (derived != null) { resp.stadium = derived; score += 5; }
+        }
 
         // ④ 좌석 파싱 ─────────────────────────────────────────
         // 우선순위: 구역명 포함 → 구역번호만 → 키워드
         Pattern[] seatPatterns = {
-                // 1. 구역명 + 구역번호 + 알파벳열 (ex. "1루 4층지정석(홈팀) 404구역 E열 7")
-                Pattern.compile("([1-3]루|외야|중앙|그린|오렌지|네이비|블루|테이블|프리미엄|파울)[^\\n]{0,30}?(\\d{3})구역\\s+([A-Z]열)\\s+(\\d+)"),
-                // 2. 구역명 + 구역번호 + 숫자열 (ex. "외야 그린석 301구역 15열 22번")
-                Pattern.compile("([1-3]루|외야|중앙|그린|오렌지|네이비|블루|테이블|프리미엄|파울)[^\\n]{0,30}?(\\d{3})구역\\s+(\\d+)열\\s+(\\d+)번?"),
-                // 3. 구역명 + 영문코드 + 숫자 (ex. "1루 KB 109 29열 10번")
-                Pattern.compile("([1-3]루|외야|중앙)\\s+([A-Z가-힣]{1,10})\\s+(\\d{2,3})\\s+(\\d{1,3})열\\s+(\\d{1,3})번", Pattern.CASE_INSENSITIVE),
-                // 4. 구역명 + 블록 (ex. "1루 오렌지 4블록 15열")
-                Pattern.compile("([1-3]루|외야|중앙)\\s+([A-Z가-힣]{1,10})\\s+(\\d{1,3}블록|[A-Z]구역)\\s*(\\d{1,3}열)?\\s*(\\d{1,3}번)?", Pattern.CASE_INSENSITIVE),
-                // 5. 구역번호만 + 알파벳열 (ex. "404구역 E열 7") — 구장명으로 seatZone 보정
+                // 1. 구역명 + 구역번호(알파벳 혼합) + 알파벳열 (ex. "중앙 4층지정석 415구역 E열 7", "100B구역 E열")
+                Pattern.compile("([1-3]루|외야|중앙|그린|오렌지|네이비|블루|테이블|프리미엄|파울)[^\\n]{0,40}?([A-Z]?\\d{2,3}[A-Z]?)구역\\s+([A-Z]열)\\s*(\\d*)"),
+                // 2. 구역명 + 구역번호(알파벳 혼합) + 숫자열 (ex. "외야 그린석 301구역 15열 22번", "100B구역 6열 19번")
+                Pattern.compile("([1-3]루|외야|중앙|그린|오렌지|네이비|블루|테이블|프리미엄|파울)[^\\n]{0,40}?([A-Z]?\\d{2,3}[A-Z]?)구역\\s+(\\d+)열\\s*(\\d*)번?"),
+                // 3. ★ 색상+블럭 통합 (색상 그룹 별도 캡처 — "1루 네이비석\n310블럭 13열 156번")
+                Pattern.compile("(?:([1-3]루|외야|중앙)\\s+)?(네이비|오렌지|그린|블루|익사이팅|레드)석?\\s*\\n?\\s*(\\d{1,3})블[럭록]\\s+(\\d{1,3})열\\s+(\\d{1,3})번?"),
+                // 3b. 구역명+블럭 (색상 없는 경우)
+                Pattern.compile("([1-3]루|외야|중앙)석?\\s*[^\\n]{0,10}\\n?\\s*(\\d{1,3})블[럭록]\\s+(\\d{1,3})열\\s+(\\d{1,3})번?"),
+                // 3c. 블럭만
+                Pattern.compile("(\\d{1,3})블[럭록]\\s+(\\d{1,3})열\\s+(\\d{1,3})번?"),
+                // 4. 구역명 + 블록코드 (ex. "1루 오렌지 4블록 15열")
+                Pattern.compile("([1-3]루|외야|중앙)\\s+([A-Z가-힣]{1,10})\\s+(\\d{1,3}블[럭록])\\s*(\\d{1,3}열)?\\s*(\\d{1,3}번)?", Pattern.CASE_INSENSITIVE),
+                // 5. 순수 숫자 구역번호 + 알파벳열 (ex. "404구역 E열 7")
                 Pattern.compile("(\\d{3})구역\\s+([A-Z]열)\\s+(\\d+)"),
-                // 6. 구역번호만 + 숫자열 (ex. "108구역 15열 7번") — 구장명으로 seatZone 보정
+                // 6. 순수 숫자 구역번호 + 숫자열 (ex. "108구역 15열 7번")
                 Pattern.compile("(\\d{3})구역\\s+(\\d+)열\\s+(\\d+)번?"),
-                // 7. 숫자 번호만 (ex. "109 29열 10번")
+                // 7. ★ 알파벳 혼합 구역번호 단독 (ex. "100B구역 6열 19번")
+                Pattern.compile("(\\d{2,3}[A-Z])구역\\s+(\\d+)열\\s+(\\d+)번?"),
+                // 8. 숫자 번호만 (ex. "109 29열 10번")
                 Pattern.compile("(\\d{2,3})\\s+(\\d{1,3})열\\s+(\\d{1,3})번"),
-                // 8. 키워드 단독
+                // 9. 키워드 + 구역번호 조합 (ex. "네이비석 310블럭")
+                Pattern.compile("(네이비|오렌지|그린|블루|테이블|프리미엄|익사이팅|파울)석?\\s*[^\\n]{0,20}?(\\d{1,3}블[럭록]|\\d{3}구역)?"),
+                // 10. 키워드 단독 (최후순위)
                 Pattern.compile("([1-3]루|외야|그린|오렌지|네이비|블루|테이블|프리미엄|익사이팅|파울)\\s*([A-Z가-힣\\d\\-]+)?"),
         };
         for (Pattern sp : seatPatterns) {
@@ -338,6 +370,24 @@ public class VisionApiController {
         }
 
         resp.confidence = Math.min(score, 100);
+    }
+
+    /** 홈팀명 → 구장명 (지류 티켓처럼 구장명 텍스트가 없을 때 역산) */
+    private static String homeTeamToStadium(String homeTeam) {
+        if (homeTeam == null) return null;
+        switch (homeTeam) {
+            case "KIA":  return "광주-기아 챔피언스 필드";
+            case "LG":
+            case "두산": return "잠실야구장";
+            case "삼성": return "대구삼성라이온즈파크";
+            case "롯데": return "사직야구장";
+            case "한화": return "대전한화생명볼파크";
+            case "SSG":  return "인천SSG랜더스필드";
+            case "NC":   return "창원NC파크";
+            case "KT":   return "수원KT위즈파크";
+            case "키움": return "고척스카이돔";
+            default:     return null;
+        }
     }
 
     /**

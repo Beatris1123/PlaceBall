@@ -188,7 +188,91 @@ public class BattleApiController {
         return ResponseEntity.ok(Map.of("certified", certified));
     }
 
-    // ── 6. 점령전 결과 확정 ──
+    // ── 6. 내 인증 경기 조회 — 프론트 경기 필터링용 ──
+    // 오늘 이후 가장 가까운 인증 티켓의 경기를 반환 (경기 일정·배틀보드 표시에 사용)
+    @GetMapping("/my-game")
+    @Transactional(readOnly = true)
+    public ResponseEntity<Map<String, Object>> getMyGame(
+            @RequestParam String nickname) {
+
+        Optional<Member> memberOpt = memberRepository.findByNickname(nickname);
+        if (memberOpt.isEmpty())
+            return ResponseEntity.ok(Map.of("found", false));
+        Member member = memberOpt.get();
+
+        // 오늘 이후 가장 가까운 인증 티켓 조회
+        List<com.example.placeball.domain.CheerPoint> tickets =
+                cheerPointRepository.findUpcomingTickets(member, LocalDate.now());
+        if (tickets.isEmpty())
+            return ResponseEntity.ok(Map.of("found", false));
+
+        LocalDate gameDate = tickets.get(0).getGameDate();
+        List<Game> games = gameRepository.findByGameDate(gameDate);
+        String favoriteTeam = member.getFavoriteTeam();
+        Game game = games.stream()
+                .filter(g -> favoriteTeam == null || favoriteTeam.equals(g.getHomeTeam()) || favoriteTeam.equals(g.getAwayTeam()))
+                .findFirst()
+                .orElse(games.isEmpty() ? null : games.get(0));
+
+        if (game == null)
+            return ResponseEntity.ok(Map.of("found", false));
+
+        Map<String, Object> result = new LinkedHashMap<>(buildBattleStatus(game));
+        result.put("found", true);
+        result.put("seatZone", tickets.get(0).getSeatZone() != null ? tickets.get(0).getSeatZone() : "");
+        return ResponseEntity.ok(result);
+    }
+
+    // ── 7. 내 경기 포인트 요약 ──
+    @GetMapping("/my-summary")
+    @Transactional(readOnly = true)
+    public ResponseEntity<Map<String, Object>> getMySummary(
+            @RequestParam String nickname) {
+
+        Optional<Member> memberOpt = memberRepository.findByNickname(nickname);
+        if (memberOpt.isEmpty())
+            return ResponseEntity.ok(Map.of("found", false, "total", 0));
+        Member member = memberOpt.get();
+
+        // 오늘 이후 가장 가까운 인증 티켓의 gameDate 기준
+        List<com.example.placeball.domain.CheerPoint> tickets =
+                cheerPointRepository.findUpcomingTickets(member, LocalDate.now());
+        if (tickets.isEmpty())
+            return ResponseEntity.ok(Map.of("found", false, "total", 0));
+
+        LocalDate gameDate = tickets.get(0).getGameDate();
+        int total = cheerPointRepository.sumByMemberAndGameDate(member, gameDate);
+
+        // 타입별 분류
+        List<com.example.placeball.domain.CheerPoint> details =
+                cheerPointRepository.findByMemberAndGameDate(member, gameDate);
+
+        int ticketPt = 0, writePt = 0;
+        for (com.example.placeball.domain.CheerPoint cp : details) {
+            if ("BATTLE_TICKET".equals(cp.getPointType())) ticketPt += cp.getAmount();
+            else writePt += cp.getAmount();
+        }
+
+        // 해당 경기 팀 정보
+        List<Game> games = gameRepository.findByGameDate(gameDate);
+        String favoriteTeam = member.getFavoriteTeam();
+        Game game = games.stream()
+                .filter(g -> favoriteTeam == null || favoriteTeam.equals(g.getHomeTeam()) || favoriteTeam.equals(g.getAwayTeam()))
+                .findFirst().orElse(games.isEmpty() ? null : games.get(0));
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("found", true);
+        result.put("total", total);
+        result.put("ticketPt", ticketPt);
+        result.put("writePt", writePt);
+        result.put("gameDate", gameDate.toString());
+        result.put("homeTeam", game != null ? game.getHomeTeam() : "");
+        result.put("awayTeam", game != null ? game.getAwayTeam() : "");
+        result.put("seatZone", tickets.get(0).getSeatZone() != null ? tickets.get(0).getSeatZone() : "");
+        return ResponseEntity.ok(result);
+    }
+
+    // ── 8. 점령전 결과 확정 ──
     @PostMapping("/finalize")
     @Transactional
     public ResponseEntity<Map<String, Object>> finalizeBattle(

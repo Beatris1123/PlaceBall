@@ -630,6 +630,58 @@
       .nav-right{ gap:6px; }
       .btn-diary, .btn-login{ padding:6px 10px; font-size:11.5px; }
     }
+
+    /* ── 내 경기 포인트 패널 ── */
+    #my-points-panel {
+      background: var(--paper);
+      border: 1.5px solid var(--line);
+      border-radius: var(--r-lg);
+      padding: 0.9rem 1.1rem;
+      margin: 0 auto 0.6rem;
+      max-width: 1200px;
+      width: calc(100% - 2rem);
+      display: none;
+    }
+    #my-points-panel.visible { display: block; }
+    .mpp-inner {
+      display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    }
+    .mpp-match {
+      font-size: 13px; font-weight: 700; color: var(--ink);
+      white-space: nowrap;
+    }
+    .mpp-divider {
+      width: 1px; height: 24px; background: var(--line-soft); flex-shrink:0;
+    }
+    .mpp-items {
+      display: flex; gap: 0.55rem; flex-wrap: wrap; flex: 1;
+    }
+    .mpp-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11.5px; font-weight: 600;
+      background: var(--bg-2); border: 1px solid var(--line-soft);
+      border-radius: var(--r-pill); padding: 3px 10px;
+      color: var(--ink-2); white-space: nowrap;
+    }
+    .mpp-chip .chip-val { font-weight: 800; color: var(--kia); }
+    .mpp-chip.ticket { border-color: rgba(230,0,18,0.3); background: rgba(230,0,18,0.04); }
+    .mpp-chip.write  { border-color: rgba(16,163,74,0.3); background: rgba(16,163,74,0.04); }
+    .mpp-chip.write .chip-val { color: var(--green); }
+    .mpp-total {
+      margin-left: auto; font-size: 13px; font-weight: 700; color: var(--ink);
+      white-space: nowrap;
+    }
+    .mpp-total-val {
+      font-size: 16px; font-weight: 900;
+      font-family: 'Bebas Neue', sans-serif; color: var(--kia);
+      margin-left: 4px;
+    }
+    .mpp-zone-badge {
+      font-size: 10.5px; font-weight: 600;
+      background: rgba(230,0,18,0.08); color: var(--kia);
+      border: 1px solid rgba(230,0,18,0.2);
+      border-radius: var(--r-pill); padding: 2px 8px; white-space: nowrap;
+    }
   </style>
 
 </head>
@@ -709,6 +761,22 @@
     </div>
   </div>
 </header>
+
+<!-- ── 내 경기 포인트 패널 (대시보드 ↔ 직관다이어리 사이) ── -->
+<div id="my-points-panel">
+  <div class="mpp-inner">
+    <span id="mpp-match" class="mpp-match">-</span>
+    <span id="mpp-zone" class="mpp-zone-badge" style="display:none"></span>
+    <div class="mpp-divider"></div>
+    <div class="mpp-items">
+      <span class="mpp-chip ticket">🎟 티켓 인증 <span class="chip-val" id="mpp-ticket">0</span>pt</span>
+      <span class="mpp-chip write">✍️ 커뮤니티 활동 <span class="chip-val" id="mpp-write">0</span>pt</span>
+    </div>
+    <div class="mpp-total">
+      내 기여 포인트 <span class="mpp-total-val" id="mpp-total">0</span>pt
+    </div>
+  </div>
+</div>
 
 <main>
   <!-- ── LEFT COLUMN ── -->
@@ -972,15 +1040,13 @@
       <div class="zone-panel">
         <div class="zone-panel-top">
           <div>
-            <div class="zone-name" id="zone-name">KIA 중앙 응원석</div>
-            <div class="zone-desc" id="zone-desc">홈팀 중심 응원이 가장 크게 모이는 메인 응원 구역입니다.</div>
+            <div class="zone-name" id="zone-name">-</div>
+            <div class="zone-desc" id="zone-desc"></div>
           </div>
           <div style="text-align:right; flex-shrink:0;">
             <div class="zone-ratio-label">현재 응원 비율</div>
             <div class="zone-ratio-val" id="zone-ratio">
-              <span style="color:var(--kia)">KIA 88%</span>
-              <span style="color:var(--muted); font-size:0.95rem; margin:0 3px;">:</span>
-              <span style="color:var(--lg-mid)">LG 12%</span>
+              <span style="color:var(--muted)">불러오는 중...</span>
             </div>
           </div>
         </div>
@@ -1199,27 +1265,27 @@
             <div style="font-size:12px; font-weight:700; color:var(--ink); margin-bottom:0.5rem;">📍 내 좌석 구역을 선택해주세요</div>
             <div style="display:flex; flex-wrap:wrap; gap:6px;" id="battle-zone-btns">
               <button class="battle-zone-btn" data-zone="3루" data-label="3루 오렌지"
-                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                      style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
                        border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
                 3루 오렌지
               </button>
               <button class="battle-zone-btn" data-zone="1루" data-label="1루 오렌지"
-                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                      style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
                        border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
                 1루 오렌지
               </button>
               <button class="battle-zone-btn" data-zone="외야" data-label="중앙 외야"
-                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                      style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
                        border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
                 중앙 외야
               </button>
               <button class="battle-zone-btn" data-zone="중앙" data-label="테이블·프리미엄"
-                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                      style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
                        border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
                 테이블·프리미엄
               </button>
               <button class="battle-zone-btn" data-zone="내야" data-label="외야 파울존"
-                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                      style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
                        border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
                 외야 파울존
               </button>
@@ -1329,28 +1395,28 @@
 
 <script src="js/index.js" onerror="console.warn('index.js missing')"></script>
 <script>
-/* 챗봇 입력 더미 동작 (프리뷰용) */
-(function(){
-  const send=document.getElementById('chat-send');
-  const input=document.getElementById('chat-input');
-  const scroll=document.getElementById('chat-messages');
-  if(!send||!input||!scroll) return;
-  send.addEventListener('click', ()=>{
-    const v=input.value.trim(); if(!v) return;
-    const u=document.createElement('div');
-    u.className='bubble'; u.style.alignSelf='flex-end';
-    u.style.background='#FCE9EB'; u.style.borderColor='#E60012';
-    u.textContent=v; scroll.appendChild(u);
-    input.value=''; scroll.scrollTop=scroll.scrollHeight;
-    setTimeout(()=>{
-      const b=document.createElement('div');
-      b.className='bubble bubble-bot';
-      b.textContent='(미리보기 모드) 실제 응답은 서버 연결 후 동작합니다.';
-      scroll.appendChild(b); scroll.scrollTop=scroll.scrollHeight;
-    },350);
-  });
-  input.addEventListener('keydown',e=>{ if(e.key==='Enter') send.click(); });
-})();
+  /* 챗봇 입력 더미 동작 (프리뷰용) */
+  (function(){
+    const send=document.getElementById('chat-send');
+    const input=document.getElementById('chat-input');
+    const scroll=document.getElementById('chat-messages');
+    if(!send||!input||!scroll) return;
+    send.addEventListener('click', ()=>{
+      const v=input.value.trim(); if(!v) return;
+      const u=document.createElement('div');
+      u.className='bubble'; u.style.alignSelf='flex-end';
+      u.style.background='#FCE9EB'; u.style.borderColor='#E60012';
+      u.textContent=v; scroll.appendChild(u);
+      input.value=''; scroll.scrollTop=scroll.scrollHeight;
+      setTimeout(()=>{
+        const b=document.createElement('div');
+        b.className='bubble bubble-bot';
+        b.textContent='(미리보기 모드) 실제 응답은 서버 연결 후 동작합니다.';
+        scroll.appendChild(b); scroll.scrollTop=scroll.scrollHeight;
+      },350);
+    });
+    input.addEventListener('keydown',e=>{ if(e.key==='Enter') send.click(); });
+  })();
 </script>
 </body>
 </html>

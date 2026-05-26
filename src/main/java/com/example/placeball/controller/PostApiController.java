@@ -29,7 +29,7 @@ public class PostApiController {
             "chat",     3,
             "photo",    10,
             "cheer",    3,
-            "analysis", 5,
+            "analysis", 3,
             "info",     3
     );
 

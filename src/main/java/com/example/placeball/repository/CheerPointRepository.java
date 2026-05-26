@@ -84,4 +84,29 @@ public interface CheerPointRepository extends JpaRepository<CheerPoint, Long> {
     // ── 중복 인증 체크 (티켓 인증용) ──
     boolean existsByMemberAndPointTypeAndDescription(
             Member member, String pointType, String description);
+
+    // ── 내 경기 총 포인트 합산 (gameDate 기준, 특정 멤버) ──
+    @Query("""
+        SELECT COALESCE(SUM(cp.amount), 0)
+        FROM CheerPoint cp
+        WHERE cp.member = :member
+          AND cp.gameDate = :gameDate
+        """)
+    int sumByMemberAndGameDate(
+            @Param("member")   Member member,
+            @Param("gameDate") LocalDate gameDate
+    );
+
+    // ── 내 경기 포인트 타입별 내역 (gameDate 기준) ──
+    @Query("""
+        SELECT cp
+        FROM CheerPoint cp
+        WHERE cp.member = :member
+          AND cp.gameDate = :gameDate
+        ORDER BY cp.earnedAt ASC
+        """)
+    List<CheerPoint> findByMemberAndGameDate(
+            @Param("member")   Member member,
+            @Param("gameDate") LocalDate gameDate
+    );
 }
