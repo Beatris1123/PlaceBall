@@ -509,7 +509,7 @@ async function loadGameList() {
 
 function renderGameList(games, myTeam) {
   const listEl = document.getElementById('f-game-list');
-  if (!games.length) { listEl.innerHTML=`<div class="game-select-empty">이번 달 ${myTeam}의 종료된 경기가 없어요</div>`; return; }
+  if (!games.length) { listEl.innerHTML=`<div class="game-select-empty">이번 달 ${myTeam}의 경기가 없어요</div>`; return; }
   listEl.innerHTML = games.map(g => {
     const isHome=g.homeTeam===myTeam, opponent=isHome?g.awayTeam:g.homeTeam;
     const myScore=isHome?g.homeScore:g.awayScore, oppScore=isHome?g.awayScore:g.homeScore;
@@ -546,47 +546,49 @@ function selectGame(item) {
   const today=new Date(); today.setHours(0,0,0,0);
 
   let result;
-  if (gameDate > today) {
-    // 미래 경기 → 경기 예정
+  if (gameDate >= today) {
+    // 오늘 포함 미래 경기 → 경기 예정
     result = 'scheduled';
-  } else if (status === 'finished' && !isNaN(myScore) && !isNaN(oppScore)) {
-    // 종료된 경기 + 점수 있음 → 승/패/무 자동 설정
+  } else if (!isNaN(myScore) && !isNaN(oppScore) && myScore >= 0 && oppScore >= 0) {
+    // 과거 경기 + 점수 있음 → 승/패/무 자동 설정
     result = myScore > oppScore ? 'win' : myScore < oppScore ? 'lose' : 'draw';
   } else {
-    // 지난 날짜인데 점수 없음 (취소/우천 등) → 취소
+    // 과거 경기인데 점수 없음 (취소/우천 등) → 취소
     result = 'cancel';
   }
 
-  selectedResult=result;
+  selectedResult = result;
 
-  // 경기 예정은 결과 버튼 비활성화
   const isScheduled = result === 'scheduled';
-  document.querySelectorAll('.result-btn').forEach(b=>{
-    b.classList.toggle('active', b.dataset.result === result);
-    if (status === 'finished') {
-      // 종료 경기는 결과 고정
-      b.disabled=true; b.style.opacity=b.dataset.result===result?'1':'0.35'; b.style.cursor='default';
-    } else if (isScheduled) {
-      // 미래 경기는 결과 선택 불가
-      b.disabled=true; b.style.opacity='0.35'; b.style.cursor='default';
-      b.classList.remove('active');
+  const isFinished  = !isNaN(myScore) && !isNaN(oppScore) && myScore >= 0 && oppScore >= 0;
+
+  document.querySelectorAll('.result-btn').forEach(b => {
+    b.classList.remove('active');
+    if (isScheduled) {
+      // 미래/오늘 예정 경기: 결과 선택 불가, scheduled 뱃지만 활성
+      b.disabled = true; b.style.opacity = '0.35'; b.style.cursor = 'default';
+    } else if (isFinished && gameDate < today) {
+      // 종료 경기 + 점수 있음: 결과 고정
+      b.classList.toggle('active', b.dataset.result === result);
+      b.disabled = true; b.style.opacity = b.dataset.result === result ? '1' : '0.35'; b.style.cursor = 'default';
     } else {
-      // 지난 날짜 + 점수 없음(취소) → 수동 변경 가능
-      b.disabled=false; b.style.opacity='1'; b.style.cursor='pointer';
+      // 취소/우천 등: 수동 변경 가능
+      b.classList.toggle('active', b.dataset.result === result);
+      b.disabled = false; b.style.opacity = '1'; b.style.cursor = 'pointer';
     }
   });
 
-  const lockMsg=document.getElementById('result-lock-msg');
+  const lockMsg = document.getElementById('result-lock-msg');
   if (lockMsg) {
-    if (status === 'finished') {
-      lockMsg.textContent = '🔒 완료된 경기는 결과가 자동 설정됩니다';
-      lockMsg.style.display='flex';
-    } else if (isScheduled) {
+    if (isScheduled) {
       lockMsg.textContent = '📅 예정된 경기입니다';
-      lockMsg.style.display='flex';
+      lockMsg.style.display = 'flex';
+    } else if (isFinished && gameDate < today) {
+      lockMsg.textContent = '🔒 완료된 경기는 결과가 자동 설정됩니다';
+      lockMsg.style.display = 'flex';
     } else {
       lockMsg.textContent = '⚠️ 경기 결과가 없습니다. 직접 선택해주세요';
-      lockMsg.style.display='flex';
+      lockMsg.style.display = 'flex';
     }
   }
   const opponent=isHome?item.dataset.away:item.dataset.home;
