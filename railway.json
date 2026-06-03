@@ -5,7 +5,7 @@
     "buildCommand": "./gradlew bootJar"
   },
   "deploy": {
-    "startCommand": "java -jar build/libs/*.jar",
+    "startCommand": "java -Xms128m -Xmx256m -XX:MaxMetaspaceSize=128m -jar build/libs/*.jar",
     "restartPolicyType": "ON_FAILURE"
   }
 }
