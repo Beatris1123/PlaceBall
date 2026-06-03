@@ -70,21 +70,21 @@ public class GameApiController {
             boolean isHome  = g.getHomeTeam().equals(team);
             String venue    = resolveVenue(g.getHomeTeam(), g.getVenue());
             String label    = g.getGameDate() + " " +
-                    (g.getGameTime() != null ? g.getGameTime().toString().substring(0,5) : "") +
-                    " | " + team + (isHome ? " (홈)" : " (원정)") + " vs " + opponent +
-                    " | " + venue;
+                (g.getGameTime() != null ? g.getGameTime().toString().substring(0,5) : "") +
+                " | " + team + (isHome ? " (홈)" : " (원정)") + " vs " + opponent +
+                " | " + venue;
 
             return Map.<String, Object>of(
-                    "id",       g.getId(),
-                    "date",     g.getGameDate().toString(),
-                    "time",     g.getGameTime() != null ? g.getGameTime().toString().substring(0,5) : "",
-                    "homeTeam", g.getHomeTeam(),
-                    "awayTeam", g.getAwayTeam(),
-                    "homeScore",g.getHomeScore() != null ? g.getHomeScore() : -1,
-                    "awayScore",g.getAwayScore() != null ? g.getAwayScore() : -1,
-                    "venue",    venue,
-                    "status",   g.getStatus() != null ? g.getStatus() : "",
-                    "label",    label
+                "id",       g.getId(),
+                "date",     g.getGameDate().toString(),
+                "time",     g.getGameTime() != null ? g.getGameTime().toString().substring(0,5) : "",
+                "homeTeam", g.getHomeTeam(),
+                "awayTeam", g.getAwayTeam(),
+                "homeScore",g.getHomeScore() != null ? g.getHomeScore() : -1,
+                "awayScore",g.getAwayScore() != null ? g.getAwayScore() : -1,
+                "venue",    venue,
+                "status",   g.getStatus() != null ? g.getStatus() : "",
+                "label",    label
             );
         }).toList();
     }
@@ -155,67 +155,30 @@ public class GameApiController {
     @GetMapping("/match")
     public Map<String, Object> matchGame(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(required = false) String hint,      // 홈팀 (티켓 앞 팀)
-            @RequestParam(required = false) String awayHint,  // 원정팀 (티켓 뒷 팀)
-            @RequestParam(required = false) String stadium
+            @RequestParam(required = false) String hint
     ) {
         List<Game> dayGames = gameRepository.findByGameDateOrderByGameTime(date);
         if (dayGames.isEmpty()) return Map.of("found", false, "message", "해당 날짜에 경기가 없습니다.");
+        if (hint == null || hint.isBlank()) return buildMatchResult(dayGames.get(0));
 
         Map<String, String> normalizeMap = buildNormalizeMap();
+        String normalizedHint = normalizeTeamHint(hint.toUpperCase(), normalizeMap);
 
-        // ── 우선순위 1: hint(홈팀) + awayHint(원정팀) 모두 있으면 정밀 매칭 ──
-        if (hint != null && !hint.isBlank() && awayHint != null && !awayHint.isBlank()) {
-            String home = normalizeTeamHint(hint.toUpperCase(), normalizeMap);
-            String away = normalizeTeamHint(awayHint.toUpperCase(), normalizeMap);
-            for (Game g : dayGames) {
-                if (g.getHomeTeam().equals(home) && g.getAwayTeam().equals(away))
-                    return buildMatchResult(g);
-            }
-            // 홈/원정 뒤바뀐 경우도 체크
-            for (Game g : dayGames) {
-                if (g.getHomeTeam().equals(away) && g.getAwayTeam().equals(home))
-                    return buildMatchResult(g);
-            }
+        for (Game g : dayGames) {
+            if (g.getHomeTeam().equals(normalizedHint) || g.getAwayTeam().equals(normalizedHint))
+                return buildMatchResult(g);
+        }
+        for (Game g : dayGames) {
+            String home = g.getHomeTeam().toUpperCase(), away = g.getAwayTeam().toUpperCase();
+            if (home.contains(normalizedHint) || away.contains(normalizedHint)
+                    || normalizedHint.contains(home) || normalizedHint.contains(away))
+                return buildMatchResult(g);
+        }
+        for (Game g : dayGames) {
+            if (fuzzyMatch(hint, g.getHomeTeam()) || fuzzyMatch(hint, g.getAwayTeam()))
+                return buildMatchResult(g);
         }
 
-        // ── 우선순위 2: hint(홈팀)만 있으면 홈팀 우선 검색 ──
-        if (hint != null && !hint.isBlank()) {
-            String normalizedHint = normalizeTeamHint(hint.toUpperCase(), normalizeMap);
-            // 홈팀으로 정확히 일치
-            for (Game g : dayGames) {
-                if (g.getHomeTeam().equals(normalizedHint)) return buildMatchResult(g);
-            }
-            // 홈팀 포함 검색
-            for (Game g : dayGames) {
-                if (g.getHomeTeam().toUpperCase().contains(normalizedHint)
-                        || normalizedHint.contains(g.getHomeTeam().toUpperCase()))
-                    return buildMatchResult(g);
-            }
-            // 홈팀 퍼지 매칭
-            for (Game g : dayGames) {
-                if (fuzzyMatch(hint, g.getHomeTeam())) return buildMatchResult(g);
-            }
-            // 원정팀으로도 검색 (홈팀에 없으면)
-            for (Game g : dayGames) {
-                if (g.getAwayTeam().equals(normalizedHint)
-                        || g.getAwayTeam().toUpperCase().contains(normalizedHint)
-                        || fuzzyMatch(hint, g.getAwayTeam()))
-                    return buildMatchResult(g);
-            }
-        }
-
-        // ── 우선순위 3: hint 없으면 stadium으로 홈팀 역산 ──
-        if ((hint == null || hint.isBlank()) && (stadium != null && !stadium.isBlank())) {
-            String derivedHome = stadiumToHomeTeam(stadium);
-            if (!derivedHome.isBlank()) {
-                for (Game g : dayGames) {
-                    if (g.getHomeTeam().equals(derivedHome)) return buildMatchResult(g);
-                }
-            }
-        }
-
-        // ── 최후 fallback: 당일 첫 경기 ──
         Map<String, Object> result = new java.util.HashMap<>(buildMatchResult(dayGames.get(0)));
         result.put("fallback", true);
         result.put("message", "팀명 매칭 실패 — 당일 첫 경기로 대체합니다.");
@@ -230,32 +193,11 @@ public class GameApiController {
 
     // ── 내부 헬퍼 ──────────────────────────────────────────────
 
-    /** 구장명 → 홈팀명 역방향 매핑 (hint 보완용) */
-    private String stadiumToHomeTeam(String stadium) {
-        Map<String, String> map = Map.ofEntries(
-                Map.entry("고척스카이돔",         "키움"),
-                Map.entry("잠실야구장",           "LG"),
-                Map.entry("광주-기아 챔피언스 필드","KIA"),
-                Map.entry("광주기아챔피언스필드",   "KIA"),
-                Map.entry("대구삼성라이온즈파크",   "삼성"),
-                Map.entry("사직야구장",           "롯데"),
-                Map.entry("대전한화생명볼파크",     "한화"),
-                Map.entry("인천SSG랜더스필드",     "SSG"),
-                Map.entry("SSG랜더스필드",         "SSG"),
-                Map.entry("창원NC파크",           "NC"),
-                Map.entry("수원KT위즈파크",        "KT")
-        );
-        for (Map.Entry<String, String> e : map.entrySet()) {
-            if (stadium.contains(e.getKey()) || e.getKey().contains(stadium)) return e.getValue();
-        }
-        return "";
-    }
-
     private String resolveVenue(String homeTeam, String crawledVenue) {
         Map<String, String> stadiumMap = Map.of(
-                "KIA","광주기아챔피언스필드","LG","잠실야구장","두산","잠실야구장",
-                "삼성","대구삼성라이온즈파크","롯데","사직야구장","한화","대전한화생명볼파크",
-                "SSG","인천SSG랜더스필드","NC","창원NC파크","KT","수원KT위즈파크","키움","고척스카이돔"
+            "KIA","광주기아챔피언스필드","LG","잠실야구장","두산","잠실야구장",
+            "삼성","대구삼성라이온즈파크","롯데","사직야구장","한화","대전한화생명볼파크",
+            "SSG","인천SSG랜더스필드","NC","창원NC파크","KT","수원KT위즈파크","키움","고척스카이돔"
         );
         if (homeTeam != null && stadiumMap.containsKey(homeTeam)) return stadiumMap.get(homeTeam);
         return (crawledVenue != null && !crawledVenue.isBlank()) ? crawledVenue : "미정";
@@ -263,16 +205,16 @@ public class GameApiController {
 
     private Map<String, Object> buildMatchResult(Game g) {
         return Map.of(
-                "found",     true,
-                "id",        g.getId(),
-                "date",      g.getGameDate().toString(),
-                "time",      g.getGameTime() != null ? g.getGameTime().toString().substring(0, 5) : "",
-                "homeTeam",  g.getHomeTeam(),
-                "awayTeam",  g.getAwayTeam(),
-                "homeScore", g.getHomeScore() != null ? g.getHomeScore() : -1,
-                "awayScore", g.getAwayScore() != null ? g.getAwayScore() : -1,
-                "venue",     resolveVenue(g.getHomeTeam(), g.getVenue()),
-                "status",    g.getStatus() != null ? g.getStatus() : ""
+            "found",     true,
+            "id",        g.getId(),
+            "date",      g.getGameDate().toString(),
+            "time",      g.getGameTime() != null ? g.getGameTime().toString().substring(0, 5) : "",
+            "homeTeam",  g.getHomeTeam(),
+            "awayTeam",  g.getAwayTeam(),
+            "homeScore", g.getHomeScore() != null ? g.getHomeScore() : -1,
+            "awayScore", g.getAwayScore() != null ? g.getAwayScore() : -1,
+            "venue",     resolveVenue(g.getHomeTeam(), g.getVenue()),
+            "status",    g.getStatus() != null ? g.getStatus() : ""
         );
     }
 
@@ -290,36 +232,16 @@ public class GameApiController {
 
     private Map<String, String> buildNormalizeMap() {
         Map<String, String> m = new java.util.LinkedHashMap<>();
-        // ── KIA (복합 표기 먼저 — 부분 매칭 오류 방지)
-        m.put("KIA타이거즈","KIA"); m.put("기아타이거즈","KIA"); m.put("KIA TIGERS","KIA");
-        m.put("KIA","KIA");        m.put("기아","KIA");         m.put("TIGERS","KIA"); m.put("타이거즈","KIA");
-        // ── LG
-        m.put("LG트윈스","LG");  m.put("LG TWINS","LG");
-        m.put("LG","LG");        m.put("TWINS","LG"); m.put("트윈스","LG"); m.put("IG","LG");
-        // ── 삼성
-        m.put("삼성라이온즈","삼성"); m.put("삼성 라이온즈","삼성"); m.put("SAMSUNG LIONS","삼성");
-        m.put("삼성","삼성");         m.put("SAMSUNG","삼성");       m.put("LIONS","삼성"); m.put("라이온즈","삼성");
-        // ── 두산
-        m.put("두산베어스","두산"); m.put("두산 베어스","두산"); m.put("DOOSAN BEARS","두산");
-        m.put("두산","두산");       m.put("DOOSAN","두산");      m.put("BEARS","두산"); m.put("베어스","두산");
-        // ── 롯데
-        m.put("롯데자이언츠","롯데"); m.put("롯데 자이언츠","롯데"); m.put("LOTTE GIANTS","롯데");
-        m.put("롯데","롯데");         m.put("LOTTE","롯데");          m.put("GIANTS","롯데"); m.put("자이언츠","롯데");
-        // ── SSG
-        m.put("SSG랜더스","SSG"); m.put("SSG LANDERS","SSG"); m.put("SK와이번스","SSG"); m.put("SK 와이번스","SSG");
-        m.put("SSG","SSG");       m.put("LANDERS","SSG");     m.put("랜더스","SSG"); m.put("SK","SSG"); m.put("SSC","SSG");
-        // ── NC
-        m.put("NC다이노스","NC"); m.put("NC DINOS","NC"); m.put("NC 다이노스","NC");
-        m.put("NC","NC");         m.put("DINOS","NC");    m.put("다이노스","NC");
-        // ── KT
-        m.put("KT위즈","KT"); m.put("KT WIZ","KT"); m.put("KT wiz","KT"); m.put("KT 위즈","KT");
-        m.put("KT","KT");     m.put("WIZ","KT");     m.put("위즈","KT"); m.put("K7","KT");
-        // ── 한화
-        m.put("한화이글스","한화"); m.put("한화 이글스","한화"); m.put("HANWHA EAGLES","한화"); m.put("한화 이글스","한화");
-        m.put("한화","한화");       m.put("HANWHA","한화");      m.put("EAGLES","한화"); m.put("이글스","한화");
-        // ── 키움
-        m.put("키움히어로즈","키움"); m.put("키움 히어로즈","키움"); m.put("KIWOOM HEROES","키움"); m.put("키움 히어로즈","키움");
-        m.put("키움","키움");         m.put("KIWOOM","키움");         m.put("HEROES","키움"); m.put("히어로즈","키움"); m.put("넥센","키움");
+        m.put("KIA","KIA"); m.put("기아","KIA"); m.put("TIGERS","KIA"); m.put("타이거즈","KIA");
+        m.put("LG","LG");   m.put("TWINS","LG"); m.put("트윈스","LG"); m.put("IG","LG");
+        m.put("삼성","삼성"); m.put("SAMSUNG","삼성"); m.put("LIONS","삼성");
+        m.put("두산","두산"); m.put("DOOSAN","두산"); m.put("BEARS","두산");
+        m.put("롯데","롯데"); m.put("LOTTE","롯데"); m.put("GIANTS","롯데");
+        m.put("SSG","SSG");  m.put("SK","SSG"); m.put("LANDERS","SSG"); m.put("SSC","SSG");
+        m.put("NC","NC");    m.put("DINOS","NC"); m.put("다이노스","NC");
+        m.put("KT","KT");    m.put("위즈","KT"); m.put("K7","KT");
+        m.put("한화","한화"); m.put("HANWHA","한화"); m.put("EAGLES","한화");
+        m.put("키움","키움"); m.put("KIWOOM","키움"); m.put("HEROES","키움"); m.put("넥센","키움");
         return m;
     }
 
@@ -338,8 +260,8 @@ public class GameApiController {
         for (int i = 1; i <= a.length(); i++)
             for (int j = 1; j <= b.length(); j++)
                 dp[i][j] = a.charAt(i-1) == b.charAt(j-1)
-                        ? dp[i-1][j-1]
-                        : 1 + Math.min(dp[i-1][j-1], Math.min(dp[i-1][j], dp[i][j-1]));
+                    ? dp[i-1][j-1]
+                    : 1 + Math.min(dp[i-1][j-1], Math.min(dp[i-1][j], dp[i][j-1]));
         return dp[a.length()][b.length()];
     }
 }

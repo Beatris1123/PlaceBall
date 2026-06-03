@@ -15,16 +15,24 @@
        ※ 디자인 전용. 모든 ID/클래스/JS 훅 그대로 보존.
        ════════════════════════════════════════════════════════════════ */
     :root {
-      --kia:        #E60012;
-      --kia-dark:   #B8000E;
-      --kia-soft:   #FCE9EB;
-      --lg:         #6B7280;     /* LG측은 중립 그레이로 */
-      --lg-mid:     #4B5563;
-      --lg-light:   #9CA3AF;
-      --brand:      #E60012;
-      --green:      #16A34A;
+      /* PLACEBALL 마스코트 브랜드 컬러 */
+      --primary:    #00A88F;     /* 민트/청록색 - 마스코트 메인 컬러 */
+      --primary-dark: #007A6B;   /* 진한 민트 */
+      --primary-soft: #E0F7F4;   /* 밝은 민트 */
+      --accent:     #1A1A1A;     /* 진한 회색 - 마스코트 유니폼 */
+      --accent-light: #4A4A4A;   /* 중간 회색 */
+      
+      /* 하위 호환성 */
+      --kia:        #00A88F;     /* 민트로 변경 */
+      --kia-dark:   #007A6B;
+      --kia-soft:   #E0F7F4;
+      --lg:         #4A4A4A;     /* 회색으로 변경 */
+      --lg-mid:     #2D2D2D;
+      --lg-light:   #6B6B6B;
+      --brand:      #00A88F;     /* 민트로 변경 */
+      --green:      #00A88F;     /* 민트로 통일 */
       --gold:       #F5B400;
-      --purple:     #6D28D9;
+      --purple:     #00A88F;     /* 민트로 변경 */
 
       /* Light paper base — 따뜻한 크림 X, 차분한 라이트 그레이 O */
       --bg:         #ECEDEF;
@@ -121,7 +129,7 @@
       color:var(--muted); text-transform:uppercase; margin-top:1px;
     }
 
-    /* HEADER 가운데 — 점령전 게이지 보드 */
+    /* HEADER 가운데 — 점령전 게이지 보드 (응원 총점) */
     .battle-board{
       position: relative;
       display: grid;
@@ -130,11 +138,34 @@
       gap: 0;
       background:#fff; border:1.5px solid var(--line);
       border-radius: var(--r-pill);
-      padding: 7px 18px;
-      min-width: 420px;
-      max-width: 500px;
+      padding: 7px 18px 11px;
+      min-width: 440px;
+      max-width: 520px;
     }
-    .battle-board-gauge{ display:none; }
+    /* 게이지 바 (하단) */
+    .battle-board-gauge{
+      position: absolute;
+      bottom: 5px; left: 20px; right: 20px;
+      height: 4px;
+      background: var(--bg-2);
+      border-radius: var(--r-pill);
+      overflow: hidden;
+      border: 1px solid var(--line-soft);
+    }
+    .bbg-kia{
+      position: absolute; left:0; top:0; bottom:0;
+      background: var(--kia);
+      border-radius: var(--r-pill);
+      width: 50%;
+      transition: width .8s ease;
+    }
+    .bbg-lg{
+      position: absolute; right:0; top:0; bottom:0;
+      background: var(--ink);
+      border-radius: var(--r-pill);
+      width: 50%;
+      transition: width .8s ease;
+    }
 
     /* 왼쪽(KIA) — 로고+정보 좌→우 */
     .bb-side{
@@ -159,7 +190,7 @@
     .bb-info{ display:flex; flex-direction:column; line-height:1.15; min-width:0; }
     .bb-side:last-of-type .bb-info{ text-align:right; }
     .bb-label { font-size:9px; color:var(--muted); font-weight:600; white-space:nowrap; }
-    .bb-pts   { font-family:'Bebas Neue',sans-serif; font-size:15px; font-weight:700;
+    .bb-pts   { font-family:'Bebas Neue',sans-serif; font-size:16px; font-weight:700;
                 letter-spacing:0.02em; white-space:nowrap; }
     .bb-pts-kia{ color:var(--kia); }
     .bb-pts-lg { color:var(--ink); }
@@ -180,7 +211,10 @@
     }
     /* 사용 안 하는 요소 숨김 */
     .bb-gauge-bar, .bb-gauge-kia, .bb-gauge-lg,
-    .bb-center-label{ display:none; }
+    .bb-center-label{
+      font-size:9px; font-weight:700; letter-spacing:0.1em;
+      color:var(--muted); text-transform:uppercase; white-space:nowrap;
+    }
 
     .nav-right{ display:flex; align-items:center; gap:8px; justify-content:flex-end; }
     .btn-diary, .btn-login{
@@ -245,30 +279,30 @@
 
     /* ══ MAIN GRID ═════════════════════════════════════════════════════ */
     main{
-      max-width: 1600px; margin: 1.25rem auto 3rem;
-      padding: 0 1.5rem;
+      max-width: 1600px; margin: 1.5rem auto 4rem;
+      padding: 0 2rem;
       display: grid;
       grid-template-columns: 22fr 56fr 22fr;
-      gap: 1.25rem;
+      gap: 1.5rem;
       align-items: start;
     }
     .left-col, .center-col, .right-col{
-      display:flex; flex-direction:column; gap:1.1rem; min-width:0;
+      display:flex; flex-direction:column; gap:1.25rem; min-width:0;
     }
 
     /* ══ CARD ══════════════════════════════════════════════════════════ */
     .card{
       background: var(--card-bg);
       border: 1.5px solid var(--line);
-      border-radius: var(--r-lg);
+      border-radius: var(--r-xl);
       box-shadow: var(--card-sh);
-      padding: 1.1rem 1.15rem 1.15rem;
+      padding: 1.25rem 1.3rem 1.3rem;
       position:relative;
     }
     .card-header{
-      display:flex; align-items:center; gap:10px;
-      margin-bottom: 0.9rem;
-      padding-bottom: 0.85rem;
+      display:flex; align-items:center; gap:12px;
+      margin-bottom: 1rem;
+      padding-bottom: 0.9rem;
       border-bottom: 1px dashed var(--line-dash);
     }
     .card-header-icon{
@@ -415,11 +449,60 @@
       background: var(--paper-2);
       border:1.5px solid var(--line); border-radius: var(--r-md);
       padding: 0.5rem;
+      position: relative;
     }
     .stadium-shell svg{ display:block; width:100%; height:auto; }
-    .seat-zone{ cursor:pointer; transition: filter .15s, opacity .15s; }
-    .seat-zone:hover{ filter: brightness(1.1); }
-    .seat-zone.active-zone{ filter: drop-shadow(0 0 6px rgba(230,0,18,0.5)); }
+
+    /* 인터랙티브 맵 — 히트맵 효과 */
+    .seat-zone{
+      cursor:pointer;
+      transition: filter .18s ease, opacity .18s ease, transform .18s ease;
+      transform-origin: center;
+    }
+    .seat-zone:hover{
+      filter: brightness(1.25) saturate(1.3) drop-shadow(0 0 8px currentColor);
+      opacity: 1 !important;
+    }
+    .seat-zone.active-zone{
+      filter: drop-shadow(0 0 9px rgba(230,0,18,0.7)) brightness(1.1);
+      animation: zone-pulse 2.2s ease-in-out infinite;
+    }
+    .seat-zone.heatmap-hot{
+      filter: drop-shadow(0 0 10px rgba(230,0,18,0.6)) brightness(1.15);
+    }
+    .seat-zone.heatmap-warm{
+      filter: drop-shadow(0 0 5px rgba(230,120,0,0.4)) brightness(1.08);
+    }
+    .seat-zone.heatmap-cool{
+      filter: brightness(0.92) saturate(0.75);
+      opacity: 0.8;
+    }
+    @keyframes zone-pulse{
+      0%,100%{ filter: drop-shadow(0 0 7px rgba(230,0,18,0.55)) brightness(1.08); }
+      50%     { filter: drop-shadow(0 0 14px rgba(230,0,18,0.85)) brightness(1.18); }
+    }
+
+    /* 맵 위 구역 정보 툴팁 */
+    .map-zone-tooltip{
+      position: absolute;
+      background: #fff;
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: 0 4px 16px rgba(17,24,39,0.12);
+      display: none;
+      white-space: nowrap;
+      transform: translate(-50%, -110%);
+    }
+    .map-zone-tooltip.visible{ display:block; }
+    .map-zone-tooltip-ratio{
+      font-size:11px; color: var(--muted); margin-top:2px; font-weight:500;
+    }
 
     .zone-buttons{
       display:flex; flex-wrap:wrap; gap:6px;
@@ -517,6 +600,40 @@
       padding: 1px 6px; border-radius: var(--r-pill);
     }
     .pb-inv-text{ font-size:9.5px; font-weight:600; color: var(--kia); }
+
+    /* ── 참여 유도형 인증샷 슬롯 ── */
+    .pb-slot-invite{
+      background: linear-gradient(135deg, #FAFBFC 0%, #F3F4F6 100%);
+      border: 1.5px dashed var(--line-dash);
+      transition: all .2s;
+    }
+    .pb-slot-invite:hover{
+      background: linear-gradient(135deg, var(--primary-soft) 0%, #E0F7F4 100%);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0,168,143,0.15);
+    }
+    .pb-slot-blur-preview{
+      display:flex; align-items:center; justify-content:center;
+      position:absolute; inset:0;
+      filter: blur(2px);
+    }
+    .pb-slot-invite-label{
+      font-size: 10px; font-weight: 800; color: var(--ink);
+      text-align: center; line-height:1.4; position:relative; z-index:1;
+      letter-spacing:-0.01em;
+    }
+    .pb-slot-reward{
+      font-size: 9px; font-weight: 700; color: var(--primary);
+      position:relative; z-index:1; letter-spacing:-0.01em;
+      background: var(--primary-soft);
+      padding: 2px 6px; border-radius: var(--r-pill);
+      border:1px solid rgba(0,168,143,0.3);
+    }
+    .pb-inv-corner{ background: var(--primary); }
+
+    /* ── 백구 CTA 버튼 ── */
+    #baekgu-cta:hover{ background: var(--primary-dark) !important; }
 
     /* ══ Match Schedule (Right) ════════════════════════════════════════ */
     .match-schedule-card{
@@ -630,58 +747,6 @@
       .nav-right{ gap:6px; }
       .btn-diary, .btn-login{ padding:6px 10px; font-size:11.5px; }
     }
-
-    /* ── 내 경기 포인트 패널 ── */
-    #my-points-panel {
-      background: var(--paper);
-      border: 1.5px solid var(--line);
-      border-radius: var(--r-lg);
-      padding: 0.9rem 1.1rem;
-      margin: 0 auto 0.6rem;
-      max-width: 1200px;
-      width: calc(100% - 2rem);
-      display: none;
-    }
-    #my-points-panel.visible { display: block; }
-    .mpp-inner {
-      display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
-    }
-    .mpp-match {
-      font-size: 13px; font-weight: 700; color: var(--ink);
-      white-space: nowrap;
-    }
-    .mpp-divider {
-      width: 1px; height: 24px; background: var(--line-soft); flex-shrink:0;
-    }
-    .mpp-items {
-      display: flex; gap: 0.55rem; flex-wrap: wrap; flex: 1;
-    }
-    .mpp-chip {
-      display: inline-flex; align-items: center; gap: 4px;
-      font-size: 11.5px; font-weight: 600;
-      background: var(--bg-2); border: 1px solid var(--line-soft);
-      border-radius: var(--r-pill); padding: 3px 10px;
-      color: var(--ink-2); white-space: nowrap;
-    }
-    .mpp-chip .chip-val { font-weight: 800; color: var(--kia); }
-    .mpp-chip.ticket { border-color: rgba(230,0,18,0.3); background: rgba(230,0,18,0.04); }
-    .mpp-chip.write  { border-color: rgba(16,163,74,0.3); background: rgba(16,163,74,0.04); }
-    .mpp-chip.write .chip-val { color: var(--green); }
-    .mpp-total {
-      margin-left: auto; font-size: 13px; font-weight: 700; color: var(--ink);
-      white-space: nowrap;
-    }
-    .mpp-total-val {
-      font-size: 16px; font-weight: 900;
-      font-family: 'Bebas Neue', sans-serif; color: var(--kia);
-      margin-left: 4px;
-    }
-    .mpp-zone-badge {
-      font-size: 10.5px; font-weight: 600;
-      background: rgba(230,0,18,0.08); color: var(--kia);
-      border: 1px solid rgba(230,0,18,0.2);
-      border-radius: var(--r-pill); padding: 2px 8px; white-space: nowrap;
-    }
   </style>
 
 </head>
@@ -727,9 +792,9 @@
         </div>
       </div>
       <div class="bb-center">
+        <div class="bb-center-label">총 응원 점수</div>
         <div class="bb-vs">VS</div>
         <div class="bb-live-badge">⚡ LIVE</div>
-        <div class="bb-center-label">화력 점령전</div>
       </div>
       <div class="bb-side">
         <div class="bb-info" style="text-align:right;">
@@ -762,27 +827,141 @@
   </div>
 </header>
 
-<!-- ── 내 경기 포인트 패널 (대시보드 ↔ 직관다이어리 사이) ── -->
-<div id="my-points-panel">
-  <div class="mpp-inner">
-    <span id="mpp-match" class="mpp-match">-</span>
-    <span id="mpp-zone" class="mpp-zone-badge" style="display:none"></span>
-    <div class="mpp-divider"></div>
-    <div class="mpp-items">
-      <span class="mpp-chip ticket">🎟 티켓 인증 <span class="chip-val" id="mpp-ticket">0</span>pt</span>
-      <span class="mpp-chip write">✍️ 커뮤니티 활동 <span class="chip-val" id="mpp-write">0</span>pt</span>
-    </div>
-    <div class="mpp-total">
-      내 기여 포인트 <span class="mpp-total-val" id="mpp-total">0</span>pt
-    </div>
-  </div>
-</div>
-
 <main>
   <!-- ── LEFT COLUMN ── -->
   <div class="left-col">
+    <!-- 백구 마스코트 위젯 — 경기장 배경 + 상태 연동 -->
+    <div id="baekgu-card" class="fade-in"
+         style="position:relative; border-radius:var(--r-xl);
+                border:1.5px solid var(--line); overflow:hidden;
+                margin-top:8px;
+                box-shadow:var(--card-sh);">
+
+      <!-- 경기장 배경 일러스트 (SVG) -->
+      <svg viewBox="0 0 260 160" width="100%" xmlns="http://www.w3.org/2000/svg"
+           style="display:block; position:relative; z-index:0;">
+        <!-- 하늘 -->
+        <defs>
+          <linearGradient id="bgSky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#C7DFFB"/>
+            <stop offset="100%" stop-color="#E8F4FD"/>
+          </linearGradient>
+          <linearGradient id="bgGrass" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#5DB96B"/>
+            <stop offset="100%" stop-color="#3E9150"/>
+          </linearGradient>
+          <linearGradient id="bgDirt" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#C8956B"/>
+            <stop offset="100%" stop-color="#B07A52"/>
+          </linearGradient>
+        </defs>
+        <rect width="260" height="160" fill="url(#bgSky)"/>
+        <!-- 관중석 윤곽 -->
+        <ellipse cx="130" cy="100" rx="130" ry="80" fill="#D8DADD"/>
+        <ellipse cx="130" cy="100" rx="118" ry="70" fill="#ECEDEF"/>
+        <!-- 외야 잔디 -->
+        <path d="M20 95 Q80 55 130 50 Q180 55 240 95 L240 160 L20 160Z" fill="url(#bgGrass)"/>
+        <!-- 내야 다이아 흙 -->
+        <path d="M95 108 Q112 88 130 82 Q148 88 165 108 L160 140 Q130 148 100 140Z" fill="url(#bgDirt)"/>
+        <!-- 내야 잔디 오버레이 -->
+        <ellipse cx="130" cy="115" rx="28" ry="22" fill="#5DB96B"/>
+        <!-- 마운드 -->
+        <ellipse cx="130" cy="118" rx="9" ry="5" fill="#C8956B" opacity="0.9"/>
+        <!-- 파울라인 -->
+        <line x1="130" y1="140" x2="68" y2="90" stroke="white" stroke-width="1.2" opacity="0.7"/>
+        <line x1="130" y1="140" x2="192" y2="90" stroke="white" stroke-width="1.2" opacity="0.7"/>
+        <!-- 관중석 색 구역 힌트 -->
+        <path d="M20 95 Q50 75 80 65 L85 80 Q60 88 30 105Z" fill="#E60012" opacity="0.35"/>
+        <path d="M240 95 Q210 75 180 65 L175 80 Q200 88 230 105Z" fill="#2563EB" opacity="0.35"/>
+        <!-- 조명 포스트 -->
+        <rect x="15" y="50" width="4" height="45" fill="#374151" rx="1"/>
+        <rect x="241" y="50" width="4" height="45" fill="#374151" rx="1"/>
+        <ellipse cx="17" cy="50" rx="7" ry="3" fill="#FDE68A" opacity="0.85"/>
+        <ellipse cx="243" cy="50" rx="7" ry="3" fill="#FDE68A" opacity="0.85"/>
+        <!-- 조명 광선 -->
+        <line x1="17" y1="50" x2="80" y2="100" stroke="#FDE68A" stroke-width="0.8" opacity="0.2"/>
+        <line x1="243" y1="50" x2="180" y2="100" stroke="#FDE68A" stroke-width="0.8" opacity="0.2"/>
+        <!-- 구름 -->
+        <ellipse cx="55" cy="22" rx="18" ry="9" fill="white" opacity="0.8"/>
+        <ellipse cx="72" cy="18" rx="14" ry="8" fill="white" opacity="0.8"/>
+        <ellipse cx="195" cy="25" rx="16" ry="8" fill="white" opacity="0.75"/>
+        <ellipse cx="210" cy="21" rx="12" ry="7" fill="white" opacity="0.75"/>
+        <!-- 관중 실루엣 (작은 물결) -->
+        <path d="M22 88 Q30 84 38 88 Q46 84 54 88 Q62 84 70 88" stroke="#374151" stroke-width="1" fill="none" opacity="0.3"/>
+        <path d="M190 88 Q198 84 206 88 Q214 84 222 88 Q230 84 238 88" stroke="#374151" stroke-width="1" fill="none" opacity="0.3"/>
+      </svg>
+
+      <!-- 백구 이미지 — SVG 위에 겹쳐서 배치 -->
+      <div style="position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+                  width:130px; z-index:3; pointer-events:none;">
+        <img id="baekgu-img" src="images/mascot_official.png" alt="백구"
+             style="width:100%; object-fit:contain;
+                    filter:drop-shadow(0 2px 10px rgba(0,0,0,0.22));
+                    transition:opacity .35s ease;">
+      </div>
+
+      <!-- 말풍선 + 상태 정보 오버레이 (하단) -->
+      <div style="position:relative; z-index:4;
+                  background:rgba(255,255,255,0.96);
+                  border-top:1.5px solid var(--line);
+                  padding:10px 14px 12px;">
+
+        <!-- 상태 뱃지 + 말풍선 -->
+        <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:8px;">
+          <div id="baekgu-state-badge"
+               style="display:inline-flex; align-items:center; gap:4px; flex-shrink:0;
+                      padding:3px 9px; border-radius:var(--r-pill);
+                      background:var(--primary-soft); border:1.5px solid var(--primary);
+                      font-size:9.5px; font-weight:700; color:var(--primary);
+                      letter-spacing:0.04em;">
+            ⚾ GUIDE
+          </div>
+          <div id="baekgu-msg"
+               style="font-size:12px; font-weight:600; color:var(--ink-2);
+                      line-height:1.5; flex:1;">
+            오늘도 함께 응원해요!
+          </div>
+        </div>
+
+        <!-- CTA 버튼 -->
+        <button id="baekgu-cta"
+                style="width:100%; padding:8px 12px; border-radius:10px;
+                       background:var(--primary); color:#fff;
+                       border:1.5px solid var(--line); font-family:inherit;
+                       font-size:12px; font-weight:700; cursor:pointer;
+                       transition:background .15s; letter-spacing:-0.01em;">
+          전장 진입하기 ⚔️
+        </button>
+
+        <!-- 응원 열기 미니 게이지 -->
+        <div id="baekgu-cheer-gauge" style="display:none; margin-top:8px;">
+          <div style="display:flex; justify-content:space-between;
+                      font-size:10px; font-weight:600; color:var(--muted); margin-bottom:3px;">
+            <span>응원 열기</span>
+            <span id="baekgu-cheer-pct" style="color:var(--primary);">0%</span>
+          </div>
+          <div style="height:5px; background:var(--bg-2); border:1px solid var(--line-soft);
+                      border-radius:99px; overflow:hidden;">
+            <div id="baekgu-cheer-bar"
+                 style="height:100%; background:var(--primary); border-radius:99px;
+                        width:0%; transition:width 1s ease;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- 실시간 전황 보고 카드 -->
-    <div class="card fade-in">
+    <div class="card fade-in" style="position:relative; overflow:hidden;">
+      <!-- 배경 응원봉 데코 -->
+      <div style="position:absolute; right:-8px; top:-8px; opacity:0.07;
+                  pointer-events:none; z-index:0;">
+        <svg viewBox="0 0 80 80" width="80" xmlns="http://www.w3.org/2000/svg">
+          <rect x="36" y="5" width="8" height="60" rx="4" fill="var(--kia)" transform="rotate(-15 40 35)"/>
+          <circle cx="40" cy="5" r="10" fill="var(--kia)"/>
+          <rect x="20" y="10" width="6" height="50" rx="3" fill="var(--kia)" transform="rotate(-35 23 35)"/>
+          <circle cx="23" cy="10" r="8" fill="var(--kia)"/>
+        </svg>
+      </div>
+      <div style="position:relative; z-index:1;">
       <div class="card-header">
         <div class="card-header-icon">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -843,28 +1022,73 @@
 
       <div class="divider"></div>
       <a href="community.html" class="community-link-btn"><span>📋</span> 게시글 보기</a>
+      </div><!-- /z-index:1 -->
     </div>
 
-    <!-- AI Chat -->
-    <div class="card fade-in" style="animation-delay:0.1s">
-      <div class="card-header">
+      <!-- AI Chat -->
+    <div class="card fade-in" style="animation-delay:0.1s; position:relative; overflow:hidden;">
+
+      <!-- 챗봇 백구 헤더 — 실제 이미지 사용 -->
+      <div style="position:relative; margin:-1.3rem -1.3rem 0;
+                  border-radius:var(--r-xl) var(--r-xl) 0 0;
+                  background:linear-gradient(180deg,#1A2333 0%,#2D3748 100%);
+                  height:118px; overflow:visible; flex-shrink:0;">
+        <!-- 야간 배경 SVG -->
+        <svg viewBox="0 0 260 118" width="100%" height="100%"
+             style="position:absolute;inset:0;" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="30"  cy="18" r="1.2" fill="white" opacity="0.7"/>
+          <circle cx="80"  cy="10" r="0.9" fill="white" opacity="0.6"/>
+          <circle cx="140" cy="14" r="1.4" fill="white" opacity="0.8"/>
+          <circle cx="200" cy="8"  r="1"   fill="white" opacity="0.5"/>
+          <circle cx="235" cy="22" r="1.1" fill="white" opacity="0.65"/>
+          <circle cx="60"  cy="30" r="0.8" fill="white" opacity="0.5"/>
+          <circle cx="170" cy="28" r="0.9" fill="white" opacity="0.55"/>
+          <circle cx="220" cy="36" r="0.7" fill="white" opacity="0.45"/>
+          <circle cx="210" cy="16" r="7"   fill="#FEF3C7" opacity="0.92"/>
+          <circle cx="213" cy="13" r="5"   fill="#2D3748" opacity="0.6"/>
+          <ellipse cx="30"  cy="118" rx="28" ry="14" fill="#FDE68A" opacity="0.18"/>
+          <ellipse cx="230" cy="118" rx="28" ry="14" fill="#FDE68A" opacity="0.18"/>
+          <rect x="20"  y="52" width="5" height="66" fill="#374151" rx="1.5"/>
+          <rect x="235" y="52" width="5" height="66" fill="#374151" rx="1.5"/>
+          <ellipse cx="22"  cy="52" rx="10" ry="4.5" fill="#FDE68A" opacity="0.8"/>
+          <ellipse cx="237" cy="52" rx="10" ry="4.5" fill="#FDE68A" opacity="0.8"/>
+          <!-- 조명 광선 -->
+          <line x1="22" y1="52" x2="90" y2="118"  stroke="#FDE68A" stroke-width="0.8" opacity="0.12"/>
+          <line x1="237" y1="52" x2="170" y2="118" stroke="#FDE68A" stroke-width="0.8" opacity="0.12"/>
+          <path d="M0 118 Q65 72 130 66 Q195 72 260 118Z" fill="#111827" opacity="0.65"/>
+          <path d="M12 90 Q20 84 28 90 Q36 84 44 90 Q52 84 60 90" stroke="#4B5563" stroke-width="1.3" fill="none"/>
+          <path d="M195 90 Q203 84 211 90 Q219 84 227 90 Q235 84 243 90" stroke="#4B5563" stroke-width="1.3" fill="none"/>
+          <ellipse cx="130" cy="118" rx="60" ry="12" fill="#4CAF6F" opacity="0.2"/>
+        </svg>
+        <!-- 흰 벽 -->
+        <div style="position:absolute; bottom:0; left:0; right:0; height:22px;
+                    background:#fff; border-top:1.5px solid var(--line);"></div>
+        <!-- 백구 이미지 — 크게, 벽 위로 자연스럽게 -->
+        <div style="position:absolute; bottom:-14px; left:50%; transform:translateX(-50%);
+                    width:110px; z-index:5;">
+          <img src="images/mascot_helper.png" alt="백구"
+               style="width:100%; object-fit:contain;
+                      filter:drop-shadow(0 4px 12px rgba(0,0,0,0.35));">
+        </div>
+      </div>
+
+      <!-- 카드 본문 (백구 아래) -->
+      <div style="padding-top:52px;">
+      <div class="card-header" style="margin-bottom:0.7rem;">
         <div class="card-header-icon">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="9"/>
-            <circle cx="9" cy="11" r="1.5" fill="currentColor"/>
-            <circle cx="15" cy="11" r="1.5" fill="currentColor"/>
-            <path d="M9 15 Q12 17 15 15" stroke-linecap="round"/>
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
         </div>
         <div class="card-title-group">
           <div class="card-title">AI 챗봇</div>
-          <div class="card-subtitle">Claude AI</div>
+          <div class="card-subtitle">Claude AI · 무엇이든 물어봐요</div>
         </div>
       </div>
       <div class="chat-window">
         <div class="chat-scroll" id="chat-messages">
           <div class="bubble bubble-bot">
-            무엇이든 물어보세요. 응원 문구, 게시글, 댓글, 경기 분위기 등 도움이 필요하신 모든 것을 도와드립니다. ⚾
+            뭐가 궁금하세요? 응원 문구, 경기 분석, 직관 팁까지 뭐든 물어보세요! ⚾
           </div>
         </div>
         <div class="typing-indicator" id="typing">
@@ -875,6 +1099,7 @@
           <button class="chat-send" id="chat-send">전송</button>
         </div>
       </div>
+      </div><!-- /padding-top -->
     </div>
   </div>
 
@@ -900,8 +1125,13 @@
         </div>
       </div>
 
-      <!-- Stadium Map -->
-      <div class="stadium-shell" style="margin-bottom:1.25rem;">
+      <!-- Stadium Map (인터랙티브 히트맵) -->
+      <div class="stadium-shell" style="margin-bottom:1.25rem;" id="stadium-map-shell">
+        <!-- 구역 호버 툴팁 -->
+        <div class="map-zone-tooltip" id="map-tooltip">
+          <div id="map-tooltip-name">구역명</div>
+          <div class="map-zone-tooltip-ratio" id="map-tooltip-ratio">홈 88% vs 원정 12%</div>
+        </div>
         <svg viewBox="0 0 680 430" width="100%" aria-label="잠실야구장 좌석 응원 현황" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <radialGradient id="fieldGrad" cx="50%" cy="55%" r="55%">
@@ -1040,36 +1270,130 @@
       <div class="zone-panel">
         <div class="zone-panel-top">
           <div>
-            <div class="zone-name" id="zone-name">-</div>
-            <div class="zone-desc" id="zone-desc"></div>
+            <div class="zone-name" id="zone-name">KIA 중앙 응원석</div>
+            <div class="zone-desc" id="zone-desc">홈팀 중심 응원이 가장 크게 모이는 메인 응원 구역입니다.</div>
           </div>
           <div style="text-align:right; flex-shrink:0;">
             <div class="zone-ratio-label">현재 응원 비율</div>
             <div class="zone-ratio-val" id="zone-ratio">
-              <span style="color:var(--muted)">불러오는 중...</span>
+              <span style="color:var(--kia)">KIA 88%</span>
+              <span style="color:var(--muted); font-size:0.95rem; margin:0 3px;">:</span>
+              <span style="color:var(--lg-mid)">LG 12%</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 구역별 응원 점수 패널 -->
-      <div id="zone-cheer-panel" style="margin-top:1.25rem;">
+      <!-- 구역별 응원 점수 패널 — 백구 대결 일러스트 -->
+      <div id="zone-cheer-panel" style="margin-top:1.25rem; position:relative;">
+        <div style="position:relative; z-index:1;">
 
-        <!-- 홈팀 / 원정팀 2단 카드 -->
+        <!-- 응원 대결 헤더 -->
+        <div style="position:relative; border-radius:14px; overflow:hidden;
+                    background:linear-gradient(135deg,#1C2E4A 0%,#243550 50%,#1A2D44 100%);
+                    border:1.5px solid var(--line); margin-bottom:0.75rem;">
+
+          <!-- 전체 glow 레이어 -->
+          <div style="position:absolute;inset:0;pointer-events:none;
+                      background:
+                        radial-gradient(ellipse 50% 100% at 8% 50%,  rgba(230,0,18,0.28)  0%, transparent 65%),
+                        radial-gradient(ellipse 50% 100% at 92% 50%, rgba(37,99,235,0.28) 0%, transparent 65%),
+                        radial-gradient(ellipse 30% 60%  at 50% 100%, rgba(253,230,138,0.08) 0%, transparent 70%);
+                      border-radius:14px;"></div>
+
+          <!-- 경기장 잔디 힌트 (하단) -->
+          <div style="position:absolute; bottom:0; left:0; right:0; height:24px; pointer-events:none;
+                      background:linear-gradient(to top, rgba(34,197,94,0.18), transparent);
+                      border-radius:0 0 14px 14px;"></div>
+
+          <!-- 이미지 + VS 레이아웃 -->
+          <div style="display:flex; align-items:flex-end; justify-content:space-between;
+                      position:relative; z-index:2; padding:12px 10px 0;">
+
+            <!-- 홈팀 백구 -->
+            <div style="flex-shrink:0; text-align:center; position:relative;">
+              <!-- 팀 컬러 후광 -->
+              <div style="position:absolute; bottom:6px; left:50%; transform:translateX(-50%);
+                          width:80px; height:30px; border-radius:50%;
+                          background:rgba(230,0,18,0.35); filter:blur(12px);"></div>
+              <!-- 팀 이름 라벨 -->
+              <div style="font-size:9px; font-weight:800; color:rgba(230,0,18,0.9);
+                          letter-spacing:0.12em; text-transform:uppercase;
+                          margin-bottom:4px; text-shadow:0 1px 4px rgba(0,0,0,0.5);">
+                홈팀
+              </div>
+              <img src="images/mascot_kia.png" alt="홈팀 백구"
+                   style="width:96px; height:96px; object-fit:contain; position:relative; z-index:1;
+                          filter:drop-shadow(0 0 14px rgba(230,0,18,0.55)) brightness(1.08);">
+            </div>
+
+            <!-- VS 중앙 -->
+            <div style="text-align:center; flex:1; padding-bottom:16px; position:relative; z-index:2;">
+              <div style="font-family:'Bebas Neue',sans-serif; font-size:2.1rem;
+                          color:white; letter-spacing:0.14em; line-height:1;
+                          text-shadow:0 2px 12px rgba(255,255,255,0.25);">VS</div>
+              <div style="font-size:8.5px; font-weight:700; color:rgba(200,215,235,0.8);
+                          letter-spacing:0.2em; text-transform:uppercase; margin-top:5px;">
+                응원 대결
+              </div>
+              <!-- 중앙 분리선 -->
+              <div style="width:1px; height:28px; background:linear-gradient(to bottom, transparent, rgba(255,255,255,0.2), transparent);
+                          margin:6px auto 0;"></div>
+            </div>
+
+            <!-- 원정팀 백구 -->
+            <div style="flex-shrink:0; text-align:center; position:relative;">
+              <div style="position:absolute; bottom:6px; left:50%; transform:translateX(-50%);
+                          width:80px; height:30px; border-radius:50%;
+                          background:rgba(37,99,235,0.35); filter:blur(12px);"></div>
+              <div style="font-size:9px; font-weight:800; color:rgba(96,165,250,0.9);
+                          letter-spacing:0.12em; text-transform:uppercase;
+                          margin-bottom:4px; text-shadow:0 1px 4px rgba(0,0,0,0.5);">
+                원정팀
+              </div>
+              <img src="images/mascot_lg.png" alt="원정팀 백구"
+                   style="width:96px; height:96px; object-fit:contain; position:relative; z-index:1;
+                          filter:drop-shadow(0 0 14px rgba(37,99,235,0.55)) brightness(1.08);
+                          transform:scaleX(-1);">
+            </div>
+          </div>
+        </div>
+
+                <!-- 홈팀 / 원정팀 2단 카드 -->
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-bottom:0.85rem;">
 
           <!-- 홈팀 응원 카드 -->
-          <div style="background:rgba(230,0,18,0.04); border:1.5px solid rgba(230,0,18,0.18); border-radius:12px; padding:0.85rem 1rem;">
-            <div id="zone-home-label" style="font-size:11px; font-weight:700; color:var(--kia); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.6rem;">홈팀 응원</div>
-            <div style="font-size:1.45rem; font-weight:900; font-family:'Bebas Neue',sans-serif; color:var(--kia); line-height:1;" id="zone-home-big">-</div>
-            <div style="font-size:11px; color:var(--muted); margin-top:3px;"><span id="zone-home-score">0</span> pt</div>
+          <div style="background:rgba(230,0,18,0.05); border:1.5px solid rgba(230,0,18,0.25);
+                      border-radius:12px; padding:0.85rem 1rem; position:relative; overflow:hidden;">
+            <div style="position:relative; z-index:1;">
+              <div id="zone-home-label" style="font-size:11px; font-weight:700; color:#E60012;
+                   letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.6rem;
+                   display:flex; align-items:center; gap:5px;">
+                <span style="display:inline-block; width:8px; height:8px; border-radius:50%;
+                             background:#E60012; border:1px solid var(--line);"></span>
+                홈팀 응원
+              </div>
+              <div style="font-size:1.45rem; font-weight:900; font-family:'Bebas Neue',sans-serif;
+                          color:#E60012; line-height:1;" id="zone-home-big">-</div>
+              <div style="font-size:11px; color:var(--muted); margin-top:3px;"><span id="zone-home-score">0</span> pt</div>
+            </div>
           </div>
 
           <!-- 원정팀 응원 카드 -->
-          <div style="background:rgba(37,99,235,0.04); border:1.5px solid rgba(37,99,235,0.18); border-radius:12px; padding:0.85rem 1rem;">
-            <div id="zone-away-label" style="font-size:11px; font-weight:700; color:#2563EB; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.6rem;">원정팀 응원</div>
-            <div style="font-size:1.45rem; font-weight:900; font-family:'Bebas Neue',sans-serif; color:#2563EB; line-height:1;" id="zone-away-big">-</div>
-            <div style="font-size:11px; color:var(--muted); margin-top:3px;"><span id="zone-away-score">0</span> pt</div>
+          <div style="background:rgba(37,99,235,0.05); border:1.5px solid rgba(37,99,235,0.25);
+                      border-radius:12px; padding:0.85rem 1rem; position:relative; overflow:hidden;">
+            <div style="position:relative; z-index:1;">
+              <div id="zone-away-label" style="font-size:11px; font-weight:700; color:#2563EB;
+                   letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.6rem;
+                   display:flex; align-items:center; gap:5px;">
+                <span style="display:inline-block; width:8px; height:8px; border-radius:50%;
+                             background:#2563EB; border:1px solid var(--line);"></span>
+                원정팀 응원
+              </div>
+              <div style="font-size:1.45rem; font-weight:900; font-family:'Bebas Neue',sans-serif;
+                          color:#2563EB; line-height:1;" id="zone-away-big">-</div>
+              <div style="font-size:11px; color:var(--muted); margin-top:3px;"><span id="zone-away-score">0</span> pt</div>
+            </div>
           </div>
         </div>
 
@@ -1095,6 +1419,7 @@
           </div>
         </div>
 
+        </div>
       </div>
     </div>
   </div>
@@ -1118,48 +1443,171 @@
         </div>
       </div>
 
-      <!-- Inventory slots -->
+      <!-- 참여 유도형 인증샷 슬롯 -->
       <div class="photo-grid">
-        <div class="pb-inv-slot">
+
+        <!-- 슬롯 1 — 블러 프리뷰 + 참여 유도 -->
+        <div class="pb-inv-slot pb-slot-invite" onclick="document.getElementById('battle-modal').classList.add('open')" title="이 구역 인증하기">
           <div class="pb-inv-corner"></div>
-          <div class="pb-inv-icon">📷</div>
-          <div class="pb-inv-lock">🔒 LOCKED</div>
-          <div class="pb-inv-text">인증 시 +10pt</div>
+          <div class="pb-slot-blur-preview">
+            <svg viewBox="0 0 60 60" width="46" height="46" style="opacity:.18;">
+              <ellipse cx="30" cy="28" rx="26" ry="18" fill="#4CAF6F"/>
+              <ellipse cx="30" cy="28" rx="14" ry="10" fill="#2E7D45"/>
+            </svg>
+          </div>
+          <div class="pb-slot-invite-label">이 구역<br>인증하기</div>
+          <div class="pb-slot-reward">⭐ +10pt · 랭킹↑</div>
         </div>
-        <div class="pb-inv-slot">
+
+        <!-- 슬롯 2 -->
+        <div class="pb-inv-slot pb-slot-invite" onclick="document.getElementById('battle-modal').classList.add('open')" title="열기를 더해주세요">
           <div class="pb-inv-corner"></div>
-          <div class="pb-inv-icon">⚾</div>
-          <div class="pb-inv-lock">🔒 LOCKED</div>
-          <div class="pb-inv-text">인증 시 +10pt</div>
+          <div class="pb-slot-blur-preview">
+            <svg viewBox="0 0 60 60" width="46" height="46" style="opacity:.18;">
+              <circle cx="30" cy="30" r="22" fill="#E60012"/>
+              <circle cx="30" cy="30" r="10" fill="#DC2626"/>
+            </svg>
+          </div>
+          <div class="pb-slot-invite-label">열기를<br>더해주세요</div>
+          <div class="pb-slot-reward">⭐ +10pt · 랭킹↑</div>
         </div>
-        <div class="pb-inv-slot">
+
+        <!-- 슬롯 3 -->
+        <div class="pb-inv-slot pb-slot-invite" onclick="document.getElementById('battle-modal').classList.add('open')" title="이 구역 인증하기">
           <div class="pb-inv-corner"></div>
-          <div class="pb-inv-icon">📷</div>
-          <div class="pb-inv-lock">🔒 LOCKED</div>
-          <div class="pb-inv-text">인증 시 +10pt</div>
+          <div class="pb-slot-blur-preview">
+            <svg viewBox="0 0 60 60" width="46" height="46" style="opacity:.18;">
+              <rect x="8" y="14" width="44" height="32" rx="6" fill="#7C3AED"/>
+              <circle cx="22" cy="26" r="5" fill="#fff"/>
+              <path d="M8 38 L22 26 L35 36 L44 28 L52 38" fill="#5B21B6"/>
+            </svg>
+          </div>
+          <div class="pb-slot-invite-label">인증샷<br>올리기</div>
+          <div class="pb-slot-reward">⭐ +10pt · 랭킹↑</div>
         </div>
-        <div class="pb-inv-slot">
+
+        <!-- 슬롯 4 -->
+        <div class="pb-inv-slot pb-slot-invite" onclick="document.getElementById('battle-modal').classList.add('open')" title="열기를 더해주세요">
           <div class="pb-inv-corner"></div>
-          <div class="pb-inv-icon">⚾</div>
-          <div class="pb-inv-lock">🔒 LOCKED</div>
-          <div class="pb-inv-text">인증 시 +10pt</div>
+          <div class="pb-slot-blur-preview">
+            <svg viewBox="0 0 60 60" width="46" height="46" style="opacity:.18;">
+              <ellipse cx="30" cy="28" rx="26" ry="18" fill="#0EA5E9"/>
+              <ellipse cx="30" cy="28" rx="14" ry="10" fill="#0284C7"/>
+            </svg>
+          </div>
+          <div class="pb-slot-invite-label">이 구역<br>인증하기</div>
+          <div class="pb-slot-reward">⭐ +10pt · 랭킹↑</div>
         </div>
-        <div class="pb-inv-slot">
+
+        <!-- 슬롯 5 -->
+        <div class="pb-inv-slot pb-slot-invite" onclick="document.getElementById('battle-modal').classList.add('open')" title="이 구역 인증하기">
           <div class="pb-inv-corner"></div>
-          <div class="pb-inv-icon">📷</div>
-          <div class="pb-inv-lock">🔒 LOCKED</div>
-          <div class="pb-inv-text">인증 시 +10pt</div>
+          <div class="pb-slot-blur-preview">
+            <svg viewBox="0 0 60 60" width="46" height="46" style="opacity:.18;">
+              <ellipse cx="30" cy="28" rx="26" ry="18" fill="#F59E0B"/>
+              <circle cx="30" cy="28" r="10" fill="#D97706"/>
+            </svg>
+          </div>
+          <div class="pb-slot-invite-label">열기를<br>더해주세요</div>
+          <div class="pb-slot-reward">⭐ +10pt · 랭킹↑</div>
         </div>
-        <div class="pb-inv-slot">
+
+        <!-- 슬롯 6 -->
+        <div class="pb-inv-slot pb-slot-invite" onclick="document.getElementById('battle-modal').classList.add('open')" title="인증샷 올리기">
           <div class="pb-inv-corner"></div>
-          <div class="pb-inv-icon">⚾</div>
-          <div class="pb-inv-lock">🔒 LOCKED</div>
-          <div class="pb-inv-text">인증 시 +10pt</div>
+          <div class="pb-slot-blur-preview">
+            <svg viewBox="0 0 60 60" width="46" height="46" style="opacity:.18;">
+              <circle cx="30" cy="30" r="22" fill="#1D4ED8"/>
+              <text x="30" y="36" text-anchor="middle" font-size="18" fill="#fff">⚾</text>
+            </svg>
+          </div>
+          <div class="pb-slot-invite-label">인증샷<br>올리기</div>
+          <div class="pb-slot-reward">⭐ +10pt · 랭킹↑</div>
         </div>
+
       </div>
 
       <div class="divider"></div>
       <button class="card-link" id="open-photos">인증샷 전체 보기 →</button>
+    </div>
+
+    <!-- ── 점령전 랭킹 진입 카드 ── -->
+    <div class="card fade-in" style="animation-delay:0.2s; position:relative; overflow:hidden; cursor:pointer;"
+         onclick="location.href='battle-ranking.html'">
+
+      <!-- 배경 데코 그라데이션 -->
+      <div style="position:absolute; inset:0; pointer-events:none;
+                  background: radial-gradient(ellipse 80% 60% at 10% 50%, rgba(230,0,18,0.06) 0%, transparent 65%),
+                              radial-gradient(ellipse 80% 60% at 90% 50%, rgba(29,78,216,0.06) 0%, transparent 65%);
+                  border-radius:inherit;"></div>
+
+      <div style="position:relative; z-index:1;">
+
+        <!-- 헤더 -->
+        <div class="card-header">
+          <div class="card-header-icon" style="background:linear-gradient(135deg,#FFF5F5,#FFF); border-color:rgba(230,0,18,0.25);">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="stroke:#E60012;">
+              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="rgba(230,0,18,0.12)" stroke="#E60012" stroke-width="1.6"/>
+            </svg>
+          </div>
+          <div class="card-title-group">
+            <div class="card-title">점령전 랭킹</div>
+            <div class="card-subtitle">Battle Ranking · 팀 순위</div>
+          </div>
+          <div style="display:inline-flex; align-items:center; gap:5px; padding:3px 9px;
+                      border-radius:999px; background:#FFF0F1; border:1px solid rgba(230,0,18,0.2);
+                      font-size:9.5px; font-weight:700; color:#E60012; letter-spacing:0.06em;">
+            🏆 TOP 10
+          </div>
+        </div>
+
+        <!-- 미니 포디엄 프리뷰 -->
+        <div id="ranking-mini-preview"
+             style="display:flex; align-items:flex-end; justify-content:center; gap:8px;
+                    margin-bottom:0.9rem; padding:0 0.25rem;">
+          <!-- JS로 채워짐. 로딩 중 기본 표시 -->
+          <div style="flex:1; background:#F8FAFC; border:1.5px solid var(--line);
+                      border-radius:10px; padding:0.7rem 0.5rem; text-align:center;">
+            <div style="font-size:1.2rem;">🥈</div>
+            <div style="font-size:11px; font-weight:800; color:var(--muted); margin-top:3px;" id="rank2-team">-</div>
+          </div>
+          <div style="flex:1.2; background:linear-gradient(160deg,#FFFBEB,#FFF);
+                      border:1.5px solid rgba(245,158,11,0.35);
+                      border-radius:10px; padding:0.85rem 0.5rem; text-align:center;
+                      box-shadow:0 4px 16px rgba(245,158,11,0.13);">
+            <div style="font-size:1.5rem;">🥇</div>
+            <div style="font-size:12px; font-weight:900; color:var(--ink); margin-top:3px;" id="rank1-team">-</div>
+          </div>
+          <div style="flex:1; background:#F8FAFC; border:1.5px solid var(--line);
+                      border-radius:10px; padding:0.7rem 0.5rem; text-align:center;">
+            <div style="font-size:1.2rem;">🥉</div>
+            <div style="font-size:11px; font-weight:800; color:var(--muted); margin-top:3px;" id="rank3-team">-</div>
+          </div>
+        </div>
+
+        <!-- 내 팀 현황 -->
+        <div id="my-team-rank-row"
+             style="display:flex; align-items:center; justify-content:space-between;
+                    background:rgba(230,0,18,0.04); border:1.5px solid rgba(230,0,18,0.15);
+                    border-radius:10px; padding:0.65rem 0.9rem; margin-bottom:0.85rem;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span id="my-team-emoji" style="font-size:1.1rem;">⚾</span>
+            <span id="my-team-name" style="font-size:12.5px; font-weight:800; color:var(--ink);">내 팀</span>
+            <span style="font-size:9.5px; font-weight:800; color:#E60012;
+                         background:#FFF0F1; border-radius:4px; padding:1px 6px;">나의 팀</span>
+          </div>
+          <div style="font-size:12px; font-weight:700; color:var(--muted);">
+            <span id="my-team-rank-num" style="font-size:1.1rem; font-weight:900; color:var(--ink);">-</span>위
+          </div>
+        </div>
+
+        <!-- 랭킹 바로가기 버튼 -->
+        <a href="battle-ranking.html" class="community-link-btn"
+           style="background:linear-gradient(135deg,#E60012,#B8000E); color:#fff;
+                  border-color:var(--line); font-weight:700;">
+          🏆 전체 랭킹 보기 →
+        </a>
+      </div>
     </div>
 
     <!-- Today's Battlefield Schedule Card (우측 하단) — Versus Layout -->
@@ -1265,27 +1713,27 @@
             <div style="font-size:12px; font-weight:700; color:var(--ink); margin-bottom:0.5rem;">📍 내 좌석 구역을 선택해주세요</div>
             <div style="display:flex; flex-wrap:wrap; gap:6px;" id="battle-zone-btns">
               <button class="battle-zone-btn" data-zone="3루" data-label="3루 오렌지"
-                      style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
                        border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
                 3루 오렌지
               </button>
               <button class="battle-zone-btn" data-zone="1루" data-label="1루 오렌지"
-                      style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
                        border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
                 1루 오렌지
               </button>
               <button class="battle-zone-btn" data-zone="외야" data-label="중앙 외야"
-                      style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
                        border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
                 중앙 외야
               </button>
               <button class="battle-zone-btn" data-zone="중앙" data-label="테이블·프리미엄"
-                      style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
                        border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
                 테이블·프리미엄
               </button>
               <button class="battle-zone-btn" data-zone="내야" data-label="외야 파울존"
-                      style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
+                style="padding:7px 13px; background:#fff; color:var(--ink-2); border:1.5px solid var(--line);
                        border-radius:var(--r-pill); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;">
                 외야 파울존
               </button>
@@ -1395,28 +1843,93 @@
 
 <script src="js/index.js" onerror="console.warn('index.js missing')"></script>
 <script>
-  /* 챗봇 입력 더미 동작 (프리뷰용) */
-  (function(){
-    const send=document.getElementById('chat-send');
-    const input=document.getElementById('chat-input');
-    const scroll=document.getElementById('chat-messages');
-    if(!send||!input||!scroll) return;
-    send.addEventListener('click', ()=>{
-      const v=input.value.trim(); if(!v) return;
-      const u=document.createElement('div');
-      u.className='bubble'; u.style.alignSelf='flex-end';
-      u.style.background='#FCE9EB'; u.style.borderColor='#E60012';
-      u.textContent=v; scroll.appendChild(u);
-      input.value=''; scroll.scrollTop=scroll.scrollHeight;
-      setTimeout(()=>{
-        const b=document.createElement('div');
-        b.className='bubble bubble-bot';
-        b.textContent='(미리보기 모드) 실제 응답은 서버 연결 후 동작합니다.';
-        scroll.appendChild(b); scroll.scrollTop=scroll.scrollHeight;
-      },350);
-    });
-    input.addEventListener('keydown',e=>{ if(e.key==='Enter') send.click(); });
-  })();
+/* 챗봇 입력 더미 동작 (프리뷰용) */
+(function(){
+  const send=document.getElementById('chat-send');
+  const input=document.getElementById('chat-input');
+  const scroll=document.getElementById('chat-messages');
+  if(!send||!input||!scroll) return;
+  send.addEventListener('click', ()=>{
+    const v=input.value.trim(); if(!v) return;
+    const u=document.createElement('div');
+    u.className='bubble'; u.style.alignSelf='flex-end';
+    u.style.background='#FCE9EB'; u.style.borderColor='#E60012';
+    u.textContent=v; scroll.appendChild(u);
+    input.value=''; scroll.scrollTop=scroll.scrollHeight;
+    setTimeout(()=>{
+      const b=document.createElement('div');
+      b.className='bubble bubble-bot';
+      b.textContent='(미리보기 모드) 실제 응답은 서버 연결 후 동작합니다.';
+      scroll.appendChild(b); scroll.scrollTop=scroll.scrollHeight;
+    },350);
+  });
+  input.addEventListener('keydown',e=>{ if(e.key==='Enter') send.click(); });
+})();
 </script>
+
+<script>
+// 맵 구역 클릭 → 툴팁 ratio 업데이트
+(function() {
+  const ZONE_NAMES = {
+    'zone-orange-3b':'3루 오렌지 🔥 (핫존)',
+    'zone-orange-3b-top':'3루 오렌지 상단',
+    'zone-orange-1b':'1루 오렌지',
+    'zone-orange-1b-top':'1루 오렌지 상단',
+    'zone-table-top':'테이블석',
+    'zone-premium':'프리미엄석',
+    'zone-exciting-l':'익사이팅존 (3루)',
+    'zone-exciting-r':'익사이팅존 (1루)',
+    'zone-foul':'내야 블루 · 파울존',
+    'zone-blue-bottom':'3루 내야석',
+    'zone-blue-bottom-r':'1루 내야석',
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.seat-zone').forEach(el => {
+      el.addEventListener('mouseenter', function() {
+        const ttName  = document.getElementById('map-tooltip-name');
+        const ttRatio = document.getElementById('map-tooltip-ratio');
+        const name = ZONE_NAMES[this.id] || this.id;
+
+        // zoneData 캐시에서 비율 찾기
+        let ratioText = '클릭해서 응원 현황 확인';
+        if (window.__zoneDataCache) {
+          const zKey = Object.keys(window.__zoneDataCache).find(k => {
+            const z = window.__zoneDataCache[k];
+            return z.zones && z.zones.includes(this.id);
+          });
+          if (zKey) {
+            const z = window.__zoneDataCache[zKey];
+            const total = (z.homeScore||0) + (z.awayScore||0);
+            if (total > 0) {
+              const hPct = Math.round((z.homeScore||0)/total*100);
+              ratioText = `홈 ${hPct}% vs 원정 ${100-hPct}%`;
+            }
+          }
+        }
+        if (ttName)  ttName.textContent  = name;
+        if (ttRatio) ttRatio.textContent = ratioText;
+
+        // 맵 클릭 시 zone 버튼도 같이 연동
+        const ZONE_MAP = {
+          'zone-orange-3b':'orange-3b','zone-orange-3b-top':'orange-3b',
+          'zone-orange-1b':'orange-1b','zone-orange-1b-top':'orange-1b',
+          'zone-table-top':'premium','zone-premium':'premium',
+          'zone-exciting-l':'premium','zone-exciting-r':'premium',
+          'zone-foul':'foul','zone-blue-bottom':'foul','zone-blue-bottom-r':'foul',
+        };
+        el.onclick = function() {
+          const zKey = ZONE_MAP[this.id];
+          if (zKey) {
+            const btn = document.querySelector(`.zone-btn[data-zone="${zKey}"]`);
+            if (btn) btn.click();
+          }
+        };
+      });
+    });
+  });
+})();
+</script>
+
 </body>
 </html>

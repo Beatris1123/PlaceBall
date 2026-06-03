@@ -14,15 +14,21 @@
            Light Paper / Sketch Dashboard 스타일
            ════════════════════════════════════════════════════════════════ */
         :root {
-          --kia:        #E60012;
-          --kia-dark:   #B8000E;
-          --kia-soft:   #FCE9EB;
-          --lg:         #6B7280;
-          --lg-mid:     #4B5563;
-          --brand:      #E60012;
-          --green:      #16A34A;
+          /* PLACEBALL 마스코트 브랜드 컬러 */
+          --primary:    #00A88F;     /* 민트/청록색 */
+          --primary-dark: #007A6B;   /* 진한 민트 */
+          --primary-soft: #E0F7F4;   /* 밝은 민트 */
+          
+          /* 하위 호환성 */
+          --kia:        #00A88F;
+          --kia-dark:   #007A6B;
+          --kia-soft:   #E0F7F4;
+          --lg:         #4A4A4A;
+          --lg-mid:     #2D2D2D;
+          --brand:      #00A88F;
+          --green:      #00A88F;
           --gold:       #F5B400;
-          --purple:     #6D28D9;
+          --purple:     #00A88F;
 
           --bg:         #ECEDEF;
           --bg-2:       #E4E6E9;
@@ -84,8 +90,22 @@
         }
         .header-inner {
           max-width: 1600px; margin: 0 auto;
-          display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+          display: grid; grid-template-columns: 1fr auto 1fr;
+          align-items: center; gap: 1.5rem;
         }
+        /* 헤더 가운데 — nav pills */
+        .header-nav {
+          display:flex; align-items:center; gap:4px;
+          background:var(--paper-2); border:1.5px solid var(--line);
+          border-radius:var(--r-pill); padding:4px;
+        }
+        .header-nav-link {
+          padding:6px 14px; border-radius:var(--r-pill);
+          font-size:12.5px; font-weight:600; color:var(--muted);
+          text-decoration:none; transition:all .15s; border:1.5px solid transparent;
+        }
+        .header-nav-link:hover { background:var(--bg); color:var(--ink); }
+        .header-nav-link.active { background:var(--ink); color:#fff; }
         .logo-area { display:flex; align-items:center; gap:0.7rem; text-decoration:none; }
         .logo-mark {
           width:42px; height:42px; border-radius:50%;
@@ -168,10 +188,10 @@
 
         /* ══ MAIN LAYOUT ════════════════════════════════════════════════ */
         .main-wrap {
-          max-width: 1600px; margin: 1.25rem auto 3rem;
-          padding: 0 1.5rem;
+          max-width: 1600px; margin: 1.5rem auto 4rem;
+          padding: 0 2rem;
           display: grid; grid-template-columns: 220px 1fr;
-          gap: 1.25rem; align-items: start;
+          gap: 1.5rem; align-items: start;
         }
 
         /* ══ SIDEBAR ════════════════════════════════════════════════════ */
@@ -179,22 +199,25 @@
 
         .btn-write {
           display:flex; align-items:center; justify-content:center; gap:8px;
-          width:100%; padding: 10px 14px;
+          width:100%; padding: 11px 14px;
           background: var(--kia); color:#fff;
-          border: 1.5px solid var(--line); border-radius: var(--r-md);
-          font-family:inherit; font-size:13px; font-weight:600;
-          cursor:pointer; transition: background .15s;
+          border: 1.5px solid var(--line); border-radius: var(--r-xl);
+          font-family:inherit; font-size:13px; font-weight:700;
+          cursor:pointer; transition: background .15s, transform .1s;
           margin-bottom: 1rem;
+          letter-spacing: -0.01em;
+          box-shadow: 0 2px 8px rgba(0,168,143,0.3);
         }
-        .btn-write:hover { background: var(--kia-dark); }
+        .btn-write:hover { background: var(--kia-dark); transform: translateY(-1px); }
+        .btn-write:active { transform: translateY(0); }
 
         /* 카드 공통 */
         .pb-card {
           background: var(--card-bg);
           border: 1.5px solid var(--line);
-          border-radius: var(--r-lg);
+          border-radius: var(--r-xl);
           box-shadow: var(--card-sh);
-          padding: 1.1rem 1.1rem 1.15rem;
+          padding: 1.25rem 1.3rem 1.3rem;
           margin-bottom: 1rem;
           position: relative;
         }
@@ -222,7 +245,7 @@
         }
         .tab-item:hover { background: var(--bg-2); border-color: var(--line-soft); }
         .tab-item.active {
-          background: var(--kia); color:#fff;
+          background: var(--ink); color:#fff;
           border-color: var(--line);
         }
         .tab-item .tab-icon { font-size:14px; width:18px; text-align:center; flex-shrink:0; }
@@ -280,12 +303,13 @@
 
         /* 마스코트 */
         .mascot-card {
-          background: var(--kia-soft);
-          border: 1.5px solid var(--line);
-          border-radius: var(--r-lg);
+          background: var(--primary-soft);
+          border: 1.5px solid var(--primary);
+          border-radius: var(--r-xl);
           box-shadow: var(--card-sh);
-          padding: 0.85rem 0.9rem;
+          padding: 0;
           position:relative; text-align:center; margin-bottom:1rem;
+          overflow:hidden;
         }
         .mascot-card .mascot-bubble {
           display:inline-block; background:#fff;
@@ -294,21 +318,22 @@
           position:relative; margin-bottom:6px;
         }
         .mascot-card .mascot-bubble::after {
-          content:''; position:absolute; left:50%; bottom:-8px; transform:translateX(-50%);
+          content:''; position:absolute; left:50%; bottom:-9px; transform:translateX(-50%);
           width:0; height:0;
-          border-left:7px solid transparent; border-right:7px solid transparent;
-          border-top:8px solid var(--line);
+          border-left:8px solid transparent; border-right:8px solid transparent;
+          border-top:9px solid var(--line);
+          z-index:0;
         }
         .mascot-card .mascot-bubble::before {
-          content:''; position:absolute; left:50%; bottom:-5px; transform:translateX(-50%);
+          content:''; position:absolute; left:50%; bottom:-6px; transform:translateX(-50%);
           width:0; height:0; z-index:1;
-          border-left:5px solid transparent; border-right:5px solid transparent;
-          border-top:6px solid #fff;
+          border-left:6px solid transparent; border-right:6px solid transparent;
+          border-top:7px solid #fff;
         }
         .mascot-svg { width:110px; height:110px; display:block; margin:0 auto; }
         .mascot-card .mascot-caption {
           font-size:10px; font-weight:700; letter-spacing:0.14em;
-          color:var(--kia); text-transform:uppercase; margin-top:4px;
+          color:var(--primary); text-transform:uppercase; margin-top:4px;
         }
 
         /* ══ BOARD ══════════════════════════════════════════════════════ */
@@ -316,19 +341,20 @@
 
         .search-bar { display:flex; gap:8px; margin-bottom:1rem; }
         .search-input {
-          flex:1; padding:9px 12px;
+          flex:1; padding:9px 14px;
           background:#fff; color:var(--ink);
-          border:1.5px solid var(--line); border-radius:10px;
+          border:1.5px solid var(--line); border-radius:var(--r-xl);
           font-family:inherit; font-size:13px; outline:none;
           transition: border-color .15s;
         }
         .search-input::placeholder { color:var(--subtle); }
         .search-input:focus { border-color:var(--kia); }
         .btn-search {
-          padding:9px 14px; background:#fff; color:var(--ink);
-          border:1.5px solid var(--line); border-radius:10px;
+          padding:9px 16px; background:#fff; color:var(--ink);
+          border:1.5px solid var(--line); border-radius:var(--r-xl);
           font-family:inherit; font-size:13px; font-weight:600;
           cursor:pointer; transition: background .15s, color .15s;
+          display:flex; align-items:center; gap:5px;
         }
         .btn-search:hover { background:var(--ink); color:#fff; }
 
@@ -337,7 +363,7 @@
           padding:0.7rem 1rem;
           background: var(--paper);
           border:1.5px solid var(--line); border-bottom:none;
-          border-radius: var(--r-md) var(--r-md) 0 0;
+          border-radius: var(--r-lg) var(--r-lg) 0 0;
           font-size:11px; font-weight:700; color:var(--muted);
           letter-spacing:0.1em; text-transform:uppercase;
         }
@@ -347,7 +373,7 @@
         .post-list {
           background:#fff;
           border:1.5px solid var(--line); border-top:none;
-          border-radius: 0 0 var(--r-md) var(--r-md);
+          border-radius: 0 0 var(--r-lg) var(--r-lg);
           overflow:hidden;
           box-shadow: var(--card-sh);
         }
@@ -392,7 +418,7 @@
           padding:4rem 2rem; text-align:center;
           background:#fff;
           border:1.5px solid var(--line); border-top:none;
-          border-radius:0 0 var(--r-md) var(--r-md);
+          border-radius:0 0 var(--r-lg) var(--r-lg);
           box-shadow: var(--card-sh);
         }
         .empty-icon { font-size:2.5rem; margin-bottom:0.75rem; display:block; }
@@ -639,6 +665,7 @@
 <body>
 <header>
     <div class="header-inner">
+        <!-- 로고 (왼쪽) -->
         <a href="index.html" class="logo-area">
             <div class="logo-mark"></div>
             <div class="logo-text">
@@ -646,7 +673,17 @@
                 <span class="logo-sub">Ballpark Community</span>
             </div>
         </a>
-        <div class="header-right">
+
+        <!-- 네비 (가운데) -->
+        <nav class="header-nav">
+            <a href="index.html" class="header-nav-link">홈</a>
+            <a href="community.html" class="header-nav-link active">커뮤니티</a>
+            <a href="diary.html" class="header-nav-link">직관 다이어리</a>
+            <a href="schedule.html" class="header-nav-link">일정</a>
+        </nav>
+
+        <!-- 우측 -->
+        <div class="header-right" style="justify-content:flex-end;">
             <div class="user-persona-badge" id="headerPersonaBadge">
                 <span class="upb-emoji" id="hpbEmoji">⚾</span>
                 <span id="hpbLabel">유형</span>
@@ -655,17 +692,80 @@
                 <span class="user-nick" id="headerNick"></span>
                 <span style="color:var(--muted)">님</span>
             </div>
-            <a href="index.html" class="btn-header">← 홈으로</a>
             <button class="btn-header" id="headerLogoutBtn">로그아웃</button>
         </div>
     </div>
 </header>
 
 <div class="page-banner">
-    <div class="banner-inner">
-        <div class="banner-badge">⚾ PLACEBALL COMMUNITY</div>
-        <h1 class="banner-title">커뮤니티</h1>
-        <p class="banner-sub">야구 팬들의 이야기, 인증샷, 분석까지 — 모든 직관 기록을 나눠요</p>
+    <div class="banner-inner" style="padding:0; overflow:hidden; position:relative; min-height:110px;">
+      <!-- 배경 일러스트 -->
+      <svg viewBox="0 0 1200 110" preserveAspectRatio="xMidYMid slice" width="100%"
+           style="position:absolute;inset:0;height:100%;" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bannerSky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0F1724"/>
+            <stop offset="100%" stop-color="#1A2D44"/>
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="110" fill="url(#bannerSky)"/>
+        <!-- 별 -->
+        <circle cx="80" cy="18" r="1.2" fill="white" opacity="0.6"/>
+        <circle cx="200" cy="12" r="0.9" fill="white" opacity="0.5"/>
+        <circle cx="450" cy="20" r="1.4" fill="white" opacity="0.7"/>
+        <circle cx="700" cy="10" r="1" fill="white" opacity="0.5"/>
+        <circle cx="900" cy="22" r="1.1" fill="white" opacity="0.6"/>
+        <circle cx="1100" cy="14" r="1.3" fill="white" opacity="0.65"/>
+        <circle cx="1050" cy="28" r="0.8" fill="white" opacity="0.45"/>
+        <circle cx="320" cy="30" r="0.9" fill="white" opacity="0.4"/>
+        <!-- 달 -->
+        <circle cx="1140" cy="20" r="12" fill="#FEF3C7" opacity="0.85"/>
+        <circle cx="1144" cy="16" r="8" fill="#1A2D44" opacity="0.7"/>
+        <!-- 관중석 실루엣 -->
+        <path d="M0 110 Q300 55 600 48 Q900 55 1200 110Z" fill="#111827" opacity="0.7"/>
+        <!-- 조명 -->
+        <ellipse cx="60" cy="80" rx="45" ry="18" fill="#FDE68A" opacity="0.12"/>
+        <ellipse cx="1140" cy="80" rx="45" ry="18" fill="#FDE68A" opacity="0.12"/>
+        <rect x="52" y="30" width="6" height="60" fill="#374151" rx="2"/>
+        <rect x="1142" y="30" width="6" height="60" fill="#374151" rx="2"/>
+        <ellipse cx="55" cy="30" rx="14" ry="5" fill="#FDE68A" opacity="0.7"/>
+        <ellipse cx="1145" cy="30" rx="14" ry="5" fill="#FDE68A" opacity="0.7"/>
+        <!-- 관중 물결 (왼쪽) -->
+        <path d="M80 88 Q88 82 96 88 Q104 82 112 88 Q120 82 128 88 Q136 82 144 88" stroke="#4B5563" stroke-width="1.5" fill="none"/>
+        <!-- 관중 물결 (오른쪽) -->
+        <path d="M1056 88 Q1064 82 1072 88 Q1080 82 1088 88 Q1096 82 1104 88 Q1112 82 1120 88" stroke="#4B5563" stroke-width="1.5" fill="none"/>
+        <!-- 필드 야광 -->
+        <ellipse cx="600" cy="110" rx="200" ry="25" fill="#22C55E" opacity="0.15"/>
+      </svg>
+
+      <!-- 텍스트 콘텐츠 -->
+      <div style="position:relative; z-index:2; padding:1.4rem 1.6rem 1.4rem 1.6rem;
+                  display:flex; align-items:center; gap:1.5rem;">
+        <!-- 백구 이미지 (응원 자세) -->
+        <div style="flex-shrink:0; width:80px; margin-top:8px;">
+          <img src="images/mascot_cheer.png" alt="응원하는 백구"
+               style="width:80px; height:80px; object-fit:contain;
+                      filter:drop-shadow(0 2px 12px rgba(0,168,143,0.4));">
+        </div>
+
+                <!-- 텍스트 -->
+        <div>
+          <div style="display:inline-flex; align-items:center; gap:6px;
+                      font-size:10px; font-weight:700; color:#00A88F;
+                      background:rgba(0,168,143,0.15); border:1px solid rgba(0,168,143,0.35);
+                      padding:3px 12px; border-radius:99px; margin-bottom:0.5rem;
+                      letter-spacing:0.1em;">
+            ⚾ PLACEBALL COMMUNITY
+          </div>
+          <h1 style="font-family:'Bebas Neue',sans-serif; font-size:2rem;
+                     letter-spacing:0.04em; color:white; margin-bottom:0.25rem; line-height:1;">
+            커뮤니티
+          </h1>
+          <p style="font-size:12px; color:#9CA3AF; font-weight:500;">
+            야구 팬들의 이야기, 인증샷, 분석까지 — 모든 직관 기록을 나눠요
+          </p>
+        </div>
+      </div>
     </div>
 </div>
 
@@ -673,34 +773,36 @@
     <aside class="sidebar">
         <button class="btn-write" id="openWriteBtn">✏️ 글쓰기</button>
 
-        <!-- 호랑이 마스코트 -->
-        <div class="mascot-card" aria-hidden="true">
-            <div class="mascot-bubble">함께 응원해요!</div>
-            <svg class="mascot-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="100" cy="105" r="78" fill="#FFFFFF" stroke="#111827" stroke-width="2.5"/>
-                <path d="M40 70 Q100 95 160 70" stroke="#E60012" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
-                <path d="M40 140 Q100 115 160 140" stroke="#E60012" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
-                <ellipse cx="100" cy="98" rx="46" ry="42" fill="#F5B400" stroke="#111827" stroke-width="2.5"/>
-                <path d="M62 70 L55 50 L78 64 Z" fill="#F5B400" stroke="#111827" stroke-width="2.5" stroke-linejoin="round"/>
-                <path d="M138 70 L145 50 L122 64 Z" fill="#F5B400" stroke="#111827" stroke-width="2.5" stroke-linejoin="round"/>
-                <path d="M64 64 L60 56 L72 62 Z" fill="#E60012"/>
-                <path d="M136 64 L140 56 L128 62 Z" fill="#E60012"/>
-                <path d="M70 75 Q74 85 70 95" stroke="#111827" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                <path d="M130 75 Q126 85 130 95" stroke="#111827" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                <path d="M100 60 L95 70 M100 60 L105 70" stroke="#111827" stroke-width="2.5" stroke-linecap="round"/>
-                <ellipse cx="100" cy="115" rx="28" ry="20" fill="#FFFFFF" stroke="#111827" stroke-width="2"/>
-                <circle cx="84" cy="95" r="5" fill="#111827"/>
-                <circle cx="116" cy="95" r="5" fill="#111827"/>
-                <circle cx="85.5" cy="93.5" r="1.5" fill="#FFFFFF"/>
-                <circle cx="117.5" cy="93.5" r="1.5" fill="#FFFFFF"/>
-                <path d="M96 106 L104 106 L100 112 Z" fill="#111827"/>
-                <path d="M100 112 Q100 120 92 120 M100 112 Q100 120 108 120" stroke="#111827" stroke-width="2" fill="none" stroke-linecap="round"/>
-                <path d="M92 120 Q100 126 108 120" fill="#E60012" stroke="#111827" stroke-width="1.5"/>
-                <path d="M58 70 Q100 30 142 70 L142 78 Q100 60 58 78 Z" fill="#E60012" stroke="#111827" stroke-width="2.5" stroke-linejoin="round"/>
-                <ellipse cx="100" cy="78" rx="48" ry="6" fill="#111827"/>
-                <text x="100" y="62" text-anchor="middle" font-family="Bebas Neue, sans-serif" font-size="16" fill="#FFFFFF">K</text>
-            </svg>
-            <div class="mascot-caption">PLACEBALL · TIGER</div>
+        <!-- 백구 마스코트 카드 — 글쓰기 유도 -->
+        <div class="mascot-card" style="position:relative; overflow:hidden; padding:0; margin-bottom:1rem;">
+          <!-- 미니 경기장 배경 -->
+          <svg viewBox="0 0 220 90" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+            <rect width="220" height="90" fill="#0F1724"/>
+            <path d="M0 90 Q55 45 110 40 Q165 45 220 90Z" fill="#111827"/>
+            <ellipse cx="110" cy="90" rx="70" ry="14" fill="#22C55E" opacity="0.2"/>
+            <circle cx="30" cy="18" r="1" fill="white" opacity="0.6"/>
+            <circle cx="100" cy="12" r="1.3" fill="white" opacity="0.7"/>
+            <circle cx="180" cy="16" r="1" fill="white" opacity="0.55"/>
+            <circle cx="190" cy="25" r="0.8" fill="white" opacity="0.5"/>
+            <rect x="10" y="32" width="4" height="58" fill="#374151" rx="1"/>
+            <rect x="206" y="32" width="4" height="58" fill="#374151" rx="1"/>
+            <ellipse cx="12" cy="32" rx="9" ry="3.5" fill="#FDE68A" opacity="0.7"/>
+            <ellipse cx="208" cy="32" rx="9" ry="3.5" fill="#FDE68A" opacity="0.7"/>
+          </svg>
+
+          <!-- 백구 이미지 — 카드 하단에 겹치기 -->
+          <div style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:90px; z-index:3;">
+            <img src="images/mascot_cheer.png" alt="응원하는 백구"
+                 style="width:100%; object-fit:contain;
+                        filter:drop-shadow(0 2px 8px rgba(0,0,0,0.25));">
+          </div>
+
+                    <!-- 말풍선 + 텍스트 -->
+          <div style="background:rgba(255,255,255,0.97); border-top:1.5px solid var(--line);
+                      padding:44px 12px 10px; text-align:center; position:relative; z-index:2;">
+            <div class="mascot-bubble" style="margin:0 auto 6px;">오늘 직관 어땠나요?</div>
+            <div class="mascot-caption">PLACEBALL · BAEKGU</div>
+          </div>
         </div>
 
         <!-- 출석체크 -->

@@ -1,5 +1,6 @@
 package com.example.placeball.controller;
 
+import com.example.placeball.domain.CheerPoint;
 import com.example.placeball.domain.Comment;
 import com.example.placeball.domain.CommunityPost;
 import com.example.placeball.domain.Member;
@@ -7,7 +8,6 @@ import com.example.placeball.repository.CheerPointRepository;
 import com.example.placeball.repository.CommentRepository;
 import com.example.placeball.repository.CommunityPostRepository;
 import com.example.placeball.repository.MemberRepository;
-import com.example.placeball.service.CheerPointService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,6 @@ public class CommentApiController {
     private final CommunityPostRepository postRepository;
     private final MemberRepository        memberRepository;
     private final CheerPointRepository    cheerPointRepository;
-    private final CheerPointService       cheerPointService;
 
     // ── 댓글 목록 ──
     @GetMapping("/api/comments")
@@ -75,9 +74,14 @@ public class CommentApiController {
         comment.setContent(req.getContent().substring(0, Math.min(req.getContent().length(), 500)));
         commentRepository.save(comment);
 
-        // 오늘 1회만 적립, seatZone 자동 연결
-        int earnedPoints = cheerPointService.award(
-                member, "COMMENT_WRITE", 3, "댓글 작성", true);
+        // 댓글 포인트는 오늘 1회만 적립
+        int earnedPoints = 0;
+        boolean alreadyEarned = cheerPointRepository.existsTodayByMemberAndType(
+                member, "COMMENT_WRITE", LocalDate.now());
+        if (!alreadyEarned) {
+            awardPoints(member, "COMMENT_WRITE", 3, "댓글 작성");
+            earnedPoints = 3;
+        }
 
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("success", true);
@@ -142,8 +146,9 @@ public class CommentApiController {
         LocalDate today = LocalDate.now();
         String cacheKey = nick + "_" + today;
 
+        // 캐시 또는 DB 둘 다 체크
         boolean alreadyDone = attendanceCache.containsKey(cacheKey)
-                || cheerPointService.alreadyEarnedToday(member, "ATTENDANCE");
+                || cheerPointRepository.existsTodayByMemberAndType(member, "ATTENDANCE", today);
 
         if (alreadyDone) {
             return ResponseEntity.ok(Map.of(
@@ -154,8 +159,7 @@ public class CommentApiController {
         }
 
         attendanceCache.put(cacheKey, today);
-        // oncePerDay=true, seatZone 자동 연결
-        cheerPointService.award(member, "ATTENDANCE", 5, "출석체크 " + today, true);
+        awardPoints(member, "ATTENDANCE", 5, "출석체크 " + today);
 
         return ResponseEntity.ok(Map.of(
                 "success",     true,
@@ -178,6 +182,15 @@ public class CommentApiController {
     }
 
     // ── 헬퍼 ──
+    private void awardPoints(Member m, String type, int amount, String desc) {
+        CheerPoint cp = new CheerPoint();
+        cp.setMember(m);
+        cp.setPointType(type);
+        cp.setAmount(amount);
+        cp.setDescription(desc);
+        cheerPointRepository.save(cp);
+    }
+
     private boolean blank(String s) { return s == null || s.isBlank(); }
     private ResponseEntity<Map<String, Object>> badReq(String msg) {
         return ResponseEntity.badRequest().body(Map.of("success", false, "message", msg));

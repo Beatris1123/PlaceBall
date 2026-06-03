@@ -7,64 +7,72 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CheerPointRepository extends JpaRepository<CheerPoint, Long> {
 
-    // ── 구역별 포인트 합산 (gameDate 기준) ──
-    // BATTLE_TICKET + 커뮤니티 활동 모두 포함. seatZone 있는 행만 집계.
+    // ── 기존: 전체 랭킹 ──
+    @Query("SELECT cp.member, SUM(cp.amount) FROM CheerPoint cp GROUP BY cp.member ORDER BY SUM(cp.amount) DESC")
+    List<Object[]> findRanking();
+
+    // ── 특정 기간 + 팀 + pointType 조건 포인트 합산 ──
     @Query("""
         SELECT COALESCE(SUM(cp.amount), 0)
         FROM CheerPoint cp
         WHERE cp.member.favoriteTeam = :team
-          AND cp.gameDate = :gameDate
+          AND cp.earnedAt BETWEEN :from AND :to
+          AND cp.pointType = :pointType
+        """)
+    int sumByTeamAndPeriodAndType(
+            @Param("team")      String team,
+            @Param("from")      LocalDateTime from,
+            @Param("to")        LocalDateTime to,
+            @Param("pointType") String pointType
+    );
+
+    // ── 특정 기간 + 팀 + 모든 pointType 합산 (기존 호환) ──
+    @Query("""
+        SELECT COALESCE(SUM(cp.amount), 0)
+        FROM CheerPoint cp
+        WHERE cp.member.favoriteTeam = :team
+          AND cp.earnedAt BETWEEN :from AND :to
+          AND cp.pointType = 'BATTLE_TICKET'
+        """)
+    int sumByTeamAndPeriod(
+            @Param("team") String team,
+            @Param("from") LocalDateTime from,
+            @Param("to")   LocalDateTime to
+    );
+
+    // ── 구역별 팀 포인트 합산 (티켓 인증만, seatZone 기준) ──
+    @Query("""
+        SELECT COALESCE(SUM(cp.amount), 0)
+        FROM CheerPoint cp
+        WHERE cp.member.favoriteTeam = :team
+          AND cp.earnedAt BETWEEN :from AND :to
+          AND cp.pointType = 'BATTLE_TICKET'
           AND cp.seatZone = :seatZone
         """)
-    int sumByTeamAndGameDateAndZone(
+    int sumByTeamAndPeriodAndZone(
             @Param("team")     String team,
-            @Param("gameDate") LocalDate gameDate,
+            @Param("from")     LocalDateTime from,
+            @Param("to")       LocalDateTime to,
             @Param("seatZone") String seatZone
     );
 
-    // ── 온라인 활동 포인트 합산 (gameDate 기준) ──
+    // ── 온라인 활동 포인트 합산 (게시글/댓글/출석 등) ──
     @Query("""
         SELECT COALESCE(SUM(cp.amount), 0)
         FROM CheerPoint cp
         WHERE cp.member.favoriteTeam = :team
-          AND cp.gameDate = :gameDate
+          AND cp.earnedAt BETWEEN :from AND :to
           AND cp.pointType IN ('POST_WRITE', 'COMMENT_WRITE', 'ATTENDANCE', 'PHOTO_UPLOAD')
         """)
-    int sumOnlineByTeamAndGameDate(
-            @Param("team")     String team,
-            @Param("gameDate") LocalDate gameDate
-    );
-
-    // ── BATTLE_TICKET 합산 (gameDate 기준, finalize·buildBattleStatus용) ──
-    @Query("""
-        SELECT COALESCE(SUM(cp.amount), 0)
-        FROM CheerPoint cp
-        WHERE cp.member.favoriteTeam = :team
-          AND cp.gameDate = :gameDate
-          AND cp.pointType = 'BATTLE_TICKET'
-        """)
-    int sumTicketByTeamAndGameDate(
-            @Param("team")     String team,
-            @Param("gameDate") LocalDate gameDate
-    );
-
-    // ── 오늘 이후 가장 가까운 인증 티켓 조회 (커뮤니티 활동 연결용) ──
-    @Query("""
-        SELECT cp
-        FROM CheerPoint cp
-        WHERE cp.member = :member
-          AND cp.pointType = 'BATTLE_TICKET'
-          AND cp.gameDate >= :today
-          AND cp.seatZone IS NOT NULL
-        ORDER BY cp.gameDate ASC
-        """)
-    List<CheerPoint> findUpcomingTickets(
-            @Param("member") Member member,
-            @Param("today")  LocalDate today
+    int sumOnlineByTeamAndPeriod(
+            @Param("team") String team,
+            @Param("from") LocalDateTime from,
+            @Param("to")   LocalDateTime to
     );
 
     // ── 오늘 특정 타입 포인트 이미 적립했는지 체크 ──
@@ -78,35 +86,37 @@ public interface CheerPointRepository extends JpaRepository<CheerPoint, Long> {
     boolean existsTodayByMemberAndType(
             @Param("member")    Member member,
             @Param("pointType") String pointType,
-            @Param("today")     LocalDate today
+            @Param("today")     java.time.LocalDate today
     );
 
-    // ── 중복 인증 체크 (티켓 인증용) ──
+    // ── 중복 인증 체크 ──
     boolean existsByMemberAndPointTypeAndDescription(
             Member member, String pointType, String description);
 
-    // ── 내 경기 총 포인트 합산 (gameDate 기준, 특정 멤버) ──
+    // ── 특정 팀 + 경기 날짜 기준 티켓 포인트 합산 (점령전 결과 집계용) ──
     @Query("""
         SELECT COALESCE(SUM(cp.amount), 0)
         FROM CheerPoint cp
-        WHERE cp.member = :member
+        WHERE cp.member.favoriteTeam = :team
           AND cp.gameDate = :gameDate
+          AND cp.pointType = 'BATTLE_TICKET'
         """)
-    int sumByMemberAndGameDate(
-            @Param("member")   Member member,
+    int sumTicketByTeamAndGameDate(
+            @Param("team")     String team,
             @Param("gameDate") LocalDate gameDate
     );
 
-    // ── 내 경기 포인트 타입별 내역 (gameDate 기준) ──
+    // ── 오늘 이후 가장 가까운 인증 티켓 목록 (gameDate ASC) ──
     @Query("""
         SELECT cp
         FROM CheerPoint cp
         WHERE cp.member = :member
-          AND cp.gameDate = :gameDate
-        ORDER BY cp.earnedAt ASC
+          AND cp.pointType = 'BATTLE_TICKET'
+          AND cp.gameDate >= :today
+        ORDER BY cp.gameDate ASC
         """)
-    List<CheerPoint> findByMemberAndGameDate(
-            @Param("member")   Member member,
-            @Param("gameDate") LocalDate gameDate
+    List<CheerPoint> findUpcomingTickets(
+            @Param("member") Member member,
+            @Param("today")  LocalDate today
     );
 }

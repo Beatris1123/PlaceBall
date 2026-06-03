@@ -2,7 +2,6 @@ package com.example.placeball.controller;
 
 import com.example.placeball.domain.*;
 import com.example.placeball.repository.*;
-import com.example.placeball.service.CheerPointService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -10,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,13 +21,12 @@ public class PostApiController {
     private final PostImageRepository     imageRepository;
     private final MemberRepository        memberRepository;
     private final CheerPointRepository    cheerPointRepository;
-    private final CheerPointService       cheerPointService;
 
     private static final Map<String, Integer> TAB_POINTS = Map.of(
             "chat",     3,
             "photo",    10,
             "cheer",    3,
-            "analysis", 3,
+            "analysis", 5,
             "info",     3
     );
 
@@ -38,10 +35,10 @@ public class PostApiController {
     @Transactional
     public ResponseEntity<Map<String, Object>> createPost(@RequestBody PostWriteRequest req) {
         Member member = findMember(req.getAuthor());
-        if (member == null)           return badReq("로그인이 필요합니다.");
-        if (blank(req.getTab()))      return badReq("카테고리를 선택해주세요.");
-        if (blank(req.getTitle()))    return badReq("제목을 입력해주세요.");
-        if (blank(req.getContent()))  return badReq("내용을 입력해주세요.");
+        if (member == null)                                           return badReq("로그인이 필요합니다.");
+        if (blank(req.getTab()))                                      return badReq("카테고리를 선택해주세요.");
+        if (blank(req.getTitle()))                                    return badReq("제목을 입력해주세요.");
+        if (blank(req.getContent()))                                  return badReq("내용을 입력해주세요.");
 
         CommunityPost post = new CommunityPost();
         post.setMember(member);
@@ -52,14 +49,24 @@ public class PostApiController {
         postRepository.save(post);
         saveImages(post, req.getImages());
 
-        // cheer·photo 탭은 하루 1회 제한, 나머지는 매번 적립
+        // 포인트 적립 — cheer/photo 탭은 오늘 1회만
+        int earnedPoints = 0;
         boolean oncePerDay = "cheer".equals(req.getTab()) || "photo".equals(req.getTab());
-        int earnedPoints = cheerPointService.award(
-                member, "POST_WRITE",
-                TAB_POINTS.getOrDefault(req.getTab(), 3),
-                tabLabel(req.getTab()) + " 작성: " + trunc(req.getTitle(), 30),
-                oncePerDay
-        );
+        if (oncePerDay) {
+            boolean alreadyEarned = cheerPointRepository.existsTodayByMemberAndType(
+                    member, "POST_WRITE", java.time.LocalDate.now());
+            if (!alreadyEarned) {
+                awardPoints(member, "POST_WRITE",
+                        TAB_POINTS.getOrDefault(req.getTab(), 3),
+                        tabLabel(req.getTab()) + " 작성: " + trunc(req.getTitle(), 30));
+                earnedPoints = TAB_POINTS.getOrDefault(req.getTab(), 3);
+            }
+        } else {
+            awardPoints(member, "POST_WRITE",
+                    TAB_POINTS.getOrDefault(req.getTab(), 3),
+                    tabLabel(req.getTab()) + " 작성: " + trunc(req.getTitle(), 30));
+            earnedPoints = TAB_POINTS.getOrDefault(req.getTab(), 3);
+        }
 
         return ok(Map.of("success", true, "id", post.getId(), "points", earnedPoints));
     }
@@ -156,7 +163,7 @@ public class PostApiController {
             return forbidden("본인이 작성한 글만 삭제할 수 있습니다.");
         postRepository.delete(post);
         memberRepository.findByNickname(author).ifPresent(m ->
-                cheerPointService.deduct(m, "POST_DELETE", 3, "게시글 삭제 (ID: " + id + ")"));
+                awardPoints(m, "POST_DELETE", -3, "게시글 삭제 (ID: " + id + ")"));
         return ok(Map.of("success", true));
     }
 
@@ -218,29 +225,26 @@ public class PostApiController {
         )));
     }
 
-    // ── 9. 응원 지수 (오늘 gameDate 기준 홈/원정) ──
+    // ── 9. 응원 지수 ──
     @GetMapping("/cheer-ratio")
     @Transactional(readOnly = true)
-    public ResponseEntity<Map<String, Object>> getCheerRatio(
-            @RequestParam(required = false) String homeTeam,
-            @RequestParam(required = false) String awayTeam) {
-
-        if (!blank(homeTeam) && !blank(awayTeam)) {
-            LocalDate today = LocalDate.now();
-            int homeScore = cheerPointRepository.sumOnlineByTeamAndGameDate(homeTeam, today);
-            int awayScore = cheerPointRepository.sumOnlineByTeamAndGameDate(awayTeam, today);
-            if (homeScore == 0 && awayScore == 0) { homeScore = 50; awayScore = 50; }
-            int total   = homeScore + awayScore;
-            int homePct = Math.round((float) homeScore / total * 100);
-            return ok(Map.of(
-                    "homeTeam", homeTeam, "awayTeam", awayTeam,
-                    "homeScore", homeScore, "awayScore", awayScore,
-                    "homePct", homePct, "awayPct", 100 - homePct
-            ));
+    public ResponseEntity<Map<String, Object>> getCheerRatio() {
+        List<Object[]> ranking = cheerPointRepository.findRanking();
+        int homeTotal = 0, awayTotal = 0;
+        for (Object[] row : ranking) {
+            int pts = ((Number) row[1]).intValue();
+            if (isHomeFan(((Member) row[0]).getFavoriteTeam())) homeTotal += pts;
+            else                                                  awayTotal += pts;
         }
-
-        // 팀 파라미터 없을 때: 경기 없는 날 기본값
-        return ok(Map.of("homeScore", 0, "awayScore", 0, "homePct", 50, "awayPct", 50));
+        if (homeTotal == 0 && awayTotal == 0) { homeTotal = 50; awayTotal = 50; }
+        int total   = homeTotal + awayTotal;
+        int homePct = Math.round((float) homeTotal / total * 100);
+        return ResponseEntity.ok(Map.of(
+                "homeScore", homeTotal,
+                "awayScore", awayTotal,
+                "homePct",   homePct,
+                "awayPct",   100 - homePct
+        ));
     }
 
     // ═══════════════════════ helpers ═══════════════════════
@@ -251,6 +255,12 @@ public class PostApiController {
             img.setPost(post); img.setImageData(images.get(i)); img.setSortOrder(i);
             imageRepository.save(img);
         }
+    }
+
+    private void awardPoints(Member m, String type, int amount, String desc) {
+        CheerPoint cp = new CheerPoint();
+        cp.setMember(m); cp.setPointType(type); cp.setAmount(amount); cp.setDescription(desc);
+        cheerPointRepository.save(cp);
     }
 
     private Map<String, Object> toListItem(CommunityPost p, String viewer) {
@@ -283,23 +293,20 @@ public class PostApiController {
         if (blank(nick)) return null;
         return memberRepository.findByNickname(nick).orElse(null);
     }
-    private boolean blank(String s)        { return s == null || s.isBlank(); }
-    private String  trunc(String s, int n) { return s.length() <= n ? s : s.substring(0, n); }
+    private boolean blank(String s)         { return s == null || s.isBlank(); }
+    private String  trunc(String s, int n)  { return s.length() <= n ? s : s.substring(0, n); }
+    private boolean isHomeFan(String team)  { return team == null || (!team.equals("LG") && !team.equals("두산")); }
     private String tabLabel(String tab) {
         return switch (tab != null ? tab : "") {
-            case "chat"     -> "잡담";
-            case "photo"    -> "인증샷";
-            case "cheer"    -> "응원/선수";
-            case "analysis" -> "경기 분석";
-            case "info"     -> "정보/팁";
-            default         -> "커뮤니티";
+            case "chat" -> "잡담"; case "photo" -> "인증샷"; case "cheer" -> "응원/선수";
+            case "analysis" -> "경기 분석"; case "info" -> "정보/팁"; default -> "커뮤니티";
         };
     }
 
-    private ResponseEntity<Map<String, Object>> ok(Map<String, Object> b)    { return ResponseEntity.ok(b); }
-    private ResponseEntity<Map<String, Object>> badReq(String msg)            { return ResponseEntity.badRequest().body(Map.of("success", false, "message", msg)); }
-    private ResponseEntity<Map<String, Object>> notFound()                    { return ResponseEntity.status(404).body(Map.of("success", false, "message", "게시글을 찾을 수 없습니다.")); }
-    private ResponseEntity<Map<String, Object>> forbidden(String msg)         { return ResponseEntity.status(403).body(Map.of("success", false, "message", msg)); }
+    private ResponseEntity<Map<String, Object>> ok(Map<String, Object> b)       { return ResponseEntity.ok(b); }
+    private ResponseEntity<Map<String, Object>> badReq(String msg)               { return ResponseEntity.badRequest().body(Map.of("success", false, "message", msg)); }
+    private ResponseEntity<Map<String, Object>> notFound()                       { return ResponseEntity.status(404).body(Map.of("success", false, "message", "게시글을 찾을 수 없습니다.")); }
+    private ResponseEntity<Map<String, Object>> forbidden(String msg)            { return ResponseEntity.status(403).body(Map.of("success", false, "message", msg)); }
 }
 
 @Data

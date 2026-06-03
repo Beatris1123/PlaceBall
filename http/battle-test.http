@@ -1,0 +1,162 @@
+### ═══════════════════════════════════════════════════════════
+### PLACEBALL — 점령전 테스트 HTTP Client
+### IntelliJ에서 각 ### 블록 왼쪽 ▶ 버튼으로 실행
+### 서버: http://localhost:8080
+### ═══════════════════════════════════════════════════════════
+
+@host = http://localhost:8080
+
+### ────────────────────────────────────────────────────────
+###  STEP 1. DB에 오늘 경기가 있는지 확인
+### ────────────────────────────────────────────────────────
+
+### 1-1. 오늘 경기 목록
+GET {{host}}/api/games/today
+Accept: application/json
+
+###
+
+### 1-2. 특정 날짜 경기 목록 (날짜 변경해서 사용)
+GET {{host}}/api/games/date?date=2026-06-02
+Accept: application/json
+
+###
+
+### ────────────────────────────────────────────────────────
+### STEP 2. 실시간 점령전 현황 확인 (battle_record 저장 전)
+### ────────────────────────────────────────────────────────
+
+### 2-1. 오늘 전체 점령전 현황
+GET {{host}}/api/battle/today
+Accept: application/json
+
+###
+
+### 2-2. 내 팀 기준 점령전 현황 (팀명 변경)
+GET {{host}}/api/battle/today?team=KIA
+Accept: application/json
+
+###
+
+### 2-3. 구역별 응원 현황
+GET {{host}}/api/battle/zones?team=KIA
+Accept: application/json
+
+###
+
+### ────────────────────────────────────────────────────────
+### STEP 3. 스케줄러 수동 트리거 (00:00 대신 지금 바로 실행)
+###   → 오늘 날짜 또는 테스트할 날짜로 변경해서 실행
+### ────────────────────────────────────────────────────────
+
+### 3-1. 날짜 지정 일괄 확정 ★★★ 핵심 테스트
+POST {{host}}/api/battle/finalize-date
+Content-Type: application/json
+
+{
+  "date": "2026-06-02"
+}
+
+###
+
+### 3-2. 단일 경기 확정 (gameId는 STEP 1 결과에서 복사)
+POST {{host}}/api/battle/finalize
+Content-Type: application/json
+
+{
+  "gameId": 1
+}
+
+###
+
+### ────────────────────────────────────────────────────────
+### STEP 4. 저장된 결과 확인
+### ────────────────────────────────────────────────────────
+
+### 4-1. 확정된 결과 조회 (battle_record 기반)
+GET {{host}}/api/battle/result?date=2026-06-02
+Accept: application/json
+
+###
+
+### 4-2. 결과가 없으면 날짜를 바꿔서 확인 (어제)
+GET {{host}}/api/battle/result?date=2026-06-01
+Accept: application/json
+
+###
+
+### ────────────────────────────────────────────────────────
+### STEP 5. 랭킹 확인 (battle_record 종합 집계)
+### ────────────────────────────────────────────────────────
+
+### 5-1. 시즌 전체 랭킹
+GET {{host}}/api/battle/rankings?year=2026
+Accept: application/json
+
+###
+
+### 5-2. 이번 달 랭킹
+GET {{host}}/api/battle/rankings?year=2026&month=6
+Accept: application/json
+
+###
+
+### 5-3. 지난 달 랭킹
+GET {{host}}/api/battle/rankings?year=2026&month=5
+Accept: application/json
+
+###
+
+### ────────────────────────────────────────────────────────
+### STEP 6. 중복 확정 방어 확인
+###   → STEP 3을 한 번 더 실행해서 "이미 확정" 응답 오는지 확인
+### ────────────────────────────────────────────────────────
+
+### 6-1. 같은 날짜 재확정 시도 (saved: 0 이어야 정상)
+POST {{host}}/api/battle/finalize-date
+Content-Type: application/json
+
+{
+  "date": "2026-06-02"
+}
+
+###
+
+### ────────────────────────────────────────────────────────
+### STEP 7. 경기 일정 확인 (날짜 바뀌면 자동으로 다음 경기)
+### ────────────────────────────────────────────────────────
+
+### 7-1. 내일 경기 일정 (날짜 변경)
+GET {{host}}/api/games/date?date=2026-06-03
+Accept: application/json
+
+###
+
+### 7-2. 이번 달 전체 일정 (달력용)
+GET {{host}}/api/games?year=2026&month=6
+Accept: application/json
+
+###
+
+### ────────────────────────────────────────────────────────
+### STEP 8. 티켓 인증 테스트 (포인트 쌓고 랭킹 변화 확인)
+### ────────────────────────────────────────────────────────
+
+### 8-1. 티켓 인증 (nickname, gameId 변경 필요)
+POST {{host}}/api/battle/certify
+Content-Type: application/json
+
+{
+  "nickname": "테스트유저",
+  "gameId": 1,
+  "stadium": "잠실야구장",
+  "seat": "3루 오렌지"
+}
+
+###
+
+### 8-2. 인증 여부 확인
+GET {{host}}/api/battle/certified?nickname=테스트유저&gameId=1
+Accept: application/json
+
+###

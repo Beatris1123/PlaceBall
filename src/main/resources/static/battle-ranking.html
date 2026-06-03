@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLACEBALL - 점령전 랭킹</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/battle-ranking.css">
+</head>
+<body>
+
+<!-- ─── 헤더 ─── -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo-area">
+      <div class="logo-mark">PB</div>
+      <div class="logo-text">
+        <span class="logo-title">PLACEBALL</span>
+        <span class="logo-sub">점령전 랭킹</span>
+      </div>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html" class="nav-link">대시보드</a>
+      <a href="schedule.html" class="nav-link">경기일정</a>
+      <a href="diary.html" class="nav-link">직관 다이어리</a>
+      <a href="battle-ranking.html" class="nav-link active">점령전 랭킹</a>
+    </nav>
+    <div class="header-right">
+      <button id="login-btn" class="btn-login" onclick="location.href='login.html'">로그인</button>
+      <div id="user-info-section" style="display:none;" class="user-info">
+        <span class="welcome-text"><span id="user-nickname"></span>님</span>
+        <button id="logout-btn" class="btn-logout">로그아웃</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="br-main">
+
+  <!-- ─── 히어로 배너 ─── -->
+  <section class="br-hero">
+    <div class="br-hero-inner">
+      <div class="br-hero-icon">🏆</div>
+      <h1 class="br-hero-title">점령전 랭킹</h1>
+      <p class="br-hero-desc">팬들의 응원 포인트로 결정되는 구장 점령전 팀 순위</p>
+    </div>
+  </section>
+
+  <!-- ─── 필터 바 ─── -->
+  <section class="br-filter-bar">
+    <div class="br-filter-inner">
+
+      <!-- 기간 탭 -->
+      <div class="br-period-tabs">
+        <button class="br-period-btn active" data-period="season">시즌 전체</button>
+        <button class="br-period-btn" data-period="month">이번 달</button>
+        <button class="br-period-btn" data-period="recent">최근 10경기</button>
+      </div>
+
+      <!-- 연도 선택 -->
+      <div class="br-year-select-wrap">
+        <label class="br-year-label">연도</label>
+        <select id="br-year" class="br-year-select"></select>
+      </div>
+
+      <!-- 월 선택 (month 모드일 때만 활성화) -->
+      <div class="br-month-select-wrap" id="br-month-wrap" style="display:none;">
+        <label class="br-year-label">월</label>
+        <select id="br-month" class="br-year-select">
+          <option value="1">1월</option><option value="2">2월</option>
+          <option value="3">3월</option><option value="4">4월</option>
+          <option value="5">5월</option><option value="6">6월</option>
+          <option value="7">7월</option><option value="8">8월</option>
+          <option value="9">9월</option><option value="10">10월</option>
+          <option value="11">11월</option><option value="12">12월</option>
+        </select>
+      </div>
+
+      <button class="br-refresh-btn" id="br-refresh">🔄 새로고침</button>
+    </div>
+  </section>
+
+  <!-- ─── 상위 3팀 포디엄 ─── -->
+  <section class="br-podium-section" id="br-podium">
+    <div class="podium-loading">순위를 불러오는 중...</div>
+  </section>
+
+  <!-- ─── 전체 랭킹 테이블 ─── -->
+  <section class="br-table-section">
+    <div class="br-table-header">
+      <h2 class="br-table-title">전체 팀 순위</h2>
+      <div class="br-table-legend">
+        <span class="legend-dot win"></span>승리
+        <span class="legend-dot lose"></span>패배
+        <span class="legend-dot draw"></span>무승부
+      </div>
+    </div>
+
+    <div class="br-table-wrap" id="br-table-wrap">
+      <div class="table-loading">데이터 로딩 중...</div>
+    </div>
+  </section>
+
+  <!-- ─── 최근 점령전 결과 ─── -->
+  <section class="br-recent-section">
+    <h2 class="br-section-title">최근 점령전 결과</h2>
+    <div class="br-recent-list" id="br-recent-list">
+      <div class="recent-loading">불러오는 중...</div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ─── 팀 상세 모달 ─── -->
+<div class="br-modal-backdrop" id="br-modal" style="display:none;">
+  <div class="br-modal-box">
+    <button class="br-modal-close" id="br-modal-close">×</button>
+    <div id="br-modal-content"></div>
+  </div>
+</div>
+
+<script src="js/battle-ranking.js"></script>
+</body>
+</html>
