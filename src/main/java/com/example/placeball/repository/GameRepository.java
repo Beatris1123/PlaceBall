@@ -73,4 +73,28 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 
     // 날짜 + 상태 조회
     List<Game> findByGameDateAndStatus(LocalDate gameDate, String status);
+
+    // ── 특정 팀의 오늘 포함 이후 가장 가까운 예정 경기 ──
+    @org.springframework.data.jpa.repository.Query("""
+        SELECT g FROM Game g
+        WHERE (g.homeTeam = :team OR g.awayTeam = :team)
+          AND g.gameDate >= :today
+        ORDER BY g.gameDate ASC, g.gameTime ASC
+        """)
+    List<Game> findUpcomingByTeam(
+            @org.springframework.data.repository.query.Param("team") String team,
+            @org.springframework.data.repository.query.Param("today") LocalDate today,
+            org.springframework.data.domain.Pageable pageable);
+
+    // ── 특정 팀의 가장 최근 과거 경기 ──
+    @org.springframework.data.jpa.repository.Query("""
+        SELECT g FROM Game g
+        WHERE (g.homeTeam = :team OR g.awayTeam = :team)
+          AND g.gameDate < :today
+        ORDER BY g.gameDate DESC, g.gameTime DESC
+        """)
+    List<Game> findPastByTeam(
+            @org.springframework.data.repository.query.Param("team") String team,
+            @org.springframework.data.repository.query.Param("today") LocalDate today,
+            org.springframework.data.domain.Pageable pageable);
 }

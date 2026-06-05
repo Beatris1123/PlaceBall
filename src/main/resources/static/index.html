@@ -518,6 +518,15 @@
     .zone-btn.active{
       background: var(--kia); color:#fff; border-color: var(--line);
     }
+    /* 온라인 응원 버튼 — 점령전(티켓) 미참여 팬용, 시각적으로 구분 */
+    .zone-btn-online{
+      border-color: #16A34A; color:#16A34A; background:#F0FDF4;
+      margin-left:auto;
+    }
+    .zone-btn-online:hover{ background:#DCFCE7; }
+    .zone-btn-online.active{
+      background:#16A34A; color:#fff; border-color:#16A34A;
+    }
 
     .zone-panel{
       background: var(--paper-2);
@@ -1264,6 +1273,7 @@
         <button class="zone-btn" data-zone="outfield-center">중앙 외야</button>
         <button class="zone-btn" data-zone="premium">테이블·프리미엄</button>
         <button class="zone-btn" data-zone="foul">외야 파울존</button>
+        <button class="zone-btn zone-btn-online" data-zone="online">🌐 온라인</button>
       </div>
 
       <!-- Zone panel -->

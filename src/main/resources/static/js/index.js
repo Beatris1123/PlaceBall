@@ -98,8 +98,8 @@ function tc(name) { return TEAM_COLORS[name] || '#94A3B8'; }
     try {
       const myTeam = localStorage.getItem('favoriteTeam') || '';
 
-      // 오늘 경기 기준 배틀 현황
-      const res    = await fetch('/api/battle/today');
+      // 오늘 경기 기준 배틀 현황 (myTeam 전달 → 오늘 경기 없으면 가까운 경기로 폴백)
+      const res    = await fetch(myTeam ? `/api/battle/today?team=${encodeURIComponent(myTeam)}` : '/api/battle/today');
       const battles = await res.json();
       if (!battles || !battles.length) return;
 
@@ -114,8 +114,8 @@ function tc(name) { return TEAM_COLORS[name] || '#94A3B8'; }
       const awayTeam  = b.awayTeam  || '-';
       const homeScore = b.homeCheerScore || 0;
       const awayScore = b.awayCheerScore || 0;
-      const homePct   = b.homePct   || 50;
-      const awayPct   = b.awayPct   || 50;
+      const homePct   = b.homePct   ?? 0;
+      const awayPct   = b.awayPct   ?? 0;
 
       // ── 점수판 팀명 업데이트 ──
       const bbHomeLogo = document.getElementById('bb-home-logo');
@@ -141,15 +141,7 @@ function tc(name) { return TEAM_COLORS[name] || '#94A3B8'; }
       if (bbgKia)     bbgKia.style.width     = homePct + '%';
       if (bbGaugeKia) bbGaugeKia.style.width = homePct + '%';
 
-      // ── 구역 패널 비율 ──
-      const zoneRatio = document.getElementById('zone-ratio');
-      if (zoneRatio) {
-        const homeColor = TEAM_COLORS_BOARD[homeTeam] || 'var(--kia)';
-        zoneRatio.innerHTML = `
-          <span style="color:${homeColor}">${homeTeam} ${homePct}%</span>
-          <span style="color:var(--muted); margin:0 5px;">:</span>
-          <span style="color:var(--lg-mid)">${awayTeam} ${awayPct}%</span>`;
-      }
+      // ── 구역 패널 비율 (zone-ratio 는 renderZonePanel 이 구역별로 관리) ──
 
       // ── 응원 반응 수치 (왼쪽 카드) ──
       const statBig = document.querySelector('.stat-big span:first-child');
@@ -462,7 +454,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!user) return;
 
     try {
-      const res     = await fetch('/api/battle/today');
+      const myTeam0 = localStorage.getItem('favoriteTeam') || '';
+      const res     = await fetch(myTeam0 ? `/api/battle/today?team=${encodeURIComponent(myTeam0)}` : '/api/battle/today');
       const battles = await res.json();
       if (!battles || !battles.length) return;
 
@@ -854,6 +847,7 @@ document.addEventListener('click', e => {
     'outfield-center': { api: '외야', name: '중앙 외야석',  desc: '홈런볼이 떨어지는 중립 구역. 양팀 응원이 교차합니다.' },
     'premium':         { api: '중앙', name: '테이블·프리미엄석', desc: '포수 뒤 중앙 최고급 좌석. 경기장 전체를 한눈에 볼 수 있는 명당입니다.' },
     'foul':            { api: '내야', name: '외야 파울존',  desc: '1·3루 파울라인 바깥 구역. 여유로운 관람을 즐기는 팬이 많습니다.' },
+    'online':          { api: '__online__', name: '온라인 응원', desc: '티켓 인증 없이 커뮤니티 출석·글·댓글로 모은 응원 점수입니다.' },
   };
 
   let zoneData      = null;  // API에서 받은 전체 데이터
@@ -863,14 +857,16 @@ document.addEventListener('click', e => {
   function renderZonePanel(zoneKey) {
     const info    = ZONE_KEY_MAP[zoneKey] || ZONE_KEY_MAP['orange-3b'];
     const apiKey  = info.api;
-    const zoneEl  = zoneData?.zones?.[apiKey];
-
-    // 구역 이름/설명 (삭제됨 — 구역 버튼 클릭 시 별도 처리 없음)
+    // 온라인 탭이면 online 데이터, 그 외엔 구역별 티켓 데이터
+    const zoneEl  = (apiKey === '__online__')
+                      ? zoneData?.online
+                      : zoneData?.zones?.[apiKey];
 
     const homeTeam = zoneData?.homeTeam || '홈';
     const awayTeam = zoneData?.awayTeam || '원정';
-    const homePct  = zoneEl?.homePct  ?? 50;
-    const awayPct  = zoneEl?.awayPct  ?? 50;
+    // 데이터가 없거나 활동이 없으면 0% (이전 50% 기본값이 150% 합산 버그의 원인)
+    const homePct  = zoneEl?.homePct  ?? 0;
+    const awayPct  = zoneEl?.awayPct  ?? 0;
     const homeScore = zoneEl?.homeScore ?? 0;
     const awayScore = zoneEl?.awayScore ?? 0;
 
@@ -882,6 +878,19 @@ document.addEventListener('click', e => {
     };
     const homeColor = TEAM_COLORS_ZONE[homeTeam] || '#E60012';
     const awayColor = TEAM_COLORS_ZONE[awayTeam] || '#2563EB';
+
+    // 구역 이름 / 설명 / 상단 비율 라벨
+    const zoneNameEl = document.getElementById('zone-name');
+    const zoneDescEl = document.getElementById('zone-desc');
+    const zoneRatioEl = document.getElementById('zone-ratio');
+    if (zoneNameEl) zoneNameEl.textContent = info.name;
+    if (zoneDescEl) zoneDescEl.textContent = info.desc;
+    if (zoneRatioEl) {
+      zoneRatioEl.innerHTML =
+        `<span style="color:${homeColor}">${homeTeam} ${homePct}%</span>` +
+        `<span style="color:var(--muted); font-size:0.95rem; margin:0 3px;">:</span>` +
+        `<span style="color:${awayColor}">${awayTeam} ${awayPct}%</span>`;
+    }
 
     // 홈팀 카드
     const homeBig   = document.getElementById('zone-home-big');
@@ -951,6 +960,14 @@ document.addEventListener('click', e => {
           'premium':         ['zone-premium','zone-table-top','zone-exciting-l','zone-exciting-r'],
           'foul':            ['zone-foul','zone-blue-bottom','zone-blue-bottom-r','zone-navy-3b','zone-navy-1b'],
         };
+        // 온라인 탭: 좌석 구역이 아니므로 전체 좌석을 균일하게 표시
+        if (currentZone === 'online') {
+          document.querySelectorAll('.seat-zone').forEach(z => {
+            z.style.opacity = '0.6';
+            z.style.filter  = 'grayscale(0.4) brightness(0.95)';
+          });
+          return;
+        }
         document.querySelectorAll('.seat-zone').forEach(z => {
           z.style.opacity = '0.35';
           z.style.filter  = 'brightness(0.7)';
